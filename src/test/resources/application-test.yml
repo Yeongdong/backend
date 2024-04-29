@@ -1,0 +1,26 @@
+env:
+  data: "test"
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  output:
+    ansi:
+      enabled: always
+
+logging.level:
+  org.hibernate.SQL: debug
+  com:
+    example:
+      devexample:
+        dev: trace
+
+mybatis:
+  type-aliases-package: com.example.spinlog.dev
+  configuration:
+    map-underscore-to-camel-case: true
