@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +27,10 @@ public class User extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String loginId;
+    private String email;
+
+    @Column(nullable = false)
+    private String name;
 
     @Min(1) @Max(100) //TODO validation 코드를 entity 에 넣어도 되는지
     private Integer age;
@@ -42,9 +44,10 @@ public class User extends BaseTimeEntity {
     @Min(0) @Max(100_000_000) //TODO validation 코드를 entity 에 넣어도 되는지
     private Integer budget;
 
-    @Builder //Builder 에서 id 를 제외하기 위해 생성자에 @Builder 사용
-    private User(String loginId, Integer age, Mbti mbti, Gender gender, Integer budget) {
-        this.loginId = loginId;
+    @Builder //Builder 에서 id 를 제외하기 위해, 클래스 레벨이 아닌 생성자 레벨에 @Builder 사용
+    public User(String email, String name, Integer age, Mbti mbti, Gender gender, Integer budget) {
+        this.email = email;
+        this.name = name;
         this.age = age;
         this.mbti = mbti;
         this.gender = gender;
