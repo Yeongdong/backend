@@ -35,16 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String oAuth2Provider = userRequest.getClientRegistration().getRegistrationId();
         log.info("oAuth2User: {}, oAuth2Provider: {}", oAuth2User.getAttributes(), oAuth2Provider);
 
-        OAuth2Response response = null;
-        if (oAuth2Provider.equals(KAKAO)) {
-            response = KakaoResponse.of(oAuth2User.getAttributes());
-        } else if (oAuth2Provider.equals(NAVER)) {
-            response = NaverResponse.of(oAuth2User.getAttributes());
-        } else if (oAuth2Provider.equals(GOOGLE)) {
-            response = GoogleResponse.of(oAuth2User.getAttributes());
-        } else {
-            return null; //TODO validation
-        }
+        OAuth2Response response = getMatchingOAuth2Response(oAuth2Provider, oAuth2User);
 
         String authenticationName = response.getAuthenticationName();
         if (!userRepository.existsByAuthenticationName(authenticationName)) {
@@ -63,5 +54,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return CustomOAuth2User.builder()
                 .oAuth2Response(response)
                 .build();
+    }
+
+    private static OAuth2Response getMatchingOAuth2Response(String oAuth2Provider, OAuth2User oAuth2User) {
+        if (oAuth2Provider.equals(KAKAO)) {
+            return KakaoResponse.of(oAuth2User.getAttributes());
+        }
+        if (oAuth2Provider.equals(NAVER)) {
+            return NaverResponse.of(oAuth2User.getAttributes());
+        }
+        if (oAuth2Provider.equals(GOOGLE)) {
+            return GoogleResponse.of(oAuth2User.getAttributes());
+        }
+        return null; //TODO 검증
     }
 }
