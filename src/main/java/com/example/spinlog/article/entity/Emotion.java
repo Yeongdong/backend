@@ -1,17 +1,17 @@
 package com.example.spinlog.article.entity;
 
 public enum Emotion {
-    ANNOYED("짜증"),
-    NERVOUS("불안"),
-    LONELY("외로움"),
-    TIRED("피곤"),
-    DEPRESSED("우울"),
-    SAD("슬픔"),
-    SORRY("죄책감"),
-    EXCITED("기분좋은"),
-    FLUTTER("설렘"),
-    PROUD("뿌듯"),
-    EVADED("모르겠어요");
+    ANNOYED("ANNOYED"),    //짜증
+    NERVOUS("NERVOUS"),    //불안
+    LONELY("LONELY"), //외로움
+    TIRED("TIRED"),  //피곤
+    DEPRESSED("DEPRESSED"),  //우울
+    SAD("SAD"),    //슬픔
+    SORRY("SORRY"),  //죄책감
+    EXCITED("EXCITED"),    //기분좋은
+    FLUTTERED("FLUTTERED"),    //설렘
+    PROUD("PROUD"),  //뿌듯
+    EVADED("EVADED"); //모르겠어요
 
     Emotion(String name) {
     }
