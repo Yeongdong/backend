@@ -11,8 +11,5 @@ public interface OAuth2Response {
     //사용자 이메일
     String getEmail();
 
-    //사용자 이름
-    String getName();
-
     String getAuthenticationName();
 }

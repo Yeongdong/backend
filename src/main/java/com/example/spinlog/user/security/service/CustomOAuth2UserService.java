@@ -16,6 +16,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -38,17 +40,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2Response response = getMatchingOAuth2Response(oAuth2Provider, oAuth2User);
 
         String authenticationName = response.getAuthenticationName();
-        if (!userRepository.existsByAuthenticationName(authenticationName)) {
+        Optional<User> foundUser = userRepository.findByAuthenticationName(authenticationName);
+
+        if (foundUser.isEmpty()) {
             log.info("User {} does not exist. Saving user into database.", authenticationName);
             userRepository.save(
                     User.builder()
                             .email(response.getEmail())
-                            .name(response.getName())
                             .authenticationName(authenticationName)
                             .build()
             );
-        }else {
+        } else {
             log.info("User {} found", authenticationName);
+            foundUser.get().changeProfile(response.getEmail());
         }
 
         return CustomOAuth2User.builder()

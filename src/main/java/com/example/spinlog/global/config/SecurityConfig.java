@@ -15,6 +15,11 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
 
+    /*
+    TODO oauth2Login() 관련
+        1. 소셜 로그인 프로바이더의 정보를 application-local.yml 에서 관련 컴포넌트 클래스로 이전
+        2. 로그인 이후의 access token 과 refresh token 등을 저장하는 방식을 기본 인메모리 방식에서 DB 로 변경
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
