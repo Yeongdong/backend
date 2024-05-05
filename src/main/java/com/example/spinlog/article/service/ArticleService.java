@@ -27,7 +27,7 @@ public class ArticleService {
         Article articleEntity = requestDTO.toEntity();
         Article saveArticle = articleRepository.save(articleEntity);
         log.info("게시글이 성공적으로 저장되었습니다. ID: {}", saveArticle.getArticleId());
-        return saveArticle.toDtoForWrite(modelMapper);
+        return WriteArticleResponseDTO.from(saveArticle, modelMapper);
     }
 
     // 게시글 리스트 => 검색어 추가 수정 필요
@@ -36,16 +36,16 @@ public class ArticleService {
     }
 
     public ViewArticleResponseDTO getArticle(Long id) {
-        Article article = findArticleById(id);
-        return article.toDtoForDetails(modelMapper);
+        Article viewArticle = findArticleById(id);
+        return ViewArticleResponseDTO.from(viewArticle, modelMapper);
     }
 
     @Transactional
     public UpdateArticleResponseDTO updateArticle(Long id, UpdateArticleRequestDTO requestDTO) {
         Article article = findArticleById(id);
-        article.modify(requestDTO);
+        Article updateArticle = article.update(requestDTO);
         log.info("ID {}의 게시글이 업데이트되었습니다.", id);
-        return article.toDtoForUpdate(modelMapper);
+        return UpdateArticleResponseDTO.from(updateArticle, modelMapper);
     }
 
     @Transactional

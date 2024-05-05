@@ -1,6 +1,8 @@
 package com.example.spinlog.article.dto;
 
+import com.example.spinlog.article.entity.Article;
 import lombok.Data;
+import org.modelmapper.ModelMapper;
 
 @Data
 public class UpdateArticleResponseDTO {
@@ -15,4 +17,8 @@ public class UpdateArticleResponseDTO {
     private String aiComment;
     private Integer amount;
     private String registerType;
+
+    public static UpdateArticleResponseDTO from(Article updateArticle, ModelMapper modelMapper) {
+        return modelMapper.map(updateArticle, UpdateArticleResponseDTO.class);
+    }
 }
