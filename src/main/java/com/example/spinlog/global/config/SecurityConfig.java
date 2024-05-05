@@ -19,6 +19,9 @@ public class SecurityConfig {
     TODO oauth2Login() 관련
         1. 소셜 로그인 프로바이더의 정보를 application-local.yml 에서 관련 컴포넌트 클래스로 이전
         2. 로그인 이후의 access token 과 refresh token 등을 저장하는 방식을 기본 인메모리 방식에서 DB 로 변경
+        3. 로그아웃을 한 뒤 다시 로그인을 하면 자동 로그인이 되지 않게
+        4. 최초 로그인인지 판별
+        5. cors 설정
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,6 +38,10 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfoEndpointConfig ->
                                 userInfoEndpointConfig.userService(customOAuth2UserService))
+
+                )
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/")
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/oauth2/**", "/login/**").permitAll()
