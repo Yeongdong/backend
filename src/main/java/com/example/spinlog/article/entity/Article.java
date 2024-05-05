@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
-import org.modelmapper.ModelMapper;
 
 @Entity
 @Table(name = "articles")
@@ -21,8 +20,6 @@ public class Article extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_id")
     private Long articleId; // 일기 번호
-
-    private Long userId; // 회원 번호
     private String content;  //내용
     private String event; // 사건
     private String thought; // 생각
@@ -39,8 +36,7 @@ public class Article extends BaseTimeEntity {
     private RegisterType registerType; // 지출과 소비
 
     @Builder
-    public Article(Long userId, String content, String event, String thought, Emotion emotion, String result, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
-        this.userId = userId;
+    public Article(String content, String event, String thought, Emotion emotion, String result, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
         this.content = content;
         this.event = event;
         this.thought = thought;
@@ -54,7 +50,7 @@ public class Article extends BaseTimeEntity {
         this.registerType = registerType;
     }
 
-    public void modify(UpdateArticleRequestDTO updateArticle) {
+    public Article update(UpdateArticleRequestDTO updateArticle) {
         this.content = updateArticle.getContent();
         this.event = updateArticle.getEvent();
         this.thought = updateArticle.getThought();
@@ -66,18 +62,6 @@ public class Article extends BaseTimeEntity {
         this.aiComment = updateArticle.getAiComment();
         this.amount = updateArticle.getAmount();
         this.registerType = RegisterType.valueOf(updateArticle.getRegisterType());
-    }
-
-    public WriteArticleResponseDTO toDtoForWrite(ModelMapper modelMapper) {
-        return modelMapper.map(this, WriteArticleResponseDTO.class);
-    }
-
-    public ViewArticleResponseDTO toDtoForDetails(ModelMapper modelMapper) {
-        return modelMapper.map(this, ViewArticleResponseDTO.class);
-    }
-
-    public UpdateArticleResponseDTO toDtoForUpdate(ModelMapper modelMapper) {
-        return modelMapper.map(this, UpdateArticleResponseDTO.class);
-
+        return this;
     }
 }
