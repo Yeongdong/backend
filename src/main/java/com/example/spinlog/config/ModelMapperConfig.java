@@ -1,6 +1,6 @@
 package com.example.spinlog.config;
 
-import com.example.spinlog.article.dto.WriteArticleResponseDTO;
+import com.example.spinlog.article.dto.WriteArticleResponseDto;
 import com.example.spinlog.article.entity.Article;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -23,14 +23,14 @@ public class ModelMapperConfig {
         };
 
         // Article -> WriteArticleResponseDTO 매핑 규칙 설정
-        modelMapper.createTypeMap(Article.class, WriteArticleResponseDTO.class)
+        modelMapper.createTypeMap(Article.class, WriteArticleResponseDto.class)
                 .addMappings(mapping -> {
                     // Emotion 필드를 String으로 매핑
                     mapping.using(enumToStringConverter)
-                            .map(Article::getEmotion, WriteArticleResponseDTO::setEmotion);
+                            .map(Article::getEmotion, WriteArticleResponseDto::setEmotion);
                     // RegisterType 필드를 String으로 매핑
                     mapping.using(enumToStringConverter)
-                            .map(Article::getRegisterType, WriteArticleResponseDTO::setRegisterType);
+                            .map(Article::getRegisterType, WriteArticleResponseDto::setRegisterType);
                 });
 
         return modelMapper;

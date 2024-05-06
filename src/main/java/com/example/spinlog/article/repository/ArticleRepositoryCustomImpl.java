@@ -1,7 +1,7 @@
 package com.example.spinlog.article.repository;
 
 import com.example.spinlog.article.dto.SearchCond;
-import com.example.spinlog.article.dto.ViewArticleResponseDTO;
+import com.example.spinlog.article.dto.ViewArticleResponseDto;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.querydsl.core.BooleanBuilder;
@@ -27,10 +27,10 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     }
 
     @Override
-    public Page<ViewArticleResponseDTO> search(SearchCond cond, Pageable pageable) {
+    public Page<ViewArticleResponseDto> search(SearchCond cond, Pageable pageable) {
         // 게시글 가져오는 쿼리
-        List<ViewArticleResponseDTO> content = queryFactory
-                .select(Projections.constructor(ViewArticleResponseDTO.class))
+        List<ViewArticleResponseDto> content = queryFactory
+                .select(Projections.constructor(ViewArticleResponseDto.class))
                 .from(article)
                 .where(
                         registerTypeEq(cond.getRegisterType()),

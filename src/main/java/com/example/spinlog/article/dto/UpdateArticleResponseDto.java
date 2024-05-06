@@ -5,7 +5,7 @@ import lombok.Data;
 import org.modelmapper.ModelMapper;
 
 @Data
-public class ViewArticleResponseDTO {
+public class UpdateArticleResponseDto {
     private String content;
     private String event;
     private String thought;
@@ -18,7 +18,7 @@ public class ViewArticleResponseDTO {
     private Integer amount;
     private String registerType;
 
-    public static ViewArticleResponseDTO from(Article viewArticle, ModelMapper modelMapper) {
-        return modelMapper.map(viewArticle, ViewArticleResponseDTO.class);
+    public static UpdateArticleResponseDto from(Article updateArticle, ModelMapper modelMapper) {
+        return modelMapper.map(updateArticle, UpdateArticleResponseDto.class);
     }
 }

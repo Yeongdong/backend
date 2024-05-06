@@ -50,7 +50,7 @@ public class Article extends BaseTimeEntity {
         this.registerType = registerType;
     }
 
-    public Article update(UpdateArticleRequestDTO updateArticle) {
+    public Article update(UpdateArticleRequestDto updateArticle) {
         this.content = updateArticle.getContent();
         this.event = updateArticle.getEvent();
         this.thought = updateArticle.getThought();

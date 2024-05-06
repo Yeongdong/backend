@@ -28,7 +28,7 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_작성_테스트() {
         // Given
-        WriteArticleRequestDTO requestDTO = WriteArticleRequestDTO.builder()
+        WriteArticleRequestDto requestDTO = WriteArticleRequestDto.builder()
                 .content("Test Thing")
                 .event("Test event")
                 .thought("Test thought")
@@ -43,7 +43,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        WriteArticleResponseDTO responseDTO = articleService.createArticle(requestDTO);
+        WriteArticleResponseDto responseDTO = articleService.createArticle(requestDTO);
 
         // Then
         assertThat(responseDTO).isNotNull();
@@ -69,7 +69,7 @@ public class ArticleServiceTest {
         Long articleId = 3L;
 
         // When
-        ViewArticleResponseDTO responseDTO = articleService.getArticle(articleId);
+        ViewArticleResponseDto responseDTO = articleService.getArticle(articleId);
 
         // Then
         assertThat(responseDTO).isNotNull();
@@ -89,7 +89,7 @@ public class ArticleServiceTest {
     public void 게시글_수정_테스트() {
         // Given
         Long articleId = 6L;
-        UpdateArticleRequestDTO updateDTO = UpdateArticleRequestDTO.builder()
+        UpdateArticleRequestDto updateDTO = UpdateArticleRequestDto.builder()
                 .content("Update Thing")
                 .event("Update event")
                 .thought("Update thought")
@@ -104,7 +104,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        UpdateArticleResponseDTO responseDTO = articleService.updateArticle(articleId, updateDTO);
+        UpdateArticleResponseDto responseDTO = articleService.updateArticle(articleId, updateDTO);
 
         // Then
         assertThat(responseDTO).isNotNull();

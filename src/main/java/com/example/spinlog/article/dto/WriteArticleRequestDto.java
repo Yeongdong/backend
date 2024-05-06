@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class WriteArticleRequestDTO {
+public class WriteArticleRequestDto {
     private String content;
     private String event;
     private String thought;

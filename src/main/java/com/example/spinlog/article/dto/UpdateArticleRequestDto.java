@@ -1,11 +1,13 @@
 package com.example.spinlog.article.dto;
 
-import com.example.spinlog.article.entity.Article;
-import lombok.Data;
-import org.modelmapper.ModelMapper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
-public class WriteArticleResponseDTO {
+@Getter
+@Builder
+@AllArgsConstructor
+public class UpdateArticleRequestDto {
     private String content;
     private String event;
     private String thought;
@@ -17,8 +19,4 @@ public class WriteArticleResponseDTO {
     private String aiComment;
     private Integer amount;
     private String registerType;
-
-    public static WriteArticleResponseDTO from(Article saveArticle, ModelMapper modelMapper) {
-        return modelMapper.map(saveArticle, WriteArticleResponseDTO.class);
-    }
 }

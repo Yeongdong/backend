@@ -23,29 +23,29 @@ public class ArticleService {
 
 
     @Transactional
-    public WriteArticleResponseDTO createArticle(WriteArticleRequestDTO requestDTO) {
-        Article articleEntity = requestDTO.toEntity();
+    public WriteArticleResponseDto createArticle(WriteArticleRequestDto requestDto) {
+        Article articleEntity = requestDto.toEntity();
         Article saveArticle = articleRepository.save(articleEntity);
         log.info("게시글이 성공적으로 저장되었습니다. ID: {}", saveArticle.getArticleId());
-        return WriteArticleResponseDTO.from(saveArticle, modelMapper);
+        return WriteArticleResponseDto.from(saveArticle, modelMapper);
     }
 
     // 게시글 리스트 => 검색어 추가 수정 필요
-    public Page<ViewArticleResponseDTO> listArticles(Pageable pageable, SearchCond searchCond) {
+    public Page<ViewArticleResponseDto> listArticles(Pageable pageable, SearchCond searchCond) {
         return articleRepository.search(searchCond, pageable);
     }
 
-    public ViewArticleResponseDTO getArticle(Long id) {
+    public ViewArticleResponseDto getArticle(Long id) {
         Article viewArticle = findArticleById(id);
-        return ViewArticleResponseDTO.from(viewArticle, modelMapper);
+        return ViewArticleResponseDto.from(viewArticle, modelMapper);
     }
 
     @Transactional
-    public UpdateArticleResponseDTO updateArticle(Long id, UpdateArticleRequestDTO requestDTO) {
+    public UpdateArticleResponseDto updateArticle(Long id, UpdateArticleRequestDto requestDto) {
         Article article = findArticleById(id);
-        Article updateArticle = article.update(requestDTO);
+        Article updateArticle = article.update(requestDto);
         log.info("ID {}의 게시글이 업데이트되었습니다.", id);
-        return UpdateArticleResponseDTO.from(updateArticle, modelMapper);
+        return UpdateArticleResponseDto.from(updateArticle, modelMapper);
     }
 
     @Transactional
