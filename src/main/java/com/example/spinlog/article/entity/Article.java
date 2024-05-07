@@ -4,6 +4,9 @@ import com.example.spinlog.article.dto.*;
 import com.example.spinlog.global.entity.BaseTimeEntity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,18 +23,40 @@ public class Article extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_id")
     private Long articleId; // 일기 번호
+
+    @NotNull
     private String content;  //내용
+
+    @NotNull
     private String event; // 사건
+
+    @NotNull
     private String thought; // 생각
+
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Emotion emotion; // 감정
+
+    @NotNull
     private String result; // 결과
+
+    @NotNull
+    @Min(1) @Max(5)
     private Float satisfaction; // 만족도
+
+    @NotNull
     private String reason; // 이유
+
+    @NotNull
     private String improvements; // 개선점
+
     @Nullable
     private String aiComment; // AI 한마디
+
+    @Min(0)
     private Integer amount; // 금액
+
+    @NotNull
     @Enumerated(EnumType.STRING)
     private RegisterType registerType; // 지출과 소비
 
