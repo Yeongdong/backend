@@ -1,6 +1,9 @@
 package com.example.spinlog.article.service;
 
 import com.example.spinlog.article.dto.*;
+import com.example.spinlog.article.entity.Article;
+import com.example.spinlog.article.entity.Emotion;
+import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +52,7 @@ public class ArticleServiceTest {
         assertThat(responseDTO).isNotNull();
     }
 
-//    @Test
+    //    @Test
 //    public void 게시글_리스트_조회_테스트() {
 //        // Given
 //        Pageable pageable = PageRequest.of(0, 10);
@@ -66,10 +69,12 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_1개_조회_테스트() {
         // Given
-        Long articleId = 3L;
+        Article article = Article.builder()
+                .build();
+        articleRepository.save(article);
 
         // When
-        ViewArticleResponseDTO responseDTO = articleService.getArticle(articleId);
+        ViewArticleResponseDTO responseDTO = articleService.getArticle(article.getArticleId());
 
         // Then
         assertThat(responseDTO).isNotNull();
@@ -88,23 +93,18 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_수정_테스트() {
         // Given
-        Long articleId = 6L;
+        Article article = Article.builder()
+                .emotion(Emotion.ANNOYED)
+                .registerType(RegisterType.SPEND)
+                .build();
+        articleRepository.save(article);
         UpdateArticleRequestDTO updateDTO = UpdateArticleRequestDTO.builder()
-                .content("Update Thing")
-                .event("Update event")
-                .thought("Update thought")
-                .emotion("EVADED")
-                .result("Update result")
-                .satisfaction(1F)
-                .reason("Update Reason")
-                .improvements("Update Improvements")
-                .aiComment("Update AiComment")
-                .amount(9999)
-                .registerType("SAVE")
+                .emotion(Emotion.SAD.toString())
+                .registerType(RegisterType.SAVE.toString())
                 .build();
 
         // When
-        UpdateArticleResponseDTO responseDTO = articleService.updateArticle(articleId, updateDTO);
+        UpdateArticleResponseDTO responseDTO = articleService.updateArticle(article.getArticleId(), updateDTO);
 
         // Then
         assertThat(responseDTO).isNotNull();
@@ -113,12 +113,14 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_삭제_테스트() {
         // Given
-        Long articleId = 2L;
+        Article article = Article.builder()
+                .build();
+        articleRepository.save(article);
 
         // When
-        articleService.deleteArticle(articleId);
+        articleService.deleteArticle(article.getArticleId());
 
         // Then
-        assertThat(articleRepository.existsById(articleId)).isFalse();
+        assertThat(articleRepository.existsById(article.getArticleId())).isFalse();
     }
 }
