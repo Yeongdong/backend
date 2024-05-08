@@ -49,14 +49,6 @@ class GenderStatisticsRepositoryTest {
     @Autowired
     EntityManager em; // flush 하기 위해 필요 (JPA 쓰기 지연 방지)
 
-    @BeforeAll
-    public static void createView(@Autowired DataSource dataSource) {
-        // JPA에서 기존 테이블 생성 해줬지만, 뷰는 생성 안 됨
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        populator.addScript(new ClassPathResource("view/before-test-schema.sql"));
-        populator.execute(dataSource);
-    }
-
     @Nested
     class 성별_감정별_금액_평균을_반환하는_메서드 {
         @Test
