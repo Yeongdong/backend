@@ -16,10 +16,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,17 +45,6 @@ class MBTIStatisticsServiceTest {
     @InjectMocks
     MBTIStatisticsService statisticsService;
 
-    @Captor
-    ArgumentCaptor<RegisterType> captorRegisterType;
-    @Captor
-    ArgumentCaptor<LocalDate> captorStartDate, captorEndDate;
-    @Captor
-    ArgumentCaptor<String> captorString;
-    @Captor
-    ArgumentCaptor<Mbti> captorMBTI;
-    @Captor
-    ArgumentCaptor<List<String>> captorWords;
-
     @Nested
     class 최근_90일_동안의_MBTI별_감정별_금액_평균을_얻는_메서드{
         @Test
@@ -72,11 +59,8 @@ class MBTIStatisticsServiceTest {
             verify(mbtiStatisticsRepository)
                     .getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
                             any(),
-                            captorStartDate.capture(),
-                            captorEndDate.capture());
-
-            assertThat(captorStartDate.getValue()).isEqualTo(now.minusDays(90));
-            assertThat(captorEndDate.getValue()).isEqualTo(now);
+                            eq(now.minusDays(90)),
+                            eq(now));
         }
 
         @ParameterizedTest
@@ -88,13 +72,10 @@ class MBTIStatisticsServiceTest {
             // then
             verify(mbtiStatisticsRepository)
                     .getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
-                            captorRegisterType.capture(),
+                            eq(registerType),
                             any(),
                             any()
                     );
-
-
-            assertThat(captorRegisterType.getValue()).isEqualTo(registerType);
         }
 
         @Test
@@ -154,11 +135,8 @@ class MBTIStatisticsServiceTest {
             verify(mbtiStatisticsRepository)
                     .getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(
                             any(),
-                            captorStartDate.capture(),
-                            captorEndDate.capture());
-
-            assertThat(captorStartDate.getValue()).isEqualTo(now.minusDays(90));
-            assertThat(captorEndDate.getValue()).isEqualTo(now);
+                            eq(now.minusDays(90)),
+                            eq(now));
         }
 
         @ParameterizedTest
@@ -170,13 +148,10 @@ class MBTIStatisticsServiceTest {
             // then
             verify(mbtiStatisticsRepository)
                     .getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(
-                            captorRegisterType.capture(),
+                            eq(registerType),
                             any(),
                             any()
                     );
-
-
-            assertThat(captorRegisterType.getValue()).isEqualTo(registerType);
         }
 
         @Test
@@ -237,11 +212,8 @@ class MBTIStatisticsServiceTest {
             verify(mbtiStatisticsRepository)
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(
                             any(),
-                            captorStartDate.capture(),
-                            captorEndDate.capture());
-
-            assertThat(captorStartDate.getValue()).isEqualTo(now.minusDays(90));
-            assertThat(captorEndDate.getValue()).isEqualTo(now);
+                            eq(now.minusDays(90)),
+                            eq(now));
         }
 
         // TODO 레포라는 이름 괜찮나?
@@ -256,14 +228,16 @@ class MBTIStatisticsServiceTest {
             statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
             
             // then
-            verify(mbtiStatisticsRepository, times(2))
+            verify(mbtiStatisticsRepository, times(1))
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(
-                            captorString.capture(),
+                            eq(Mbti.NONE.toString()),
                             any(),
                             any());
-
-            assertThat(captorString.getAllValues().get(0)).isEqualTo(Mbti.NONE.toString());
-            assertThat(captorString.getAllValues().get(1)).isEqualTo(userMBTI.toString());
+            verify(mbtiStatisticsRepository, times(1))
+                    .getAllMemosByMBTIBetweenStartDateAndEndDate(
+                            eq(userMBTI.toString()),
+                            any(),
+                            any());
         }
 
         @Test
@@ -295,9 +269,11 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.NONE);
 
             // when
-            WordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
 
             // then
+            ArgumentCaptor<List<String>> captorWords = ArgumentCaptor.forClass(List.class);
+
             verify(wordExtractionService)
                     .analyzeWords(captorWords.capture());
 
@@ -329,13 +305,10 @@ class MBTIStatisticsServiceTest {
             // then
             verify(mbtiStatisticsRepository)
                     .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
-                            captorRegisterType.capture(),
+                            eq(registerType),
                             any(),
                             any()
                     );
-
-
-            assertThat(captorRegisterType.getValue()).isEqualTo(registerType);
         }
 
         @Test
@@ -350,11 +323,8 @@ class MBTIStatisticsServiceTest {
             verify(mbtiStatisticsRepository)
                     .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
                             any(),
-                            captorStartDate.capture(),
-                            captorEndDate.capture());
-
-            assertThat(captorStartDate.getValue()).isEqualTo(now.minusDays(90));
-            assertThat(captorEndDate.getValue()).isEqualTo(now);
+                            eq(now.minusDays(90)),
+                            eq(now));
         }
     }
 }
