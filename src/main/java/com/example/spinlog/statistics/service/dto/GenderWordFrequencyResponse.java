@@ -1,4 +1,4 @@
-package com.example.spinlog.statistics.controller.dto;
+package com.example.spinlog.statistics.service.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -10,11 +10,4 @@ import java.util.List;
 public class GenderWordFrequencyResponse {
     private List<WordFrequency> maleWordFrequencies;
     private List<WordFrequency> femaleWordFrequencies;
-
-    @Getter
-    @Builder
-    public static class WordFrequency{
-        private String word;
-        private Long frequency;
-    }
 }

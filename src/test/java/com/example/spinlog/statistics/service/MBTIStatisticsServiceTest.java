@@ -1,9 +1,9 @@
 package com.example.spinlog.statistics.service;
 
 import com.example.spinlog.article.entity.RegisterType;
-import com.example.spinlog.statistics.controller.dto.MBTIDailyAmountSumResponse;
-import com.example.spinlog.statistics.controller.dto.MBTIEmotionAmountAverageResponse;
-import com.example.spinlog.statistics.controller.dto.WordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.MBTIDailyAmountSumResponse;
+import com.example.spinlog.statistics.service.dto.MBTIEmotionAmountAverageResponse;
+import com.example.spinlog.statistics.service.dto.WordFrequencyResponse;
 import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;

@@ -1,6 +1,6 @@
 package com.example.spinlog.statistics.service;
 
-import com.example.spinlog.statistics.controller.dto.WordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.WordFrequency;
 import kr.co.shineware.nlp.komoran.model.Token;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -51,11 +51,11 @@ class WordExtractionServiceTest {
                 .thenReturn(input);
 
         // when
-        List<WordFrequencyResponse.WordFrequency> results = wordExtractionService.analyzeWords(List.of());
+        List<WordFrequency> results = wordExtractionService.analyzeWords(List.of());
 
         // then
         List<String> strings = results.stream()
-                .map(WordFrequencyResponse.WordFrequency::getWord)
+                .map(WordFrequency::getWord)
                 .toList();
         assertThat(keywords)
                 .extracting(Token::getMorph)
@@ -80,11 +80,11 @@ class WordExtractionServiceTest {
                 .thenReturn(keywords);
 
         // when
-        List<WordFrequencyResponse.WordFrequency> results = wordExtractionService.analyzeWords(List.of());
+        List<WordFrequency> results = wordExtractionService.analyzeWords(List.of());
 
         // then
         results.stream()
-                .map(WordFrequencyResponse.WordFrequency::getWord)
+                .map(WordFrequency::getWord)
                 .filter(w -> w.startsWith("동사") || w.startsWith("형용사"))
                 .forEach(w -> assertThat(w).isIn("동사다", "형용사다"));
     }
@@ -105,11 +105,11 @@ class WordExtractionServiceTest {
                 .thenReturn(keywords);
 
         // when
-        List<WordFrequencyResponse.WordFrequency> results = wordExtractionService.analyzeWords(List.of());
+        List<WordFrequency> results = wordExtractionService.analyzeWords(List.of());
 
         // then
         assertThat(results)
-                .extracting(WordFrequencyResponse.WordFrequency::getFrequency)
+                .extracting(WordFrequency::getFrequency)
                 .allMatch((f) -> f == 3L);
     }
 }

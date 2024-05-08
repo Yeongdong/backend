@@ -1,7 +1,6 @@
-package com.example.spinlog.statistics.controller.dto;
+package com.example.spinlog.statistics.service.dto;
 
-import com.example.spinlog.statistics.entity.MBTIFactor;
-import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
+import com.example.spinlog.statistics.repository.dto.GenderDailyAmountSumDto;
 import com.example.spinlog.user.entity.Gender;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +16,7 @@ public class GenderDailyAmountSumResponse {
     private Gender gender;
     private List<EmotionAmountSum> emotionAmountSums;
 
-    public static GenderDailyAmountSumResponse of(Gender gender, List<MBTIDailyAmountSumDto> dtos){
+    public static GenderDailyAmountSumResponse of(Gender gender, List<GenderDailyAmountSumDto> dtos){
         return GenderDailyAmountSumResponse.builder()
                 .gender(gender)
                 .emotionAmountSums(
@@ -52,7 +51,7 @@ public class GenderDailyAmountSumResponse {
             this.amountSum = amountSum;
         }
 
-        public static EmotionAmountSum of(MBTIDailyAmountSumDto dto){
+        public static EmotionAmountSum of(GenderDailyAmountSumDto dto){
             return EmotionAmountSum.builder()
                     .date(dto.getLocalDate())
                     .amountSum(dto.getAmountSum())

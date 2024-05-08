@@ -1,4 +1,4 @@
-package com.example.spinlog.statistics.controller.dto;
+package com.example.spinlog.statistics.service.dto;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.statistics.entity.MBTIFactor;

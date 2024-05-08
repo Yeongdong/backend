@@ -1,4 +1,4 @@
-package com.example.spinlog.statistics.controller.dto;
+package com.example.spinlog.statistics.service.dto;
 
 import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
