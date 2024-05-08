@@ -1,9 +1,8 @@
 package com.example.spinlog.statistics.controller;
 
-import com.example.spinlog.article.entity.RegisterType;
-import com.example.spinlog.statistics.controller.dto.GenderDailyAmountSumResponse;
-import com.example.spinlog.statistics.controller.dto.GenderEmotionAmountAverageResponse;
-import com.example.spinlog.statistics.controller.dto.GenderWordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.GenderDailyAmountSumResponse;
+import com.example.spinlog.statistics.service.dto.GenderEmotionAmountAverageResponse;
+import com.example.spinlog.statistics.service.dto.GenderWordFrequencyResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

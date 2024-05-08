@@ -1,6 +1,6 @@
 package com.example.spinlog.statistics.service;
 
-import com.example.spinlog.statistics.controller.dto.WordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.WordFrequency;
 import kr.co.shineware.nlp.komoran.model.Token;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class WordExtractionService {
     private final KomoranService komoranService;
 
-    public List<WordFrequencyResponse.WordFrequency> analyzeWords(List<String> memos){
+    public List<WordFrequency> analyzeWords(List<String> memos){
         /**
          * 1. 명사 형용사 감탄사 명사만 뽑는다
          * 2. 명사, 형용사에 '다' 붙인다.
@@ -32,7 +32,7 @@ public class WordExtractionService {
                         Collectors.counting()
                 ))
                 .entrySet().stream()
-                .map(e -> WordFrequencyResponse.WordFrequency.builder()
+                .map(e -> WordFrequency.builder()
                         .word(e.getKey())
                         .frequency(e.getValue())
                         .build())

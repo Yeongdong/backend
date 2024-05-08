@@ -1,10 +1,12 @@
 package com.example.spinlog.statistics.service;
 
 import com.example.spinlog.article.entity.RegisterType;
-import com.example.spinlog.statistics.controller.dto.*;
 import com.example.spinlog.statistics.repository.GenderStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.*;
-import com.example.spinlog.statistics.required_have_to_delete.UserInfoService;
+import com.example.spinlog.statistics.service.dto.GenderDailyAmountSumResponse;
+import com.example.spinlog.statistics.service.dto.GenderEmotionAmountAverageResponse;
+import com.example.spinlog.statistics.service.dto.GenderWordFrequencyResponse;
+import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,22 +32,62 @@ public class GenderStatisticsService {
     }
 
     public List<GenderEmotionAmountAverageResponse> getAmountAveragesEachGenderAndEmotionLast90Days(LocalDate today, RegisterType registerType){
-        // 레포에게 성별, 감정별 금액평균 데이터 요청
-        // 그루핑
-        return null;
+        LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
+        List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.
+                getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
+
+        return dtos.stream()
+                .collect(
+                        groupingBy(GenderEmotionAmountAverageDto::getGender))
+                .entrySet().stream()
+                .map((e) ->
+                        GenderEmotionAmountAverageResponse.of(e.getKey(), e.getValue()))
+                .toList();
     }
 
     public List<GenderDailyAmountSumResponse> getAmountSumsEachGenderAndDayLast90Days(LocalDate today, RegisterType registerType) {
-        // 레포에게 성별, 일별 금액평균 데이터 요청
-        // 그루핑
-        return null;
+        LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
+        List<GenderDailyAmountSumDto> dtos = genderStatisticsRepository
+                .getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
+
+        return dtos.stream()
+                .collect(
+                        groupingBy(GenderDailyAmountSumDto::getGender))
+                .entrySet().stream()
+                .map((e) ->
+                        GenderDailyAmountSumResponse.of(e.getKey(), e.getValue()))
+                .toList();
     }
 
     public GenderWordFrequencyResponse getWordFrequenciesLast90Days(LocalDate today){
-        // 레포에게 성별 메모 요청
-        // wordExtractionService에게 명령
-        // 정리해서 반환
-        return null;
+        LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
+        List<MemoDto> maleMemos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(Gender.MALE, startDate, today);
+        List<MemoDto> femaleMemos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(Gender.FEMALE, startDate, today);
+
+        return GenderWordFrequencyResponse.builder()
+                .maleWordFrequencies(
+                        wordExtractionService.analyzeWords(
+                                maleMemos.stream()
+                                        .flatMap((m) -> Stream.of(
+                                                m.getContent(),
+                                                m.getEvent(),
+                                                m.getReason(),
+                                                m.getResult(),
+                                                m.getThought(),
+                                                m.getImprovements()))
+                                        .toList()))
+                .femaleWordFrequencies(
+                        wordExtractionService.analyzeWords(
+                                femaleMemos.stream()
+                                        .flatMap((m) -> Stream.of(
+                                                m.getContent(),
+                                                m.getEvent(),
+                                                m.getReason(),
+                                                m.getResult(),
+                                                m.getThought(),
+                                                m.getImprovements()))
+                                        .toList()))
+                .build();
     }
 
     private static boolean isNone(Mbti mbti) {
@@ -53,8 +95,7 @@ public class GenderStatisticsService {
     }
 
     public List<GenderSatisfactionAverageDto> getSatisfactionAveragesEachGenderLast90Days(LocalDate today, RegisterType registerType){
-        // 레포에게 성별 만족도 평균 요청
-        // 그대로 반환
-        return null;
+        LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
+        return genderStatisticsRepository.getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate(registerType, startDate, today);
     }
 }

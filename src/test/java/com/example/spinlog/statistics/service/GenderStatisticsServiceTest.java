@@ -1,13 +1,11 @@
 package com.example.spinlog.statistics.service;
 
 import com.example.spinlog.article.entity.RegisterType;
-import com.example.spinlog.statistics.controller.dto.*;
 import com.example.spinlog.statistics.repository.GenderStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.*;
-import com.example.spinlog.statistics.required_have_to_delete.UserInfoService;
+import com.example.spinlog.statistics.service.dto.GenderDailyAmountSumResponse;
+import com.example.spinlog.statistics.service.dto.GenderEmotionAmountAverageResponse;
 import com.example.spinlog.user.entity.Gender;
-import com.example.spinlog.user.entity.Mbti;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
@@ -201,7 +199,7 @@ class GenderStatisticsServiceTest {
             statisticsService.getWordFrequenciesLast90Days(now);
 
             // then
-            verify(genderStatisticsRepository)
+            verify(genderStatisticsRepository, times(2))
                     .getAllMemosByGenderBetweenStartDateAndEndDate(
                             any(),
                             eq(now.minusDays(90)),
@@ -237,7 +235,7 @@ class GenderStatisticsServiceTest {
             );
             when(genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(any(), any(), any()))
                     .thenReturn(memos)
-                    .thenReturn(null);
+                    .thenReturn(memos);
 
             // when
             statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
