@@ -43,7 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> foundUser = userRepository.findByAuthenticationName(authenticationName);
 
         if (foundUser.isEmpty()) {
-            log.info("User {} does not exist. Saving user into database.", authenticationName);
+            log.info("User {} does not exist. Saving user into database.", response.getProvider() + "-" + response.getEmail());
             userRepository.save(
                     User.builder()
                             .email(response.getEmail())
@@ -51,7 +51,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .build()
             );
         } else {
-            log.info("User {} found", authenticationName);
+            log.info("User {} found", response.getProvider() + "-" + response.getEmail());
             foundUser.get().changeProfile(response.getEmail());
         }
 
