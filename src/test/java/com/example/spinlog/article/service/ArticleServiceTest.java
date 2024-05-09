@@ -28,7 +28,7 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_작성_테스트() {
         // Given
-        WriteArticleRequestDto requestDTO = WriteArticleRequestDto.builder()
+        WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
                 .content("Test Thing")
                 .event("Test event")
                 .thought("Test thought")
@@ -43,10 +43,10 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        WriteArticleResponseDto responseDTO = articleService.createArticle(requestDTO);
+        WriteArticleResponseDto responseDto = articleService.createArticle(requestDto);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
 //    @Test
@@ -69,10 +69,10 @@ public class ArticleServiceTest {
         Long articleId = 3L;
 
         // When
-        ViewArticleResponseDto responseDTO = articleService.getArticle(articleId);
+        ViewArticleResponseDto responseDto = articleService.getArticle(articleId);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ArticleServiceTest {
     public void 게시글_수정_테스트() {
         // Given
         Long articleId = 6L;
-        UpdateArticleRequestDto updateDTO = UpdateArticleRequestDto.builder()
+        UpdateArticleRequestDto updateDto = UpdateArticleRequestDto.builder()
                 .content("Update Thing")
                 .event("Update event")
                 .thought("Update thought")
@@ -104,10 +104,10 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        UpdateArticleResponseDto responseDTO = articleService.updateArticle(articleId, updateDTO);
+        UpdateArticleResponseDto responseDto = articleService.updateArticle(articleId, updateDto);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
     @Test
