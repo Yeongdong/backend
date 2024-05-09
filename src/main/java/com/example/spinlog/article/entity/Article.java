@@ -38,7 +38,7 @@ public class Article extends BaseTimeEntity {
     private RegisterType registerType; // 지출과 소비
 
     @Builder
-    public Article(String content, LocalDateTime spendDate, String event, String thought, Emotion emotion, String result, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
+    public Article(String content, LocalDateTime spendDate, String event, String thought, Emotion emotion, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
         this.content = content;
         this.spendDate = spendDate;
         this.event = event;
