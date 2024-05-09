@@ -8,9 +8,9 @@ import org.modelmapper.ModelMapper;
 public class ViewArticleResponseDto {
     private String content;
     private String event;
+    private String spendDate;
     private String thought;
     private String emotion;
-    private String result;
     private Float satisfaction;
     private String reason;
     private String improvements;

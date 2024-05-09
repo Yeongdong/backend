@@ -7,19 +7,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @AllArgsConstructor
 public class WriteArticleRequestDto {
     private String content;
+    private String spendDate;
     private String event;
     private String thought;
     private String emotion;
-    private String result;
     private Float satisfaction;
     private String reason;
     private String improvements;
-    private String aiComment;
     private Integer amount;
     private String registerType;
 
@@ -31,14 +32,13 @@ public class WriteArticleRequestDto {
     public Article toEntity() {
         return Article.builder()
                 .content(content)
+                .spendDate(LocalDateTime.parse(spendDate))
                 .event(event)
                 .thought(thought)
                 .emotion(Emotion.valueOf(emotion))
-                .result(result)
                 .satisfaction(satisfaction)
                 .reason(reason)
                 .improvements(improvements)
-                .aiComment(aiComment)
                 .amount(amount)
                 .registerType(RegisterType.valueOf(registerType))
                 .build();
