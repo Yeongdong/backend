@@ -3,7 +3,8 @@ package com.example.spinlog.statistics.controller;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.statistics.service.dto.MBTIDailyAmountSumResponse;
 import com.example.spinlog.statistics.service.dto.MBTIEmotionAmountAverageResponse;
-import com.example.spinlog.statistics.service.dto.WordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.MBTISatisfactionAverageResponse;
+import com.example.spinlog.statistics.service.dto.MBTIWordFrequencyResponse;
 import com.example.spinlog.statistics.repository.dto.MBTISatisfactionAverageDto;
 import com.example.spinlog.statistics.service.MBTIStatisticsService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class MBTIStatisticsController {
 
     // TODO API 변경사항 반영 - 유저 MBTI 필드 추가
     @GetMapping("/api/statistics/mbti/emotion/amounts/average")
-    public List<MBTIEmotionAmountAverageResponse> getAmountAverageEachMBTIAndEmotionLast90Days(
+    public MBTIEmotionAmountAverageResponse getAmountAverageEachMBTIAndEmotionLast90Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(
                 LocalDate.now(),
@@ -31,7 +32,7 @@ public class MBTIStatisticsController {
     }
 
     @GetMapping("/api/statistics/mbti/daily/amounts/sum")
-    public List<MBTIDailyAmountSumResponse> getAmountSumsEachMBTIAndDayLast90Days(
+    public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast90Days(
             @RequestParam(defaultValue = "SPEND") String registerType) {
         return statisticsService.getAmountSumsEachMBTIAndDayLast90Days(
                 LocalDate.now(),
@@ -39,12 +40,12 @@ public class MBTIStatisticsController {
     }
 
     @GetMapping("/api/statistics/mbti/word/frequencies")
-    public WordFrequencyResponse getWordFrequencyLast90Days(){
+    public MBTIWordFrequencyResponse getWordFrequencyLast90Days(){
         return statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
     }
 
     @GetMapping("/api/statistics/mbti/statisfactions/average")
-    public List<MBTISatisfactionAverageDto> getSatisfactionAveragesEachMBTILast90Days(
+    public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast90Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return statisticsService.getSatisfactionAveragesEachMBTILast90Days(
                 LocalDate.now(),

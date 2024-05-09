@@ -2,6 +2,7 @@ package com.example.spinlog.statistics.service.dto;
 
 import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
+import com.example.spinlog.user.entity.Mbti;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -11,53 +12,43 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
+@Builder
 public class MBTIDailyAmountSumResponse {
-    private MBTIFactor mbtiFactor;
-    private List<EmotionAmountSum> emotionAmountSums;
+    private Mbti mbti;
+    private List<MBTIDailyAmountSum> mbtiDailyAmountSums;
 
+    @Getter
     @Builder
-    public MBTIDailyAmountSumResponse(MBTIFactor mbtiFactor, List<EmotionAmountSum> emotionAmountSums) {
-        this.mbtiFactor = mbtiFactor;
-        this.emotionAmountSums = emotionAmountSums;
-    }
+    public static class MBTIDailyAmountSum {
+        private MBTIFactor mbtiFactor;
+        private List<DailyAmountSum> dailyAmountSums;
 
-    public static MBTIDailyAmountSumResponse of(String factor, List<MBTIDailyAmountSumDto> dtos){
-        return MBTIDailyAmountSumResponse.builder()
-                .mbtiFactor(MBTIFactor.valueOf(factor))
-                .emotionAmountSums(
-                        dtos.stream()
-                                .map(EmotionAmountSum::of)
-                                .collect(Collectors.toList())
-                )
-                .build();
-    }
-
-    @Override
-    public String toString() {
-        return "EmotionAmountAverage\n" +
-                "mbtiFactor=" + mbtiFactor + "\n" +
-                "emotionCount=\n" +
-                emotionAmountSums.stream()
-                        .map(EmotionAmountSum::toString)
-                        .map(ea -> ea+"\n")
-                        .toList()
-                + "\n";
+        public static MBTIDailyAmountSum of(String factor, List<MBTIDailyAmountSumDto> dtos) {
+            return MBTIDailyAmountSum.builder()
+                    .mbtiFactor(MBTIFactor.valueOf(factor))
+                    .dailyAmountSums(
+                            dtos.stream()
+                                    .map(DailyAmountSum::of)
+                                    .collect(Collectors.toList())
+                    )
+                    .build();
+        }
     }
 
     @Getter
     @ToString
-    public static class EmotionAmountSum {
+    public static class DailyAmountSum {
         private LocalDate date;
         private Long amountSum;
 
         @Builder
-        public EmotionAmountSum(LocalDate date, Long amountSum) {
+        public DailyAmountSum(LocalDate date, Long amountSum) {
             this.date = date;
             this.amountSum = amountSum;
         }
 
-        public static EmotionAmountSum of(MBTIDailyAmountSumDto dto){
-            return EmotionAmountSum.builder()
+        public static DailyAmountSum of(MBTIDailyAmountSumDto dto){
+            return DailyAmountSum.builder()
                     .date(dto.getLocalDate())
                     .amountSum(dto.getAmountSum())
                     .build();

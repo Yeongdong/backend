@@ -3,9 +3,9 @@ package com.example.spinlog.statistics.service.dto;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
+import com.example.spinlog.user.entity.Mbti;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,11 +13,17 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class MBTIEmotionAmountAverageResponse {
+    private Mbti mbti;
+    private List<MBTIEmotionAmountAverage> mbtiEmotionAmountAverages;
+
+    @Getter
+    @Builder
+    public static class MBTIEmotionAmountAverage {
         private MBTIFactor mbtiFactor;
         private List<EmotionAmountAverage> emotionAmountAverages;
 
-        public static MBTIEmotionAmountAverageResponse of(String factor, List<MBTIEmotionAmountAverageDto> dtos){
-            return MBTIEmotionAmountAverageResponse.builder()
+        public static MBTIEmotionAmountAverage of(String factor, List<MBTIEmotionAmountAverageDto> dtos) {
+            return MBTIEmotionAmountAverage.builder()
                     .mbtiFactor(MBTIFactor.valueOf(factor))
                     .emotionAmountAverages(
                             dtos.stream()
@@ -26,21 +32,9 @@ public class MBTIEmotionAmountAverageResponse {
                     )
                     .build();
         }
-
-        @Override
-        public String toString() {
-            return "EmotionAmountAverage\n" +
-                    "mbtiFactor =" + mbtiFactor + "\n" +
-                    "emotionCount=\n" +
-                    emotionAmountAverages.stream()
-                            .map(EmotionAmountAverage::toString)
-                            .map(ea -> ea+"\n")
-                            .toList()
-                    + "\n";
-        }
+    }
 
     @Getter
-    @ToString
     public static class EmotionAmountAverage {
         private Emotion emotion;
         private Long amountAverage;

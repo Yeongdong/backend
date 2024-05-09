@@ -3,7 +3,8 @@ package com.example.spinlog.statistics.service;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.statistics.service.dto.MBTIDailyAmountSumResponse;
 import com.example.spinlog.statistics.service.dto.MBTIEmotionAmountAverageResponse;
-import com.example.spinlog.statistics.service.dto.WordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.MBTISatisfactionAverageResponse;
+import com.example.spinlog.statistics.service.dto.MBTIWordFrequencyResponse;
 import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
@@ -36,37 +37,45 @@ public class MBTIStatisticsService {
         this.userInfoService = userInfoService;
     }
 
-    public List<MBTIEmotionAmountAverageResponse> getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate today, RegisterType registerType){
+    public MBTIEmotionAmountAverageResponse getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate today, RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
         
         // TODO 없는 값에 대한 0 padding 작업
 
-        return dtos.stream()
-                .collect(
-                        groupingBy(MBTIEmotionAmountAverageDto::getMbtiFactor))
-                .entrySet().stream()
-                .map((e) ->
-                        MBTIEmotionAmountAverageResponse.of(e.getKey(), e.getValue()))
-                .toList();
+        return MBTIEmotionAmountAverageResponse.builder()
+                .mbti(userInfoService.getUserMBTI())
+                .mbtiEmotionAmountAverages(
+                        dtos.stream()
+                                .collect(
+                                        groupingBy(MBTIEmotionAmountAverageDto::getMbtiFactor))
+                                .entrySet().stream()
+                                .map((e) ->
+                                        MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage.of(e.getKey(), e.getValue()))
+                                .toList())
+                .build();
     }
 
-    public List<MBTIDailyAmountSumResponse> getAmountSumsEachMBTIAndDayLast90Days(LocalDate today, RegisterType registerType) {
+    public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast90Days(LocalDate today, RegisterType registerType) {
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
 
         // TODO 없는 값에 대한 0 padding 작업
 
-        return dtos.stream()
-                .collect(
-                        groupingBy(MBTIDailyAmountSumDto::getMbtiFactor))
-                .entrySet().stream()
-                .map((e) ->
-                        MBTIDailyAmountSumResponse.of(e.getKey(), e.getValue()))
-                .toList();
+        return MBTIDailyAmountSumResponse.builder()
+                .mbti(userInfoService.getUserMBTI())
+                .mbtiDailyAmountSums(
+                        dtos.stream()
+                                .collect(
+                                        groupingBy(MBTIDailyAmountSumDto::getMbtiFactor))
+                                .entrySet().stream()
+                                .map((e) ->
+                                        MBTIDailyAmountSumResponse.MBTIDailyAmountSum.of(e.getKey(), e.getValue()))
+                                .toList())
+                .build();
     }
 
-    public WordFrequencyResponse getWordFrequenciesLast90Days(LocalDate today){
+    public MBTIWordFrequencyResponse getWordFrequenciesLast90Days(LocalDate today){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         // 최근 90일동안 모든 유저가 적은 메모의 빈도수 측정
         List<MemoDto> memos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(Mbti.NONE.toString(), startDate, today);
@@ -75,7 +84,8 @@ public class MBTIStatisticsService {
         Mbti mbti = userInfoService.getUserMBTI();
 
         if(isNone(mbti)){
-            return WordFrequencyResponse.builder()
+            return MBTIWordFrequencyResponse.builder()
+                    .mbti(mbti)
                     .allWordFrequencies(
                             wordExtractionService.analyzeWords(
                                     memos.stream()
@@ -94,7 +104,8 @@ public class MBTIStatisticsService {
 
         List<MemoDto> memoByMBTI = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(mbti.toString(), startDate, today);
 
-        return WordFrequencyResponse.builder()
+        return MBTIWordFrequencyResponse.builder()
+                .mbti(mbti)
                 .allWordFrequencies(
                         wordExtractionService.analyzeWords(
                                 memos.stream()
@@ -126,8 +137,13 @@ public class MBTIStatisticsService {
         return mbti == null || mbti == Mbti.NONE;
     }
 
-    public List<MBTISatisfactionAverageDto> getSatisfactionAveragesEachMBTILast90Days(LocalDate today, RegisterType registerType){
+    public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast90Days(LocalDate today, RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
-        return mbtiStatisticsRepository.getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(registerType, startDate, today);
+        return MBTISatisfactionAverageResponse.builder()
+                .mbti(userInfoService.getUserMBTI())
+                .mbtiSatisfactionAverages(
+                        mbtiStatisticsRepository
+                                .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(registerType, startDate, today))
+                .build();
     }
 }

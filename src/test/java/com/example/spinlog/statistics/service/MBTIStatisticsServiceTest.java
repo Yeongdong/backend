@@ -3,7 +3,7 @@ package com.example.spinlog.statistics.service;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.statistics.service.dto.MBTIDailyAmountSumResponse;
 import com.example.spinlog.statistics.service.dto.MBTIEmotionAmountAverageResponse;
-import com.example.spinlog.statistics.service.dto.WordFrequencyResponse;
+import com.example.spinlog.statistics.service.dto.MBTIWordFrequencyResponse;
 import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
@@ -95,15 +95,16 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(inputs);
 
             // when
-            List<MBTIEmotionAmountAverageResponse> responses =
-                    statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate.now(), null);
+            List<MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage> responses =
+                    statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate.now(), null)
+                            .getMbtiEmotionAmountAverages();
 
             // then
             assertThat(responses)
                     .hasSize(2);
 
             // TODO 그루핑하는 테스트 분리 & 리팩토링
-            for(MBTIEmotionAmountAverageResponse r: responses){
+            for(MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage r: responses){
                 for(int i=0;i<inputs.size();i++){
                     if(inputs.get(i).getMbtiFactor().equals(r.getMbtiFactor().toString())){
                         final int index = i;
@@ -171,18 +172,19 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(inputs);
 
             // when
-            List<MBTIDailyAmountSumResponse> responses =
-                    statisticsService.getAmountSumsEachMBTIAndDayLast90Days(LocalDate.now(), null);
+            List<MBTIDailyAmountSumResponse.MBTIDailyAmountSum> responses =
+                    statisticsService.getAmountSumsEachMBTIAndDayLast90Days(LocalDate.now(), null)
+                            .getMbtiDailyAmountSums();
 
             // then
             assertThat(responses)
                     .hasSize(2);
 
-            for(MBTIDailyAmountSumResponse r: responses){
+            for(MBTIDailyAmountSumResponse.MBTIDailyAmountSum r: responses){
                 for(int i=0;i<inputs.size();i++){
                     if(inputs.get(i).getMbtiFactor().equals(r.getMbtiFactor().toString())){
                         final int index = i;
-                        r.getEmotionAmountSums()
+                        r.getDailyAmountSums()
                                 .forEach(ea -> {
                                     if(ea.getDate().equals(inputs.get(index).getLocalDate())
                                             && ea.getAmountSum().equals(inputs.get(index).getAmountSum()))
@@ -247,7 +249,7 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.NONE);
 
             // when
-            WordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
 
             // then
             assertThat(response.getMyWordFrequencies())
