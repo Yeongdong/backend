@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -75,6 +76,7 @@ public class GenderStatisticsService {
                                                 m.getResult(),
                                                 m.getThought(),
                                                 m.getImprovements()))
+                                        .filter(Objects::nonNull)
                                         .toList()))
                 .femaleWordFrequencies(
                         wordExtractionService.analyzeWords(
@@ -86,6 +88,7 @@ public class GenderStatisticsService {
                                                 m.getResult(),
                                                 m.getThought(),
                                                 m.getImprovements()))
+                                        .filter(Objects::nonNull)
                                         .toList()))
                 .build();
     }
