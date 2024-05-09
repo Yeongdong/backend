@@ -196,7 +196,7 @@ class GenderStatisticsServiceTest {
             LocalDate now = LocalDate.now();
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(now);
+            statisticsService.getWordFrequenciesEachGenderLast90Days(now);
 
             // then
             verify(genderStatisticsRepository, times(2))
@@ -209,7 +209,7 @@ class GenderStatisticsServiceTest {
         @Test
         void 레포에게_성별로_MALE과_FEMALE을_전달한다() throws Exception {
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
 
             // then
             verify(genderStatisticsRepository, times(1))
@@ -238,7 +238,7 @@ class GenderStatisticsServiceTest {
                     .thenReturn(memos);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
 
             // then
             ArgumentCaptor<List<String>> captorWords = ArgumentCaptor.forClass(List.class);

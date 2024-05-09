@@ -38,7 +38,7 @@ public class GenderStatisticsController {
 
     @GetMapping("/api/statistics/gender/word/frequencies")
     public GenderWordFrequencyResponse getWordFrequencyEachGenderLast90Days(){
-        return genderStatisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+        return genderStatisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
     }
 
     @GetMapping("/api/statistics/gender/statisfactions/average")

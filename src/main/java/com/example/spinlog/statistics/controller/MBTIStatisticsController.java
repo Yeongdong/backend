@@ -22,7 +22,6 @@ import java.util.List;
 public class MBTIStatisticsController {
     private final MBTIStatisticsService statisticsService;
 
-    // TODO API 변경사항 반영 - 유저 MBTI 필드 추가
     @GetMapping("/api/statistics/mbti/emotion/amounts/average")
     public MBTIEmotionAmountAverageResponse getAmountAverageEachMBTIAndEmotionLast90Days(
             @RequestParam(defaultValue = "SPEND") String registerType){

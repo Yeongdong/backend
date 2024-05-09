@@ -60,7 +60,7 @@ public class GenderStatisticsService {
                 .toList();
     }
 
-    public GenderWordFrequencyResponse getWordFrequenciesLast90Days(LocalDate today){
+    public GenderWordFrequencyResponse getWordFrequenciesEachGenderLast90Days(LocalDate today){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MemoDto> maleMemos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(Gender.MALE, startDate, today);
         List<MemoDto> femaleMemos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(Gender.FEMALE, startDate, today);

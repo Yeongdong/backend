@@ -2,10 +2,7 @@ package com.example.spinlog.statistics.controller;
 
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.statistics.service.MBTIStatisticsService;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +30,9 @@ class MBTIStatisticsControllerTest {
     MBTIStatisticsService mbtiStatisticsService;
 
     @Nested
-    class MBTI_감정별_금액_평균_통계_API {
+    class MBTI별_감정별_금액_평균_통계_API {
         @Test
+        @DisplayName("/api/statistics/mbti/emotion/amounts/average 로 요청하면 getAmountAveragesEachMBTIAndEmotionLast90Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getAmountAverage_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/emotion/amounts/average"));
@@ -45,7 +43,7 @@ class MBTIStatisticsControllerTest {
         }
 
         @Test
-        void registerType_쿼리_파라미터를_입력하지_않으면_SPEND가_입력된다() throws Exception {
+        void registerType_쿼리_파라미터를_입력하지_않으면_defaultValue로_SPEND가_입력된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/emotion/amounts/average"));
 
@@ -55,7 +53,7 @@ class MBTIStatisticsControllerTest {
         }
 
         @Test
-        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_실패한다() throws Exception {
+        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_400을_반환한다() throws Exception {
             // given
             String invalidRegisterType = "Invalid";
 
@@ -67,7 +65,7 @@ class MBTIStatisticsControllerTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"SPEND", "SAVE"})
-        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력하면_성공한다(String registerType) throws Exception {
+        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력해야_한다(String registerType) throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/emotion/amounts/average?registerType=" + registerType));
 
@@ -78,8 +76,9 @@ class MBTIStatisticsControllerTest {
     }
 
     @Nested
-    class MBTI_일별_금액_총합_통계_API {
+    class MBTI별_일별_금액_총합_통계_API {
         @Test
+        @DisplayName("/api/statistics/mbti/daily/amounts/sum 로 요청하면 getAmountSumsEachMBTIAndDayLast90Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getAmountSums_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/daily/amounts/sum"));
@@ -90,7 +89,7 @@ class MBTIStatisticsControllerTest {
         }
 
         @Test
-        void registerType_쿼리_파라미터를_입력하지_않으면_SPEND가_입력된다() throws Exception {
+        void registerType_쿼리_파라미터를_입력하지_않으면_defaultValue로_SPEND가_입력된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/daily/amounts/sum"));
 
@@ -100,7 +99,7 @@ class MBTIStatisticsControllerTest {
         }
 
         @Test
-        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_실패한다() throws Exception {
+        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_400을_반환한다() throws Exception {
             // given
             String invalidRegisterType = "Invalid";
 
@@ -112,7 +111,7 @@ class MBTIStatisticsControllerTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"SPEND", "SAVE"})
-        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력하면_성공한다(String registerType) throws Exception {
+        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력해야_한다(String registerType) throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/daily/amounts/sum?registerType=" + registerType));
 
@@ -123,8 +122,9 @@ class MBTIStatisticsControllerTest {
     }
 
     @Nested
-    class MBTI_단어_빈도수_통계_API {
+    class MBTI별_단어_빈도수_통계_API {
         @Test
+        @DisplayName("/api/statistics/mbti/word/frequencies 로 요청하면 getWordFrequenciesLast90Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getWordFrequencies_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/word/frequencies"));
@@ -138,6 +138,7 @@ class MBTIStatisticsControllerTest {
     @Nested
     class MBTI별_만족도_평균_통계_API {
         @Test
+        @DisplayName("/api/statistics/mbti/statisfactions/average 로 요청하면 getSatisfactionAveragesEachMBTILast90Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getSatisfactionAverages_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/statisfactions/average"));
@@ -148,7 +149,7 @@ class MBTIStatisticsControllerTest {
         }
 
         @Test
-        void registerType_쿼리_파라미터를_입력하지_않으면_SPEND가_입력된다() throws Exception {
+        void registerType_쿼리_파라미터를_입력하지_않으면_defaultValue로_SPEND가_입력된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/statisfactions/average"));
 
@@ -158,7 +159,7 @@ class MBTIStatisticsControllerTest {
         }
 
         @Test
-        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_실패한다() throws Exception {
+        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_400을_반환한다() throws Exception {
             // given
             String invalidRegisterType = "Invalid";
 
@@ -169,7 +170,7 @@ class MBTIStatisticsControllerTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"SPEND", "SAVE"})
-        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력하면_성공한다(String registerType) throws Exception {
+        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력해야_한다(String registerType) throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/statisfactions/average?registerType=" + registerType));
 
