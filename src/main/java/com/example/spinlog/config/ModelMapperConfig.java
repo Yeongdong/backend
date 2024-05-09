@@ -1,10 +1,10 @@
 package com.example.spinlog.config;
 
+import com.example.spinlog.ai.dto.AiResponseDto;
 import com.example.spinlog.article.dto.WriteArticleResponseDto;
 import com.example.spinlog.article.entity.Article;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.spi.MappingContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,24 +14,30 @@ public class ModelMapperConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
-        // Enum -> String으로 변환
-        Converter<Enum, String> enumToStringConverter = new Converter<>() {
-            @Override
-            public String convert(MappingContext<Enum, String> context) {
-                return context.getSource() != null ? context.getSource().name() : null;
-            }
+        // Enum -> String 컨버터
+        Converter<Enum, String> enumToStringConverter = context -> {
+            Enum source = context.getSource();
+            return source != null ? source.name() : null;
         };
 
-        // Article -> WriteArticleResponseDTO 매핑 규칙 설정
+        // String -> AiResponseDto 컨버터
+        Converter<String, AiResponseDto> stringToAiResponseDtoConverter = context -> {
+            String aiComment = context.getSource();
+            return AiResponseDto.builder().content(aiComment).build();
+        };
+
+        // Article -> WriteArticleResponseDto 매핑 설정
         modelMapper.createTypeMap(Article.class, WriteArticleResponseDto.class)
                 .addMappings(mapping -> {
-                    // Emotion 필드를 String으로 매핑
                     mapping.using(enumToStringConverter)
                             .map(Article::getEmotion, WriteArticleResponseDto::setEmotion);
-                    // RegisterType 필드를 String으로 매핑
                     mapping.using(enumToStringConverter)
                             .map(Article::getRegisterType, WriteArticleResponseDto::setRegisterType);
                 });
+
+        // String -> AiResponseDto 매핑 설정
+        modelMapper.createTypeMap(String.class, AiResponseDto.class)
+                .setConverter(stringToAiResponseDtoConverter);
 
         return modelMapper;
     }

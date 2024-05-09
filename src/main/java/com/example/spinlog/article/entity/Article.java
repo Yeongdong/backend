@@ -64,4 +64,8 @@ public class Article extends BaseTimeEntity {
         this.registerType = RegisterType.valueOf(updateArticle.getRegisterType());
         return this;
     }
+
+    public void addAiComment(String aiComment) {
+        this.aiComment = aiComment;
+    }
 }
