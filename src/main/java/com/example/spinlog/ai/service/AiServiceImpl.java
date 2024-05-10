@@ -23,6 +23,11 @@ public class AiServiceImpl implements AiService {
     private final ArticleService articleService;
     private final ModelMapper modelMapper;
 
+    private final static String AI_MODEL = "gpt-3.5-turbo";
+    private final static String AI_ROLE = "system";
+    private final static String USER_ROLE = "user";
+    private final static String MESSAGE_TO_AI = "You are collecting emotional and consumption data from users in their 20s and 30s. Connect emotions and consumption and provide users with consumption-related advice in one sentence in Korean.";
+
     @Value("${apiKey}")
     private String apiKey;
 
@@ -54,7 +59,7 @@ public class AiServiceImpl implements AiService {
      */
     private CommentRequest createCommentRequest(List<Message> messages) {
         return CommentRequest.builder()
-                .model("gpt-3.5-turbo")
+                .model(AI_MODEL)
                 .messages(messages)
                 .build();
     }
@@ -67,11 +72,11 @@ public class AiServiceImpl implements AiService {
      */
     private List<Message> prepareMessages(AiRequestDto requestDto) {
         Message message1 = Message.builder()
-                .role("system")
-                .content("You are collecting emotional and consumption data from users in their 20s and 30s. Connect emotions and consumption and provide users with consumption-related advice in one sentence in Korean.")
+                .role(AI_ROLE)
+                .content(MESSAGE_TO_AI)
                 .build();
         Message message2 = Message.builder()
-                .role("user")
+                .role(USER_ROLE)
                 .content(requestDto.toString())
                 .build();
         return Arrays.asList(message1, message2);
