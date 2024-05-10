@@ -1,6 +1,9 @@
 package com.example.spinlog.article.service;
 
 import com.example.spinlog.article.dto.*;
+import com.example.spinlog.article.entity.Article;
+import com.example.spinlog.article.entity.Emotion;
+import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,28 +31,27 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_작성_테스트() {
         // Given
-        WriteArticleRequestDto requestDTO = WriteArticleRequestDto.builder()
+        WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
                 .content("Test Thing")
+                .spendDate("2024-04-04T11:22:33")
                 .event("Test event")
                 .thought("Test thought")
                 .emotion("ANNOYED")
-                .result("Test result")
                 .satisfaction(5F)
                 .reason("Test Reason")
                 .improvements("Test Improvements")
-                .aiComment("Test AiComment")
                 .amount(100)
                 .registerType("SPEND")
                 .build();
 
         // When
-        WriteArticleResponseDto responseDTO = articleService.createArticle(requestDTO);
+        WriteArticleResponseDto responseDto = articleService.createArticle(requestDto);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
-//    @Test
+    //    @Test
 //    public void 게시글_리스트_조회_테스트() {
 //        // Given
 //        Pageable pageable = PageRequest.of(0, 10);
@@ -66,13 +68,15 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_1개_조회_테스트() {
         // Given
-        Long articleId = 3L;
+        Article article = Article.builder()
+                .build();
+        articleRepository.save(article);
 
         // When
-        ViewArticleResponseDto responseDTO = articleService.getArticle(articleId);
+        ViewArticleResponseDto responseDto = articleService.getArticle(article.getArticleId());
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
     @Test
@@ -88,37 +92,35 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_수정_테스트() {
         // Given
-        Long articleId = 6L;
-        UpdateArticleRequestDto updateDTO = UpdateArticleRequestDto.builder()
-                .content("Update Thing")
-                .event("Update event")
-                .thought("Update thought")
-                .emotion("EVADED")
-                .result("Update result")
-                .satisfaction(1F)
-                .reason("Update Reason")
-                .improvements("Update Improvements")
-                .aiComment("Update AiComment")
-                .amount(9999)
-                .registerType("SAVE")
+        Article article = Article.builder()
+                .emotion(Emotion.ANNOYED)
+                .registerType(RegisterType.SPEND)
+                .build();
+        articleRepository.save(article);
+        UpdateArticleRequestDto updateDto = UpdateArticleRequestDto.builder()
+                .spendDate("2024-05-05T12:34:56")
+                .emotion(Emotion.SAD.toString())
+                .registerType(RegisterType.SAVE.toString())
                 .build();
 
         // When
-        UpdateArticleResponseDto responseDTO = articleService.updateArticle(articleId, updateDTO);
+        articleService.updateArticle(article.getArticleId(), updateDto);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(article.getEmotion()).isEqualTo(Emotion.SAD);
     }
 
     @Test
     public void 게시글_삭제_테스트() {
         // Given
-        Long articleId = 2L;
+        Article article = Article.builder()
+                .build();
+        articleRepository.save(article);
 
         // When
-        articleService.deleteArticle(articleId);
+        articleService.deleteArticle(article.getArticleId());
 
         // Then
-        assertThat(articleRepository.existsById(articleId)).isFalse();
+        assertThat(articleRepository.existsById(article.getArticleId())).isFalse();
     }
 }

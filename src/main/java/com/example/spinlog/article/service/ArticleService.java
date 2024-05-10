@@ -31,7 +31,7 @@ public class ArticleService {
     }
 
     // 게시글 리스트 => 검색어 추가 수정 필요
-    public Page<ViewArticleResponseDto> listArticles(Pageable pageable, SearchCond searchCond) {
+    public Page<ViewArticleListResponseDto> listArticles(Pageable pageable, SearchCond searchCond) {
         return articleRepository.search(searchCond, pageable);
     }
 
@@ -41,11 +41,10 @@ public class ArticleService {
     }
 
     @Transactional
-    public UpdateArticleResponseDto updateArticle(Long id, UpdateArticleRequestDto requestDto) {
+    public void updateArticle(Long id, UpdateArticleRequestDto requestDto) {
         Article article = findArticleById(id);
-        Article updateArticle = article.update(requestDto);
+        article.update(requestDto);
         log.info("ID {}의 게시글이 업데이트되었습니다.", id);
-        return UpdateArticleResponseDto.from(updateArticle, modelMapper);
     }
 
     @Transactional

@@ -37,8 +37,8 @@ public class ArticleController {
      * @return 게시글 리스트를 포함하는 ResponseEntity
      */
     @GetMapping
-    public ApiResponseWrapper<Page<ViewArticleResponseDto>> viewList(Pageable pageable, SearchCond searchCond) {
-        Page<ViewArticleResponseDto> responseDto = articleService.listArticles(pageable, searchCond);
+    public ApiResponseWrapper<Page<ViewArticleListResponseDto>> viewList(Pageable pageable, SearchCond searchCond) {
+        Page<ViewArticleListResponseDto> responseDto = articleService.listArticles(pageable, searchCond);
         log.info("게시글 리스트 불러오기 성공");
         return ResponseUtils.ok(responseDto, "게시글 리스트 불러오기 성공");
     }
@@ -61,13 +61,13 @@ public class ArticleController {
      *
      * @param id               업데이트 요청 데이터 Id
      * @param updateRequestDTO 업데이트 요청 데이터
-     * @return 수정된 게시글 객체를 포함하는 ResponseEntity
+     * @return 업데이트 성공 메시지 ResponseEntity
      */
     @PatchMapping("/{id}")
-    public ApiResponseWrapper<UpdateArticleResponseDto> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
-        UpdateArticleResponseDto responseDto = articleService.updateArticle(id, updateRequestDTO);
+    public ApiResponseWrapper<Void> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
+        articleService.updateArticle(id, updateRequestDTO);
         log.info("게시글 업데이트 성공");
-        return ResponseUtils.ok(responseDto, "게시글 업데이트 성공");
+        return ResponseUtils.ok("게시글 업데이트 성공");
     }
 
     /**
