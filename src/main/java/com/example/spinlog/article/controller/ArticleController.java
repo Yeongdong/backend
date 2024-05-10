@@ -74,7 +74,7 @@ public class ArticleController {
      * 게시글 삭제
      *
      * @param id 삭제 요청 데이터 Id
-     * @return 삭제 성공시 상태코드 204
+     * @return 삭제 성공 메시지 ResponseEntity
      */
     @DeleteMapping("/{id}")
     public ApiResponseWrapper<Void> deleteArticle(@PathVariable Long id) {

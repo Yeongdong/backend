@@ -2,6 +2,7 @@ package com.example.spinlog.article.entity;
 
 import com.example.spinlog.article.dto.*;
 import com.example.spinlog.global.entity.BaseTimeEntity;
+import com.example.spinlog.user.entity.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -22,6 +23,10 @@ public class Article extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_id")
     private Long articleId; // 일기 번호
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;  // 회원
     private String content;  // 내용
     private LocalDateTime spendDate;    // 소비 날짜
     private String event; // 사건
@@ -38,7 +43,8 @@ public class Article extends BaseTimeEntity {
     private RegisterType registerType; // 지출과 소비
 
     @Builder
-    public Article(String content, LocalDateTime spendDate, String event, String thought, Emotion emotion, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
+    public Article(User user, String content, LocalDateTime spendDate, String event, String thought, Emotion emotion, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
+        this.user = user;
         this.content = content;
         this.spendDate = spendDate;
         this.event = event;
