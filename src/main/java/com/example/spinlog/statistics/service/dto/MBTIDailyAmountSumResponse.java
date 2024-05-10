@@ -4,6 +4,7 @@ import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.user.entity.Mbti;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -37,6 +38,7 @@ public class MBTIDailyAmountSumResponse {
 
     @Getter
     @ToString
+    @EqualsAndHashCode
     public static class DailyAmountSum {
         private LocalDate date;
         private Long amountSum;

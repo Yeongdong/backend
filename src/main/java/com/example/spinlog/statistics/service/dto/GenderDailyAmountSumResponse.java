@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 @Builder
 public class GenderDailyAmountSumResponse {
     private Gender gender;
-    private List<EmotionAmountSum> emotionAmountSums;
+    private List<DailyAmountSum> dailyAmountSums;
 
     public static GenderDailyAmountSumResponse of(Gender gender, List<GenderDailyAmountSumDto> dtos){
         return GenderDailyAmountSumResponse.builder()
                 .gender(gender)
-                .emotionAmountSums(
+                .dailyAmountSums(
                         dtos.stream()
-                                .map(EmotionAmountSum::of)
+                                .map(DailyAmountSum::of)
                                 .collect(Collectors.toList())
                 )
                 .build();
@@ -32,8 +32,8 @@ public class GenderDailyAmountSumResponse {
         return "EmotionAmountAverage\n" +
                 "gender=" + gender + "\n" +
                 "emotionCount=\n" +
-                emotionAmountSums.stream()
-                        .map(EmotionAmountSum::toString)
+                dailyAmountSums.stream()
+                        .map(DailyAmountSum::toString)
                         .map(ea -> ea+"\n")
                         .toList()
                 + "\n";
@@ -41,18 +41,18 @@ public class GenderDailyAmountSumResponse {
 
     @Getter
     @ToString
-    public static class EmotionAmountSum {
+    public static class DailyAmountSum {
         private LocalDate date;
         private Long amountSum;
 
         @Builder
-        public EmotionAmountSum(LocalDate date, Long amountSum) {
+        public DailyAmountSum(LocalDate date, Long amountSum) {
             this.date = date;
             this.amountSum = amountSum;
         }
 
-        public static EmotionAmountSum of(GenderDailyAmountSumDto dto){
-            return EmotionAmountSum.builder()
+        public static DailyAmountSum of(GenderDailyAmountSumDto dto){
+            return DailyAmountSum.builder()
                     .date(dto.getLocalDate())
                     .amountSum(dto.getAmountSum())
                     .build();

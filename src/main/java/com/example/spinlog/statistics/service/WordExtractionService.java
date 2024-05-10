@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -25,18 +26,23 @@ public class WordExtractionService {
 
         List<String> keyWords = getKeyWords(
                 komoranService.getTokens(memos));
+        Map<String, Long> collect = getWordFrequencies(keyWords);
 
-        return keyWords.stream()
-                .collect(Collectors.groupingBy(
-                        Function.identity(),
-                        Collectors.counting()
-                ))
-                .entrySet().stream()
+        return collect.entrySet()
+                .stream()
                 .map(e -> WordFrequency.builder()
                         .word(e.getKey())
                         .frequency(e.getValue())
                         .build())
                 .toList();
+    }
+
+    private static Map<String, Long> getWordFrequencies(List<String> keyWords) {
+        return keyWords.stream()
+                .collect(Collectors.groupingBy(
+                        Function.identity(),
+                        Collectors.counting()
+                ));
     }
 
     private List<String> getKeyWords(List<Token> tokens) {

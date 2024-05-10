@@ -8,7 +8,6 @@ import com.example.spinlog.statistics.service.dto.MBTIWordFrequencyResponse;
 import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
-import com.example.spinlog.statistics.repository.dto.MBTISatisfactionAverageDto;
 import com.example.spinlog.statistics.repository.dto.MemoDto;
 import com.example.spinlog.statistics.required_have_to_delete.UserInfoService;
 import com.example.spinlog.user.entity.Mbti;
@@ -38,11 +37,11 @@ public class MBTIStatisticsService {
         this.userInfoService = userInfoService;
     }
 
-    public MBTIEmotionAmountAverageResponse getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate today, RegisterType registerType){
+    public MBTIEmotionAmountAverageResponse getAmountAveragesEachMBTIAndEmotionLast90Days(
+            LocalDate today,
+            RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
-        
-        // TODO 없는 값에 대한 0 padding 작업
 
         return MBTIEmotionAmountAverageResponse.builder()
                 .mbti(userInfoService.getUserMBTI())
@@ -57,11 +56,11 @@ public class MBTIStatisticsService {
                 .build();
     }
 
-    public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast90Days(LocalDate today, RegisterType registerType) {
+    public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast90Days(
+            LocalDate today,
+            RegisterType registerType) {
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
-
-        // TODO 없는 값에 대한 0 padding 작업
 
         return MBTIDailyAmountSumResponse.builder()
                 .mbti(userInfoService.getUserMBTI())
@@ -76,7 +75,8 @@ public class MBTIStatisticsService {
                 .build();
     }
 
-    public MBTIWordFrequencyResponse getWordFrequenciesLast90Days(LocalDate today){
+    public MBTIWordFrequencyResponse getWordFrequenciesLast90Days(
+            LocalDate today){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         // 최근 90일동안 모든 유저가 적은 메모의 빈도수 측정
         List<MemoDto> memos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(Mbti.NONE.toString(), startDate, today);
@@ -100,7 +100,7 @@ public class MBTIStatisticsService {
                                             .filter(Objects::nonNull)
                                             .toList())
                     )
-                    .myWordFrequencies(List.of())
+                    .userWordFrequencies(List.of())
                     .build();
         }
 
@@ -121,7 +121,7 @@ public class MBTIStatisticsService {
                                         .filter(Objects::nonNull)
                                         .toList())
                 )
-                .myWordFrequencies(
+                .userWordFrequencies(
                         wordExtractionService.analyzeWords(
                                 memoByMBTI.stream()
                                         .flatMap((m) -> Stream.of(
@@ -141,13 +141,18 @@ public class MBTIStatisticsService {
         return mbti == null || mbti == Mbti.NONE;
     }
 
-    public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast90Days(LocalDate today, RegisterType registerType){
+    public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast90Days(
+            LocalDate today,
+            RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         return MBTISatisfactionAverageResponse.builder()
                 .mbti(userInfoService.getUserMBTI())
                 .mbtiSatisfactionAverages(
                         mbtiStatisticsRepository
-                                .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(registerType, startDate, today))
+                                .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
+                                        registerType,
+                                        startDate,
+                                        today))
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.statistics.repository.dto.GenderEmotionAmountAverageDto;
 import com.example.spinlog.user.entity.Gender;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class GenderEmotionAmountAverageResponse {
 
     @Getter
     @Builder
+    @EqualsAndHashCode
     public static class EmotionAmountAverage {
         private Emotion emotion;
         private Long amountAverage;

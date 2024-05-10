@@ -5,6 +5,7 @@ import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
 import com.example.spinlog.user.entity.Mbti;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class MBTIEmotionAmountAverageResponse {
     }
 
     @Getter
+    @EqualsAndHashCode
     public static class EmotionAmountAverage {
         private Emotion emotion;
         private Long amountAverage;

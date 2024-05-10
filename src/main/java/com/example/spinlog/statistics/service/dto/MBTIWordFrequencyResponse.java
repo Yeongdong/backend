@@ -11,5 +11,5 @@ import java.util.List;
 public class MBTIWordFrequencyResponse {
     private Mbti mbti;
     private List<WordFrequency> allWordFrequencies;
-    private List<WordFrequency> myWordFrequencies;
+    private List<WordFrequency> userWordFrequencies;
 }
