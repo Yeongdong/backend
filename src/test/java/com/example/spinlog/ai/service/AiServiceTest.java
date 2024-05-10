@@ -2,12 +2,20 @@ package com.example.spinlog.ai.service;
 
 import com.example.spinlog.ai.dto.AiRequestDto;
 import com.example.spinlog.ai.dto.AiResponseDto;
+import com.example.spinlog.article.dto.WriteArticleRequestDto;
+import com.example.spinlog.article.dto.WriteArticleResponseDto;
+import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.service.ArticleService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.NoSuchElementException;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -17,55 +25,62 @@ class AiServiceTest {
     private AiService aiService;
 
     @Autowired
-    private OpenAiClient openAiClient;
-
-    @Autowired
     private ArticleService articleService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    WriteArticleResponseDto writeArticleResponseDto;
 
+    @BeforeEach
+    void setUp() {
+        // 게시글 생성
+        WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
+                .content("투썸플레이스 아이스아메리카노")
+                .spendDate("2024-04-04T11:22:33")
+                .event("부장님께 혼남")
+                .thought("Test thought")
+                .emotion("ANNOYED")
+                .satisfaction(2F)
+                .reason("홧김에 돈 쓴게 마음에 들지 않는다")
+                .improvements("소비 전에 한번 더 생각하고 참아본다")
+                .amount(5000)
+                .registerType("SPEND")
+                .build();
+        writeArticleResponseDto = articleService.createArticle(requestDto);
+    }
 
+    @AfterEach
+    void tearDown() {
+        articleService.deleteArticle(writeArticleResponseDto.getArticleId());
+    }
 
     @Test
+    @DisplayName("AI한마디를 요청하면 응답을 받는다.")
     void requestAiComment_ShouldReturnAiResponseDto() {
-        // 준비
-        Long articleId = 1L;
-        AiRequestDto requestDto = new AiRequestDto();
-        requestDto.setArticleId(articleId);
-        // 다른 요청 데이터도 준비할 수 있습니다.
+        // Given
+        AiRequestDto aiRequestDto = AiRequestDto.builder()
+                .articleId(writeArticleResponseDto.getArticleId())
+                .build();
 
-        // 기대 값 설정
-        String expectedAiComment = "AI 코멘트";
-        AiResponseDto expectedResponseDto = new AiResponseDto();
-        expectedResponseDto.setContent(expectedAiComment);
+        // When
+        AiResponseDto aiResponseDto = aiService.requestAiComment(aiRequestDto);
 
-        // 메서드 호출
-        AiResponseDto result = aiService.requestAiComment(requestDto);
+        // Then
+        assertThat(aiResponseDto).isNotNull();
+        assertThat(aiResponseDto.getContent()).isNotEmpty();
 
-        // 결과 검증
-        assertEquals(expectedResponseDto.getContent(), result.getContent(), "AI 응답이 예상 값과 일치하는지 확인");
+        Article aiCommentAddArticle = articleService.findArticleById(aiRequestDto.getArticleId());
+        assertThat(aiCommentAddArticle.getAiComment()).isEqualTo(aiResponseDto.getContent());
     }
 
     @Test
-    void requestAiComment_WhenOpenAiClientReturnsEmptyChoice_ThrowsException() {
-        // 준비
-        AiRequestDto requestDto = new AiRequestDto();
-        requestDto.setArticleId(1L);
-
-        // 메서드 호출 및 예외 검증
-        assertThrows(IllegalStateException.class, () -> aiService.requestAiComment(requestDto),
-                "OpenAiClient가 빈 Choice를 반환할 경우 IllegalStateException 예외가 발생해야 합니다.");
-    }
-
-    @Test
+    @DisplayName("존재하지 않는 Article ID를 입력하면 NoSuchElementExcepiton이 발생한다.")
     void requestAiComment_WhenArticleNotFound_ThrowsException() {
-        // 준비
-        AiRequestDto requestDto = new AiRequestDto();
-        requestDto.setArticleId(9999L); // 존재하지 않는 articleId 설정
+        // Given
+        AiRequestDto aiRequestDto = AiRequestDto.builder()
+                .articleId(999L)
+                .build();
 
-        // 메서드 호출 및 예외 검증
-        assertThrows(IllegalArgumentException.class, () -> aiService.requestAiComment(requestDto),
-                "존재하지 않는 Article ID로 인해 IllegalArgumentException 예외가 발생해야 합니다.");
+        // When, Then
+        assertThrows(NoSuchElementException.class, () -> aiService.requestAiComment(aiRequestDto),
+                "존재하지 않는 Article ID로 인해 NoSuchElementException 예외 발생.");
     }
 }

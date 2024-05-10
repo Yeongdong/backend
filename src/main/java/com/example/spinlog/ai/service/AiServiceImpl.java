@@ -16,7 +16,7 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:apikey.yml")
+@PropertySource("classpath:openai.yml")
 public class AiServiceImpl implements AiService {
 
     private final OpenAiClient openAiClient;
