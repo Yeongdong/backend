@@ -36,7 +36,7 @@ public class GenderEmotionAmountAverageResponse {
 
         public static EmotionAmountAverage of(GenderEmotionAmountAverageDto dto){
             return EmotionAmountAverage.builder()
-                    .emotion(Emotion.valueOf(dto.getEmotion()))
+                    .emotion(dto.getEmotion())
                     .amountAverage(dto.getAmountAverage())
                     .build();
         }

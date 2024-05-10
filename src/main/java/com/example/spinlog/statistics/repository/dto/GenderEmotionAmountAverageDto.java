@@ -1,5 +1,6 @@
 package com.example.spinlog.statistics.repository.dto;
 
+import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.user.entity.Gender;
 import lombok.*;
 
@@ -10,6 +11,6 @@ import lombok.*;
 @EqualsAndHashCode
 public class GenderEmotionAmountAverageDto {
     private Gender gender;
-    private String emotion;
+    private Emotion emotion;
     private Long amountAverage;
 }

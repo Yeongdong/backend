@@ -24,9 +24,9 @@ public class MBTIDailyAmountSumResponse {
         private MBTIFactor mbtiFactor;
         private List<DailyAmountSum> dailyAmountSums;
 
-        public static MBTIDailyAmountSum of(String factor, List<MBTIDailyAmountSumDto> dtos) {
+        public static MBTIDailyAmountSum of(MBTIFactor factor, List<MBTIDailyAmountSumDto> dtos) {
             return MBTIDailyAmountSum.builder()
-                    .mbtiFactor(MBTIFactor.valueOf(factor))
+                    .mbtiFactor(factor)
                     .dailyAmountSums(
                             dtos.stream()
                                     .map(DailyAmountSum::of)

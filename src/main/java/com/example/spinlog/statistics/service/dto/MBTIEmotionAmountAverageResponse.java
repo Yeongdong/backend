@@ -23,9 +23,9 @@ public class MBTIEmotionAmountAverageResponse {
         private MBTIFactor mbtiFactor;
         private List<EmotionAmountAverage> emotionAmountAverages;
 
-        public static MBTIEmotionAmountAverage of(String factor, List<MBTIEmotionAmountAverageDto> dtos) {
+        public static MBTIEmotionAmountAverage of(MBTIFactor factor, List<MBTIEmotionAmountAverageDto> dtos) {
             return MBTIEmotionAmountAverage.builder()
-                    .mbtiFactor(MBTIFactor.valueOf(factor))
+                    .mbtiFactor(factor)
                     .emotionAmountAverages(
                             dtos.stream()
                                     .map(EmotionAmountAverage::of)
@@ -49,7 +49,7 @@ public class MBTIEmotionAmountAverageResponse {
 
         public static EmotionAmountAverage of(MBTIEmotionAmountAverageDto dto){
             return EmotionAmountAverage.builder()
-                    .emotion(Emotion.valueOf(dto.getEmotion()))
+                    .emotion(dto.getEmotion())
                     .average(dto.getAmountAverage())
                     .build();
         }

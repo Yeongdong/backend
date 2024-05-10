@@ -138,10 +138,10 @@ class GenderStatisticsControllerTest {
     @Nested
     class 성별_만족도_평균_통계_API {
         @Test
-        @DisplayName("/api/statistics/gender/statisfactions/average 로 요청하면 getSatisfactionAveragesEachGenderLast90Days 메서드가 실행 된다.")
+        @DisplayName("/api/statistics/gender/satisfactions/average 로 요청하면 getSatisfactionAveragesEachGenderLast90Days 메서드가 실행 된다.")
         void 아래_path로_요청하면_genderStatisticsService의_getSatisfactionAverages_메서드가_실행된다() throws Exception {
             // when
-            mockMvc.perform(get("/api/statistics/gender/statisfactions/average"));
+            mockMvc.perform(get("/api/statistics/gender/satisfactions/average"));
 
             // then
             verify(genderStatisticsService, times(1))
@@ -151,7 +151,7 @@ class GenderStatisticsControllerTest {
         @Test
         void registerType_쿼리_파라미터를_입력하지_않으면_defaultValue로_SPEND가_입력된다() throws Exception {
             // when
-            mockMvc.perform(get("/api/statistics/gender/statisfactions/average"));
+            mockMvc.perform(get("/api/statistics/gender/satisfactions/average"));
 
             // then
             verify(genderStatisticsService)
@@ -164,7 +164,7 @@ class GenderStatisticsControllerTest {
             String invalidRegisterType = "Invalid";
 
             // when // then
-            mockMvc.perform(get("/api/statistics/gender/statisfactions/average?registerType=" + invalidRegisterType))
+            mockMvc.perform(get("/api/statistics/gender/satisfactions/average?registerType=" + invalidRegisterType))
                     .andExpect(status().isBadRequest());
         }
 
@@ -172,7 +172,7 @@ class GenderStatisticsControllerTest {
         @ValueSource(strings = {"SPEND", "SAVE"})
         void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력해야_한다(String registerType) throws Exception {
             // when
-            mockMvc.perform(get("/api/statistics/gender/statisfactions/average?registerType=" + registerType));
+            mockMvc.perform(get("/api/statistics/gender/satisfactions/average?registerType=" + registerType));
 
             // then
             verify(genderStatisticsService, times(1))

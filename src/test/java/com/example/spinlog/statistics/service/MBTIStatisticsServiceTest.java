@@ -2,6 +2,7 @@ package com.example.spinlog.statistics.service;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
+import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTISatisfactionAverageDto;
 import com.example.spinlog.statistics.service.dto.*;
 import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
@@ -80,10 +81,10 @@ class MBTIStatisticsServiceTest {
         void 레포지토리로부터_MBTI별_감정별_금액_평균_데이터를_받아_MBTI_별로_grouping해서_로그인_한_유저의_MBTI와_함께_반환한다() throws Exception {
             // given
             List<MBTIEmotionAmountAverageDto> returned = List.of(
-                    new MBTIEmotionAmountAverageDto("I", "PROUD", 1L),
-                    new MBTIEmotionAmountAverageDto("I", "SAD", 2L),
-                    new MBTIEmotionAmountAverageDto("E", "PROUD", 3L),
-                    new MBTIEmotionAmountAverageDto("E", "SAD", 4L)
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.I, Emotion.PROUD, 1L),
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.I, Emotion.SAD, 2L),
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.E, Emotion.PROUD, 3L),
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.E, Emotion.SAD, 4L)
             );
             List<Boolean> visited = new ArrayList<>(returned.size());
 
@@ -104,14 +105,13 @@ class MBTIStatisticsServiceTest {
             assertThat(responseList)
                     .hasSize(2);
 
-            List<String> mbtiFactors = returned.stream()
+            List<MBTIFactor> mbtiFactors = returned.stream()
                     .map(MBTIEmotionAmountAverageDto::getMbtiFactor)
                     .distinct()
                     .toList();
             assertThat(responseList)
                     .extracting(MBTIEmotionAmountAverageResponse
                             .MBTIEmotionAmountAverage::getMbtiFactor)
-                    .extracting(Objects::toString)
                     .containsExactlyInAnyOrderElementsOf(mbtiFactors);
 
             for(var r: responseList){
@@ -124,8 +124,8 @@ class MBTIStatisticsServiceTest {
                 List<MBTIEmotionAmountAverageDto> returned) {
             List<Tuple> dailyAmountAveragesGroupedByMBTI = returned.stream()
                     .filter(a -> a.getMbtiFactor()
-                            .equals(response.getMbtiFactor().toString()))
-                    .map(a -> new Tuple(Emotion.valueOf(a.getEmotion()), a.getAmountAverage()))
+                            .equals(response.getMbtiFactor()))
+                    .map(a -> new Tuple(a.getEmotion(), a.getAmountAverage()))
                     .toList();
             assertThat(response.getEmotionAmountAverages())
                     .extracting("emotion", "amountAverage")
@@ -170,10 +170,10 @@ class MBTIStatisticsServiceTest {
         void 레포지토리로부터_MBTI별_일별_금액_총합_데이터를_받아_MBTI_별로_grouping해서_로그인_한_유저의_MBTI와_함께_반환한다() throws Exception {
             // given
             List<MBTIDailyAmountSumDto> returned = List.of(
-                    new MBTIDailyAmountSumDto("I", LocalDate.now(), 1L),
-                    new MBTIDailyAmountSumDto("I", LocalDate.now().minusDays(1L), 2L),
-                    new MBTIDailyAmountSumDto("E", LocalDate.now(), 3L),
-                    new MBTIDailyAmountSumDto("E", LocalDate.now().minusDays(1L), 4L)
+                    new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now(), 1L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now().minusDays(1L), 2L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now(), 3L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now().minusDays(1L), 4L)
             );
             when(mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(any(), any(), any()))
                     .thenReturn(returned);
@@ -192,14 +192,13 @@ class MBTIStatisticsServiceTest {
             assertThat(responseList)
                     .hasSize(2);
 
-            List<String> mbtiFactors = returned.stream()
+            List<MBTIFactor> mbtiFactors = returned.stream()
                     .map(MBTIDailyAmountSumDto::getMbtiFactor)
                     .distinct()
                     .toList();
             assertThat(responseList)
                     .extracting(MBTIDailyAmountSumResponse
                             .MBTIDailyAmountSum::getMbtiFactor)
-                    .extracting(Objects::toString)
                     .containsExactlyInAnyOrderElementsOf(mbtiFactors);
 
             for(var r: responseList){
@@ -207,10 +206,12 @@ class MBTIStatisticsServiceTest {
             }
         }
 
-        private static void assertDailyAmountSumGroupedByMBTI(MBTIDailyAmountSumResponse.MBTIDailyAmountSum response, List<MBTIDailyAmountSumDto> returned) {
+        private static void assertDailyAmountSumGroupedByMBTI(
+                MBTIDailyAmountSumResponse.MBTIDailyAmountSum response,
+                List<MBTIDailyAmountSumDto> returned) {
             List<Tuple> dailyAmountSumGroupedByMBTI = returned.stream()
                     .filter(a -> a.getMbtiFactor()
-                            .equals(response.getMbtiFactor().toString()))
+                            .equals(response.getMbtiFactor()))
                     .map(a -> new Tuple(a.getLocalDate(), a.getAmountSum()))
                     .toList();
             assertThat(response.getDailyAmountSums())
@@ -404,7 +405,7 @@ class MBTIStatisticsServiceTest {
             // given
             List<MBTISatisfactionAverageDto> returned = List.of(
                     MBTISatisfactionAverageDto.builder()
-                            .mbtiFactor("I")
+                            .mbtiFactor(MBTIFactor.I)
                             .satisfactionAverage(1.0f)
                             .build()
             );

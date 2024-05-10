@@ -1,5 +1,6 @@
 package com.example.spinlog.statistics.repository.dto;
 
+import com.example.spinlog.statistics.entity.MBTIFactor;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode
 public class MBTIDailyAmountSumDto {
-    private String mbtiFactor;
+    private MBTIFactor mbtiFactor;
     private LocalDate localDate;
     private Long amountSum;
 }

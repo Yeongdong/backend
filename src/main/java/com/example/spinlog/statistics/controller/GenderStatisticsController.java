@@ -41,8 +41,8 @@ public class GenderStatisticsController {
         return genderStatisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
     }
 
-    @GetMapping("/api/statistics/gender/statisfactions/average")
-    public List<GenderSatisfactionAverageDto> getStatisfactionAveragesEachGenderLast90Days(
+    @GetMapping("/api/statistics/gender/satisfactions/average")
+    public List<GenderSatisfactionAverageDto> getSatisfactionAveragesEachGenderLast90Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return genderStatisticsService.getSatisfactionAveragesEachGenderLast90Days(
                 LocalDate.now(),

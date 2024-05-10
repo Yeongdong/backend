@@ -77,10 +77,10 @@ class GenderStatisticsServiceTest {
         void 레포지토리로부터_성별_감정별_금액_평균_데이터를_받아_성별로_grouping해서_반환한다() throws Exception {
             // given
             List<GenderEmotionAmountAverageDto> returned = List.of(
-                    new GenderEmotionAmountAverageDto(Gender.MALE, "PROUD", 1L),
-                    new GenderEmotionAmountAverageDto(Gender.MALE, "SAD", 2L),
-                    new GenderEmotionAmountAverageDto(Gender.FEMALE, "PROUD", 3L),
-                    new GenderEmotionAmountAverageDto(Gender.FEMALE, "SAD", 4L)
+                    new GenderEmotionAmountAverageDto(Gender.MALE, Emotion.PROUD, 1L),
+                    new GenderEmotionAmountAverageDto(Gender.MALE, Emotion.SAD, 2L),
+                    new GenderEmotionAmountAverageDto(Gender.FEMALE, Emotion.PROUD, 3L),
+                    new GenderEmotionAmountAverageDto(Gender.FEMALE, Emotion.SAD, 4L)
             );
 
             when(genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(any(), any(), any()))
@@ -114,8 +114,7 @@ class GenderStatisticsServiceTest {
             List<Tuple> emotionAmountAveragesGroupedByGender = returned.stream()
                     .filter(a -> a.getGender()
                             .equals(response.getGender()))
-                    .map(a -> new Tuple(Emotion.valueOf(
-                            a.getEmotion()),
+                    .map(a -> new Tuple(a.getEmotion(),
                             a.getAmountAverage()))
                     .toList();
             assertThat(response.getEmotionAmountAverages())

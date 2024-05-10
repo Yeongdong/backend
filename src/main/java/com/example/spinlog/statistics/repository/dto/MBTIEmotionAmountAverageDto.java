@@ -1,5 +1,7 @@
 package com.example.spinlog.statistics.repository.dto;
 
+import com.example.spinlog.article.entity.Emotion;
+import com.example.spinlog.statistics.entity.MBTIFactor;
 import lombok.*;
 
 @NoArgsConstructor
@@ -8,7 +10,7 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 public class MBTIEmotionAmountAverageDto {
-    private String mbtiFactor;
-    private String emotion;
+    private MBTIFactor mbtiFactor;
+    private Emotion emotion;
     private Long amountAverage;
 }

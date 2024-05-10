@@ -43,7 +43,7 @@ public class MBTIStatisticsController {
         return statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
     }
 
-    @GetMapping("/api/statistics/mbti/statisfactions/average")
+    @GetMapping("/api/statistics/mbti/satisfactions/average")
     public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast90Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return statisticsService.getSatisfactionAveragesEachMBTILast90Days(

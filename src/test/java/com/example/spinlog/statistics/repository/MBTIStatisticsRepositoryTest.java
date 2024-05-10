@@ -5,6 +5,7 @@ import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.global.entity.BaseTimeEntity;
+import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
 import com.example.spinlog.statistics.repository.dto.MBTISatisfactionAverageDto;
@@ -14,8 +15,6 @@ import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
 import jakarta.persistence.EntityManager;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,169 +49,134 @@ class MBTIStatisticsRepositoryTest {
     @Autowired
     EntityManager em; // flush 하기 위해 필요 (JPA 쓰기 지연 방지)
 
+
+    /**
+     * DB가 데이터를 필터링 해서 반환하는데, 필터링 됐음을 유저의 MBTI로 구분한다.
+     * ISTJ -> 필터링 되지 않고 그대로 받환되는 데이터의 MBTI
+     * ENFP -> 필터링 되어 받을 수 없는 데이터의 MBTI
+     * */
+    User survivedUser;
+    Mbti survivedMBTI = Mbti.ISTJ;
+    List<MBTIFactor> survivedMBTIFactors = List.of(
+            MBTIFactor.I, MBTIFactor.S, MBTIFactor.T, MBTIFactor.J
+    );
+    User filteredUser;
+    Mbti filteredMBTI = Mbti.ENFP;
+    List<MBTIFactor> filteredMBTIFactors = List.of(
+            MBTIFactor.E, MBTIFactor.N, MBTIFactor.F, MBTIFactor.P
+    );
+
+    LocalDate startDate, endDate;
+
+    /**
+     * JPA에서 등록된 엔티티를 테이블로 생성 해주지만, 뷰는 생성 안되서, sql 파일로 직접 생성
+     * */
     @BeforeAll
     public static void createView(@Autowired DataSource dataSource) {
-        // JPA에서 기존 테이블 생성 해줬지만, 뷰는 생성 안 됨
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
         populator.addScript(new ClassPathResource("view/before-test-schema.sql"));
         populator.execute(dataSource);
     }
 
+    /**
+     * 필터링 결과를 구분하기 위해, 필터링 대상 MBTI를 가지고 있는 유저 객체 2개를 생성한다.
+     * */
+    @BeforeEach
+    public void createTwoUserToDivideFilteringResultAndLocalDateRange() {
+        survivedUser = User.builder()
+                .email("survived@email")
+                .name("survivedUser")
+                .mbti(survivedMBTI)
+                .gender(Gender.MALE)
+                .build();
+        filteredUser = User.builder()
+                .email("filtered@email")
+                .name("filteredUser")
+                .mbti(filteredMBTI) // 정반대의 MBTI 입력 -> 이 MBTI는 필터링 되는 MBTI
+                .gender(Gender.FEMALE)
+                .build();
+        userRepository.save(survivedUser);
+        userRepository.save(filteredUser);
+
+        startDate = LocalDate.now().minusDays(2);
+        endDate = LocalDate.now().minusDays(1);
+    }
+
     @Nested
-    class MBTI별_감정별_금액_평균을_반환하는_메서드 {
+    class getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            Emotion removedEmotion = Emotion.SAD;
-            Emotion survivedEmotion = Emotion.PROUD;
+            Emotion emotion = Emotion.PROUD;
             List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), registerType, removedEmotion, period.startDate.atStartOfDay().minusSeconds(1L), 1000),
-                    makeArticle(user.getId(), registerType, removedEmotion, period.endDate.atStartOfDay().plusSeconds(1L), 1000)
+                    makeArticle(filteredUser.getId(), registerType, emotion, startDate.atStartOfDay().minusSeconds(1L), 1000),
+                    makeArticle(filteredUser.getId(), registerType, emotion, endDate.atStartOfDay().plusSeconds(1L), 1000)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(MBTIEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(survivedEmotion.toString())
-                    .isNotIn(removedEmotion);
+            assertThat(dtos.stream()
+                    .map(MBTIEmotionAmountAverageDto::getMbtiFactor)
+                    .distinct()
+                    .toList())
+                    .containsExactlyInAnyOrderElementsOf(survivedMBTIFactors)
+                    .doesNotContainAnyElementsOf(filteredMBTIFactors);
         }
 
         @Test
         void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType removedRegisterType = RegisterType.SAVE;
-            RegisterType registerType = RegisterType.SPEND;
-            Emotion removedEmotion = Emotion.SAD;
-            Emotion survivedEmotion = Emotion.PROUD;
+            RegisterType survivedRegisterType = RegisterType.SPEND;
+            RegisterType filteredRegisterType = RegisterType.SAVE;
+            Emotion emotion = Emotion.PROUD;
             List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), removedRegisterType, removedEmotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), removedRegisterType, removedEmotion, period.endDate.atStartOfDay(), 1000)
+                    makeArticle(filteredUser.getId(), filteredRegisterType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(filteredUser.getId(), filteredRegisterType, emotion, endDate.atStartOfDay(), 1000)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), survivedRegisterType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), survivedRegisterType, emotion, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
+                    survivedRegisterType,
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(MBTIEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(survivedEmotion.toString())
-                    .isNotIn(removedEmotion);
+            assertThat(dtos.stream()
+                    .map(MBTIEmotionAmountAverageDto::getMbtiFactor)
+                    .distinct()
+                    .toList())
+                    .containsExactlyInAnyOrderElementsOf(survivedMBTIFactors)
+                    .doesNotContainAnyElementsOf(filteredMBTIFactors);
         }
 
         @Test
         @Order(1)
         void MBTI별_감정별_금액의_평균을_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 2000),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 3000)
-            );
-            Long amountAverage = (long) articles.stream()
-                    .map(Article::getAmount)
-                    .reduce(Integer::sum)
-                    .get() / articles.size();
-
-            em.flush();
-
-            // when
-            List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
-            );
-
-            // then
-            assertThat(dtos)
-                    .extracting(MBTIEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(emotion.toString());
-            assertThat(dtos)
-                    .extracting(MBTIEmotionAmountAverageDto::getAmountAverage)
-                    .containsOnly(amountAverage);
-        }
-
-        @Test
-        @Order(2)
-        void 금액의_평균을_반활할_때_100의_자리수에서_반올림된다() throws Exception {
-            // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType registerType = RegisterType.SPEND;
-            Emotion emotion = Emotion.PROUD;
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 1100),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 2200),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 3300)
+                    makeArticle(survivedUser.getId(), registerType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 2000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 3000)
             );
             Long amountAverage = (long) articles.stream()
                     .map(Article::getAmount)
@@ -226,532 +189,360 @@ class MBTIStatisticsRepositoryTest {
             // when
             List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(MBTIEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(emotion.toString());
+                    .containsOnly(emotion);
             assertThat(dtos)
                     .extracting(MBTIEmotionAmountAverageDto::getAmountAverage)
                     .containsOnly(amountAverage);
         }
+
+        @Test
+        @Order(2)
+        void 금액의_평균을_반활할_때_100의_자리수에서_반올림_한다() throws Exception {
+            // given
+            RegisterType registerType = RegisterType.SPEND;
+            Emotion emotion = Emotion.PROUD;
+            List<Article> articles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, emotion, startDate.atStartOfDay(), 1100),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 2200),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 3300)
+            );
+            Long amountAverage = (long) articles.stream()
+                    .map(Article::getAmount)
+                    .reduce(Integer::sum)
+                    .get() / articles.size();
+            amountAverage = roundingAverage(amountAverage);
+
+            em.flush();
+
+            // when
+            List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
+                    registerType,
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(MBTIEmotionAmountAverageDto::getAmountAverage)
+                    .containsOnly(amountAverage);
+            assertThat(amountAverage % 1000).isZero();
+        }
     }
 
     @Nested
-    class MBTI별_일별_금액_합을_반환하는_메서드 {
+    class getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay().minusSeconds(1L), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay().plusSeconds(1L), 1000)
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), registerType, null, startDate.atStartOfDay().minusSeconds(1L), 1000),
+                    makeArticle(filteredUser.getId(), registerType, null, endDate.atStartOfDay().plusSeconds(1L), 1000)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(MBTIDailyAmountSumDto::getLocalDate)
-                    .containsAll(
-                            articles.stream()
-                                    .map(a -> a.getCreatedDate().toLocalDate())
-                                    .toList()
-                    )
-                    .doesNotContain(
-                            period.startDate.minusDays(1),
-                            period.endDate.plusDays(1));
+            assertThat(dtos.stream()
+                    .map(MBTIDailyAmountSumDto::getMbtiFactor)
+                    .distinct()
+                    .toList())
+                    .containsExactlyInAnyOrderElementsOf(survivedMBTIFactors)
+                    .doesNotContainAnyElementsOf(filteredMBTIFactors);
         }
 
         @Test
         void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
+            RegisterType filteredRegisterType = RegisterType.SPEND;
+            RegisterType survivedRegisterType = RegisterType.SAVE;
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, startDate.atStartOfDay(), 1000),
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, endDate.atStartOfDay(), 1000)
             );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType removedRegisterType = RegisterType.SAVE;
-            RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), removedRegisterType, null, period.startDate.atStartOfDay().minusSeconds(1L), 1000),
-                    makeArticle(user.getId(), removedRegisterType, null, period.endDate.atStartOfDay().plusSeconds(1L), 1000)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
+                    survivedRegisterType,
+                    startDate,
+                    endDate
             );
 
             // then
-            // TODO 날짜를 기준으로 객체를 찾고 싶다
-            assertThat(dtos)
-                    .extracting(MBTIDailyAmountSumDto::getLocalDate)
-                    .containsAll(
-                            articles.stream()
-                                    .map(a -> a.getCreatedDate().toLocalDate())
-                                    .toList()
-                    )
-                    .doesNotContain(
-                            period.startDate.minusDays(1),
-                            period.endDate.plusDays(1));
+            assertThat(dtos.stream()
+                    .map(MBTIDailyAmountSumDto::getMbtiFactor)
+                    .distinct()
+                    .toList())
+                    .containsExactlyInAnyOrderElementsOf(survivedMBTIFactors)
+                    .doesNotContainAnyElementsOf(filteredMBTIFactors);
         }
 
         @Test
         void MBTI별_일별_금액의_합을_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 2000),
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 3000)
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 2000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 3000)
             );
-            Integer sum = articles.stream()
-                    .map(Article::getAmount)
-                    .reduce(Integer::sum).orElseGet(() -> -1);
+            long sum = articles.stream()
+                    .mapToLong(Article::getAmount)
+                    .reduce(Long::sum).orElseGet(() -> -1L);
             em.flush();
 
             // when
             List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(MBTIDailyAmountSumDto::getAmountSum)
-                    .containsOnly((long)sum);
+                    .containsOnly(sum);
         }
     }
     @Nested
-    class 단어_빈도수를_반환하는_메서드 {
+    class getAllMemosByMBTIBetweenStartDateAndEndDate {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-
-            String things = "things";
-            String removedThings = "removed";
-            List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay().minusSeconds(1L), removedThings),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay().plusSeconds(1L), removedThings)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), things),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), things)
-            );
-            em.flush();
-
-            // when
-            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
-                    Mbti.NONE.toString(),
-                    period.startDate,
-                    period.endDate
-            );
-
-            // then
-            assertThat(dtos)
-                    .extracting(MemoDto::getContent)
-                    .containsOnly(things)
-                    .doesNotContain(removedThings);
-        }
-
-        @Test
-        void MBTI를_입력하면_해당_MBTI_유저들의_메모만_반환된다() throws Exception {
-            // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("Han")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-
-            String things = "things";
-            String removedThings = "removed";
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), removedThings),
-                    makeArticle(otherUser.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), removedThings)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), things),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), things)
-            );
-            em.flush();
-
-            // when
-            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
-                    user.getMbti().toString(),
-                    period.startDate,
-                    period.endDate
-            );
-
-            // then
-            assertThat(dtos)
-                    .extracting(MemoDto::getContent)
-                    .containsOnly(things)
-                    .doesNotContain(removedThings);
-        }
-
-        @Test
-        void MBTI를_입력하지_않으면_모든_유저들의_메모가_반환된다() throws Exception {
-            // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("Han")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-
-            String things = "things";
-            String otherThings = "removed";
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), otherThings),
-                    makeArticle(otherUser.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), otherThings)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), things),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), things)
-            );
-            em.flush();
-
-            // when
-            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
-                    Mbti.NONE.toString(),
-                    period.startDate,
-                    period.endDate
-            );
-
-            // then
-            assertThat(dtos)
-                    .extracting(MemoDto::getContent)
-                    .contains(things)
-                    .contains(otherThings);
-        }
-
-    }
-    @Nested
-    class MBTI별_만족도_평균을_반환하는_메서드 {
-        @Test
-        void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
-            // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), registerType, null, period.startDate.atStartOfDay().minusSeconds(1L), 1.0f),
-                    makeArticle(otherUser.getId(), registerType, null, period.endDate.atStartOfDay().plusSeconds(1L), 1.0f)
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), registerType, null, startDate.atStartOfDay().minusSeconds(1L), filteredContent),
+                    makeArticle(filteredUser.getId(), registerType, null, endDate.atStartOfDay().plusSeconds(1L), filteredContent)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), survivedContent),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), survivedContent)
+            );
+            em.flush();
+
+            // when
+            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    Mbti.NONE.toString(),
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(MemoDto::getContent)
+                    .containsOnly(survivedContent)
+                    .doesNotContain(filteredContent);
+        }
+
+        @Test
+        void MBTI_파라미터에_해당하는_MBTI_유저들의_메모가_반환된다() throws Exception {
+            // given
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), RegisterType.SPEND, null, startDate.atStartOfDay(), filteredContent),
+                    makeArticle(filteredUser.getId(), RegisterType.SPEND, null, endDate.atStartOfDay(), filteredContent)
+            );
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), RegisterType.SPEND, null, startDate.atStartOfDay(), survivedContent),
+                    makeArticle(survivedUser.getId(), RegisterType.SPEND, null, endDate.atStartOfDay(), survivedContent)
+            );
+            em.flush();
+
+            // when
+            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    survivedUser.getMbti().toString(),
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(MemoDto::getContent)
+                    .containsOnly(survivedContent)
+                    .doesNotContain(filteredContent);
+        }
+
+        @Test
+        void MBTI_파라미터로_NONE을_입력하면_모든_유저들의_메모가_반환된다() throws Exception {
+            // given
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), RegisterType.SPEND, null, startDate.atStartOfDay(), filteredContent),
+                    makeArticle(filteredUser.getId(), RegisterType.SPEND, null, endDate.atStartOfDay(), filteredContent)
+            );
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), RegisterType.SPEND, null, startDate.atStartOfDay(), survivedContent),
+                    makeArticle(survivedUser.getId(), RegisterType.SPEND, null, endDate.atStartOfDay(), survivedContent)
+            );
+            em.flush();
+
+            // when
+            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    Mbti.NONE.toString(),
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(MemoDto::getContent)
+                    .containsAnyElementsOf(
+                            filteredArticles.stream()
+                                    .map(Article::getContent)
+                                    .toList())
+                    .containsAnyElementsOf(
+                            survivedArticles.stream()
+                                    .map(Article::getContent)
+                                    .toList());
+        }
+
+    }
+
+    @Nested
+    class getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate {
+        @Test
+        void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
+            // given
+            RegisterType registerType = RegisterType.SPEND;
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), registerType, null, startDate.atStartOfDay().minusSeconds(1L), 1.0f),
+                    makeArticle(filteredUser.getId(), registerType, null, endDate.atStartOfDay().plusSeconds(1L), 1.0f)
+            );
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 1.0f),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 1.0f)
             );
             em.flush();
 
             // when
             List<MBTISatisfactionAverageDto> dtos = mbtiStatisticsRepository.getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(MBTISatisfactionAverageDto::getMbtiFactor)
-                    .contains(user.getMbti().toString().split(""))
-                    .doesNotContain(otherUser.getMbti().toString().split(""));
+            assertThat(dtos.stream()
+                    .map(MBTISatisfactionAverageDto::getMbtiFactor)
+                    .distinct()
+                    .toList())
+                    .containsExactlyInAnyOrderElementsOf(survivedMBTIFactors)
+                    .doesNotContainAnyElementsOf(filteredMBTIFactors);
         }
 
         @Test
         void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType removedRegisterType = RegisterType.SAVE;
-            RegisterType registerType = RegisterType.SPEND;
+            RegisterType filteredRegisterType = RegisterType.SAVE;
+            RegisterType survivedRegisterType = RegisterType.SPEND;
             List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), removedRegisterType, null, period.startDate.atStartOfDay(), 1.0f),
-                    makeArticle(otherUser.getId(), removedRegisterType, null, period.endDate.atStartOfDay(), 1.0f)
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, startDate.atStartOfDay(), 1.0f),
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, endDate.atStartOfDay(), 1.0f)
             );
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, startDate.atStartOfDay(), 1.0f),
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, endDate.atStartOfDay(), 1.0f)
             );
             em.flush();
 
             // when
             List<MBTISatisfactionAverageDto> dtos = mbtiStatisticsRepository.getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
+                    survivedRegisterType,
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(MBTISatisfactionAverageDto::getMbtiFactor)
-                    .contains(user.getMbti().toString().split(""))
-                    .doesNotContain(otherUser.getMbti().toString().split(""));
+            assertThat(dtos.stream()
+                    .map(MBTISatisfactionAverageDto::getMbtiFactor)
+                    .distinct()
+                    .toList())
+                    .containsExactlyInAnyOrderElementsOf(survivedMBTIFactors)
+                    .doesNotContainAnyElementsOf(filteredMBTIFactors);
         }
 
         @Test
         @Order(1)
         void MBTI별_만족도의_평균을_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), registerType, null, period.startDate.atStartOfDay(), 1.0f),
-                    makeArticle(otherUser.getId(), registerType, null, period.endDate.atStartOfDay(), 2.0f)
-            );
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 3.0f),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 4.0f)
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 3.0f),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 4.0f)
             );
+            Float satisfactionAverage = articles.stream()
+                    .map(Article::getSatisfaction)
+                    .reduce(Float::sum)
+                    .orElseGet(() -> 0f)
+                    / articles.size();
             em.flush();
 
             // when
             List<MBTISatisfactionAverageDto> dtos = mbtiStatisticsRepository.getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(
                     dtos.stream()
-                            .filter(d -> {
-                                String factor = d.getMbtiFactor();
-                                if(Arrays.stream(user.getMbti().toString().split("")).anyMatch(m -> m.equals(factor)))
-                                    return true;
-                                return false;
-                            })
                             .map(MBTISatisfactionAverageDto::getSatisfactionAverage)
                             .toList()
-            ).containsOnly(3.5f);
-            assertThat(
-                    dtos.stream()
-                            .filter(d -> {
-                                String factor = d.getMbtiFactor();
-                                if(Arrays.stream(otherUser.getMbti().toString().split("")).anyMatch(m -> m.equals(factor)))
-                                    return true;
-                                return false;
-                            })
-                            .map(MBTISatisfactionAverageDto::getSatisfactionAverage)
-                            .toList()
-            ).containsOnly(1.5f);
+            ).containsOnly(satisfactionAverage);
         }
 
         @Test
         @Order(2)
         void 만족도의_평균을_소수_둘째_자리에서_반올림해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), registerType, null, period.startDate.atStartOfDay(), 1.04f),
-                    makeArticle(otherUser.getId(), registerType, null, period.endDate.atStartOfDay(), 2.0f)
-            );
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 3.04f),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 4.0f)
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 3.04f),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 4.08f)
             );
             em.flush();
 
             // when
             List<MBTISatisfactionAverageDto> dtos = mbtiStatisticsRepository.getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(
                     dtos.stream()
-                            .filter(d -> {
-                                String factor = d.getMbtiFactor();
-                                if(Arrays.stream(user.getMbti().toString().split("")).anyMatch(m -> m.equals(factor)))
-                                    return true;
-                                return false;
-                            })
                             .map(MBTISatisfactionAverageDto::getSatisfactionAverage)
                             .toList()
-            ).containsOnly(3.5f);
-            assertThat(
-                    dtos.stream()
-                            .filter(d -> {
-                                String factor = d.getMbtiFactor();
-                                if(Arrays.stream(otherUser.getMbti().toString().split("")).anyMatch(m -> m.equals(factor)))
-                                    return true;
-                                return false;
-                            })
-                            .map(MBTISatisfactionAverageDto::getSatisfactionAverage)
-                            .toList()
-            ).containsOnly(1.5f);
+            ).containsOnly(3.6f);
         }
     }
     Article makeArticle(Long userId, RegisterType registerType, Emotion emotion, LocalDateTime dateTime, int amount) {
@@ -763,6 +554,7 @@ class MBTIStatisticsRepositoryTest {
                 .build();
         articleRepository.save(article);
 
+        // TODO spendDate 머지 후, 수정 필요
         try {
             Field createdDate = BaseTimeEntity.class.getDeclaredField("createdDate");
             createdDate.setAccessible(true);
@@ -819,16 +611,12 @@ class MBTIStatisticsRepositoryTest {
         return article;
     }
 
+    /**
+     * Long 타입 변수를 받아 100의 자리에서 반올림하는 메서드
+     * */
     private static Long roundingAverage(Long amountAverage) {
         amountAverage += 500L;
         amountAverage = amountAverage - (amountAverage % 1000);
         return amountAverage;
-    }
-    @Getter
-    @AllArgsConstructor
-    static class DatePeriod {
-
-        private LocalDate startDate;
-        private LocalDate endDate;
     }
 }

@@ -5,10 +5,8 @@ import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.global.entity.BaseTimeEntity;
-import com.example.spinlog.statistics.repository.dto.GenderDailyAmountSumDto;
-import com.example.spinlog.statistics.repository.dto.GenderEmotionAmountAverageDto;
-import com.example.spinlog.statistics.repository.dto.GenderSatisfactionAverageDto;
-import com.example.spinlog.statistics.repository.dto.MemoDto;
+import com.example.spinlog.statistics.entity.MBTIFactor;
+import com.example.spinlog.statistics.repository.dto.*;
 import com.example.spinlog.statistics.required_have_to_delete.UserRepository;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
@@ -49,165 +47,117 @@ class GenderStatisticsRepositoryTest {
     @Autowired
     EntityManager em; // flush 하기 위해 필요 (JPA 쓰기 지연 방지)
 
+    /**
+     * DB가 데이터를 필터링 해서 반환하는데, 필터링 됐음을 유저의 Gender로 구분한다.
+     * MALE -> 필터링 되지 않고 그대로 받환되는 데이터의 Gender
+     * FEMALE -> 필터링 되어 받을 수 없는 데이터의 Gender
+     * */
+    User survivedUser;
+    Gender survivedGender = Gender.MALE;
+    User filteredUser;
+    Gender filteredGender = Gender.FEMALE;
+
+    LocalDate startDate, endDate;
+
+    /**
+     * 필터링 결과를 구분하기 위해, 필터링 대상 MBTI를 가지고 있는 유저 객체 2개를 생성한다.
+     * */
+    @BeforeEach
+    public void createTwoUserToDivideFilteringResultAndLocalDateRange() {
+        survivedUser = User.builder()
+                .email("survived@email")
+                .name("survivedUser")
+                .mbti(Mbti.ISTJ)
+                .gender(survivedGender)
+                .build();
+        filteredUser = User.builder()
+                .email("filtered@email")
+                .name("filteredUser")
+                .mbti(Mbti.ENFP)
+                .gender(filteredGender) // 정반대의 Gender 입력 -> 이 gender는 필터링 되는 gender
+                .build();
+        userRepository.save(survivedUser);
+        userRepository.save(filteredUser);
+
+        startDate = LocalDate.now().minusDays(2);
+        endDate = LocalDate.now().minusDays(1);
+    }
+
     @Nested
     class 성별_감정별_금액_평균을_반환하는_메서드 {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            Emotion removedEmotion = Emotion.SAD;
-            Emotion survivedEmotion = Emotion.PROUD;
+            Emotion emotion = Emotion.PROUD;
             List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), registerType, removedEmotion, period.startDate.atStartOfDay().minusSeconds(1L), 1000),
-                    makeArticle(user.getId(), registerType, removedEmotion, period.endDate.atStartOfDay().plusSeconds(1L), 1000)
+                    makeArticle(filteredUser.getId(), registerType, emotion, startDate.atStartOfDay().minusSeconds(1L), 1000),
+                    makeArticle(filteredUser.getId(), registerType, emotion, endDate.atStartOfDay().plusSeconds(1L), 1000)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(GenderEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(survivedEmotion.toString())
-                    .isNotIn(removedEmotion.toString());
+            assertThat(dtos.stream()
+                    .map(GenderEmotionAmountAverageDto::getGender)
+                    .distinct()
+                    .toList())
+                    .containsOnly(survivedGender)
+                    .doesNotContain(filteredGender);
         }
 
         @Test
         void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType removedRegisterType = RegisterType.SAVE;
-            RegisterType registerType = RegisterType.SPEND;
-            Emotion removedEmotion = Emotion.SAD;
-            Emotion survivedEmotion = Emotion.PROUD;
+            RegisterType survivedRegisterType = RegisterType.SPEND;
+            RegisterType filteredRegisterType = RegisterType.SAVE;
+            Emotion emotion = Emotion.PROUD;
             List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), removedRegisterType, removedEmotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), removedRegisterType, removedEmotion, period.endDate.atStartOfDay(), 1000)
+                    makeArticle(filteredUser.getId(), filteredRegisterType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(filteredUser.getId(), filteredRegisterType, emotion, endDate.atStartOfDay(), 1000)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, survivedEmotion, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), survivedRegisterType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), survivedRegisterType, emotion, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
+                    survivedRegisterType,
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(GenderEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(survivedEmotion.toString())
-                    .isNotIn(removedEmotion.toString());
+            assertThat(dtos.stream()
+                    .map(GenderEmotionAmountAverageDto::getGender)
+                    .distinct()
+                    .toList())
+                    .containsOnly(survivedGender)
+                    .doesNotContain(filteredGender);
         }
 
         @Test
         @Order(1)
         void 성별_감정별_금액의_평균을_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 2000),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 3000)
-            );
-            Long amountAverage = (long) articles.stream()
-                    .map(Article::getAmount)
-                    .reduce(Integer::sum)
-                    .get() / articles.size();
-
-            em.flush();
-
-            // when
-            List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
-            );
-
-            // then
-            assertThat(dtos)
-                    .hasSize(1)
-                    .extracting(GenderEmotionAmountAverageDto::getGender)
-                    .containsOnly(Gender.MALE);
-            assertThat(dtos)
-                    .extracting(GenderEmotionAmountAverageDto::getEmotion)
-                    .containsOnly(emotion.toString());
-            assertThat(dtos)
-                    .extracting(GenderEmotionAmountAverageDto::getAmountAverage)
-                    .containsOnly(amountAverage);
-        }
-
-        @Test
-        @Order(2)
-        void 금액의_평균을_반활할_때_100의_자리수에서_반올림된다() throws Exception {
-            // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType registerType = RegisterType.SPEND;
-            Emotion emotion = Emotion.PROUD;
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 1100),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 2200),
-                    makeArticle(user.getId(), registerType, emotion, period.endDate.atStartOfDay(), 3300)
+                    makeArticle(survivedUser.getId(), registerType, emotion, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 2000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 3000)
             );
             Long amountAverage = (long) articles.stream()
                     .map(Article::getAmount)
@@ -220,14 +170,50 @@ class GenderStatisticsRepositoryTest {
             // when
             List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(GenderEmotionAmountAverageDto::getEmotion)
+                    .containsOnly(emotion);
+            assertThat(dtos)
+                    .extracting(GenderEmotionAmountAverageDto::getAmountAverage)
+                    .containsOnly(amountAverage);
+        }
+
+        @Test
+        @Order(2)
+        void 금액의_평균을_반활할_때_100의_자리수에서_반올림된다() throws Exception {
+            // given
+            RegisterType registerType = RegisterType.SPEND;
+            Emotion emotion = Emotion.PROUD;
+            List<Article> articles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, emotion, startDate.atStartOfDay(), 1100),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 2200),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 3300)
+            );
+            Long amountAverage = (long) articles.stream()
+                    .map(Article::getAmount)
+                    .reduce(Integer::sum)
+                    .get() / articles.size();
+            amountAverage = roundingAverage(amountAverage);
+
+            em.flush();
+
+            // when
+            List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(
+                    registerType,
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(GenderEmotionAmountAverageDto::getAmountAverage)
                     .containsOnly(amountAverage);
+            assertThat(amountAverage % 1000).isZero();
         }
     }
 
@@ -236,139 +222,87 @@ class GenderStatisticsRepositoryTest {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay().minusSeconds(1L), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay().plusSeconds(1L), 1000)
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), registerType, null, startDate.atStartOfDay().minusSeconds(1L), 1000),
+                    makeArticle(filteredUser.getId(), registerType, null, endDate.atStartOfDay().plusSeconds(1L), 1000)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<GenderDailyAmountSumDto> dtos = genderStatisticsRepository.getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .extracting(GenderDailyAmountSumDto::getLocalDate)
-                    .containsAll(
-                            articles.stream()
-                                    .map(a -> a.getCreatedDate().toLocalDate())
-                                    .toList()
-                    )
-                    .doesNotContain(
-                            period.startDate.minusDays(1),
-                            period.endDate.plusDays(1));
+            assertThat(dtos.stream()
+                    .map(GenderDailyAmountSumDto::getGender)
+                    .distinct()
+                    .toList())
+                    .containsOnly(survivedGender)
+                    .doesNotContain(filteredGender);
         }
 
         @Test
         void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
+            RegisterType filteredRegisterType = RegisterType.SPEND;
+            RegisterType survivedRegisterType = RegisterType.SAVE;
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, startDate.atStartOfDay(), 1000),
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, endDate.atStartOfDay(), 1000)
             );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType removedRegisterType = RegisterType.SAVE;
-            RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), removedRegisterType, null, period.startDate.atStartOfDay().minusSeconds(1L), 1000),
-                    makeArticle(user.getId(), removedRegisterType, null, period.endDate.atStartOfDay().plusSeconds(1L), 1000)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, startDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, endDate.atStartOfDay(), 1000)
             );
             em.flush();
 
             // when
             List<GenderDailyAmountSumDto> dtos = genderStatisticsRepository.getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
+                    survivedRegisterType,
+                    startDate,
+                    endDate
             );
 
             // then
-            // TODO 날짜를 기준으로 객체를 찾고 싶다
-            assertThat(dtos)
-                    .extracting(GenderDailyAmountSumDto::getLocalDate)
-                    .containsAll(
-                            articles.stream()
-                                    .map(a -> a.getCreatedDate().toLocalDate())
-                                    .toList()
-                    )
-                    .doesNotContain(
-                            period.startDate.minusDays(1),
-                            period.endDate.plusDays(1));
+            assertThat(dtos.stream()
+                    .map(GenderDailyAmountSumDto::getGender)
+                    .distinct()
+                    .toList())
+                    .containsOnly(survivedGender)
+                    .doesNotContain(filteredGender);
         }
 
         @Test
         void 성별_일별_금액의_합을_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 2000),
-                    makeArticle(user.getId(), registerType, emotion, period.startDate.atStartOfDay(), 3000)
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 1000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 2000),
+                    makeArticle(survivedUser.getId(), registerType, emotion, endDate.atStartOfDay(), 3000)
             );
-            Long sum = articles.stream()
-                    .mapToLong(a -> a.getAmount().longValue())
+            long sum = articles.stream()
+                    .mapToLong(Article::getAmount)
                     .reduce(Long::sum).orElseGet(() -> -1L);
             em.flush();
 
             // when
             List<GenderDailyAmountSumDto> dtos = genderStatisticsRepository.getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
-            assertThat(dtos)
-                    .hasSize(1)
-                    .extracting(GenderDailyAmountSumDto::getGender)
-                    .containsOnly(Gender.MALE);
-            assertThat(dtos)
-                    .extracting(GenderDailyAmountSumDto::getLocalDate)
-                    .containsOnly(period.startDate);
             assertThat(dtos)
                     .extracting(GenderDailyAmountSumDto::getAmountSum)
                     .containsOnly(sum);
@@ -379,91 +313,60 @@ class GenderStatisticsRepositoryTest {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
+            RegisterType registerType = RegisterType.SPEND;
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), registerType, null, startDate.atStartOfDay().minusSeconds(1L), filteredContent),
+                    makeArticle(filteredUser.getId(), registerType, null, endDate.atStartOfDay().plusSeconds(1L), filteredContent)
             );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-
-            String things = "things";
-            String removedThings = "removed";
-            List<Article> removedArticles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay().minusSeconds(1L), removedThings),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay().plusSeconds(1L), removedThings)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), things),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), things)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), survivedContent),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), survivedContent)
             );
             em.flush();
 
             // when
             List<MemoDto> dtos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(
                     Gender.MALE,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(MemoDto::getContent)
-                    .containsOnly(things)
-                    .doesNotContain(removedThings);
+                    .containsOnly(survivedContent)
+                    .doesNotContain(filteredContent);
         }
 
         @Test
         void 입력한_성별을_가지고_있는_유저들의_메모만_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .gender(Gender.MALE)
-                            .build()
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), RegisterType.SPEND, null, startDate.atStartOfDay(), filteredContent),
+                    makeArticle(filteredUser.getId(), RegisterType.SPEND, null, endDate.atStartOfDay(), filteredContent)
             );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("Han")
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-
-            String things = "things";
-            String removedThings = "removed";
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), removedThings),
-                    makeArticle(otherUser.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), removedThings)
-            );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.startDate.atStartOfDay(), things),
-                    makeArticle(user.getId(), RegisterType.SPEND, null, period.endDate.atStartOfDay(), things)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), RegisterType.SPEND, null, startDate.atStartOfDay(), survivedContent),
+                    makeArticle(survivedUser.getId(), RegisterType.SPEND, null, endDate.atStartOfDay(), survivedContent)
             );
             em.flush();
 
             // when
             List<MemoDto> dtos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(
                     Gender.MALE,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(MemoDto::getContent)
-                    .containsOnly(things)
-                    .doesNotContain(removedThings);
+                    .containsOnly(survivedContent)
+                    .doesNotContain(filteredContent);
         }
     }
     @Nested
@@ -471,232 +374,115 @@ class GenderStatisticsRepositoryTest {
         @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), registerType, null, period.startDate.atStartOfDay().minusSeconds(1L), 1.0f),
-                    makeArticle(otherUser.getId(), registerType, null, period.endDate.atStartOfDay().plusSeconds(1L), 1.0f)
+            List<Article> filteredArticles = List.of(
+                    makeArticle(filteredUser.getId(), registerType, null, startDate.atStartOfDay().minusSeconds(1L), 1.0f),
+                    makeArticle(filteredUser.getId(), registerType, null, endDate.atStartOfDay().plusSeconds(1L), 1.0f)
             );
-            List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+            List<Article> survivedArticles = List.of(
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 1.0f),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 1.0f)
             );
             em.flush();
 
             // when
             List<GenderSatisfactionAverageDto> dtos = genderStatisticsRepository.getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(GenderSatisfactionAverageDto::getGender)
-                    .contains(user.getGender())
-                    .doesNotContain(otherUser.getGender());
+                    .contains(survivedGender)
+                    .doesNotContain(filteredGender);
         }
 
         @Test
         void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
-            RegisterType removedRegisterType = RegisterType.SAVE;
-            RegisterType registerType = RegisterType.SPEND;
+            RegisterType filteredRegisterType = RegisterType.SAVE;
+            RegisterType survivedRegisterType = RegisterType.SPEND;
             List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), removedRegisterType, null, period.startDate.atStartOfDay(), 1.0f),
-                    makeArticle(otherUser.getId(), removedRegisterType, null, period.endDate.atStartOfDay(), 1.0f)
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, startDate.atStartOfDay(), 1.0f),
+                    makeArticle(filteredUser.getId(), filteredRegisterType, null, endDate.atStartOfDay(), 1.0f)
             );
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 1000),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 1000)
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, startDate.atStartOfDay(), 1.0f),
+                    makeArticle(survivedUser.getId(), survivedRegisterType, null, endDate.atStartOfDay(), 1.0f)
             );
             em.flush();
 
             // when
             List<GenderSatisfactionAverageDto> dtos = genderStatisticsRepository.getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate(
-                    registerType,
-                    period.startDate,
-                    period.endDate
+                    survivedRegisterType,
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(dtos)
                     .extracting(GenderSatisfactionAverageDto::getGender)
-                    .contains(user.getGender())
-                    .doesNotContain(otherUser.getGender());
+                    .contains(survivedGender)
+                    .doesNotContain(filteredGender);
         }
 
         @Test
         @Order(1)
         void 성별_만족도의_평균을_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), registerType, null, period.startDate.atStartOfDay(), 1.0f),
-                    makeArticle(otherUser.getId(), registerType, null, period.endDate.atStartOfDay(), 2.0f)
-            );
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 3.0f),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 4.0f)
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 3.0f),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 4.0f)
             );
+            Float satisfactionAverage = articles.stream()
+                    .map(Article::getSatisfaction)
+                    .reduce(Float::sum)
+                    .orElseGet(() -> 0f)
+                    / articles.size();
             em.flush();
 
             // when
             List<GenderSatisfactionAverageDto> dtos = genderStatisticsRepository.getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(
                     dtos.stream()
-                            .filter(d -> {
-                                Gender gender = d.getGender();
-                                if(user.getGender().equals(gender))
-                                    return true;
-                                return false;
-                            })
                             .map(GenderSatisfactionAverageDto::getSatisfactionAverage)
                             .toList()
-            ).containsOnly(3.5f);
-            assertThat(
-                    dtos.stream()
-                            .filter(d -> {
-                                Gender gender = d.getGender();
-                                if(otherUser.getGender().equals(gender))
-                                    return true;
-                                return false;
-                            })
-                            .map(GenderSatisfactionAverageDto::getSatisfactionAverage)
-                            .toList()
-            ).containsOnly(1.5f);
+            ).containsOnly(satisfactionAverage);
         }
 
         @Test
         @Order(2)
         void 만족도의_평균을_소수_둘째_자리에서_반올림해서_반환한다() throws Exception {
             // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("gks@gks")
-                            .name("Han")
-                            .mbti(Mbti.ISTJ)
-                            .gender(Gender.MALE)
-                            .build()
-            );
-            User otherUser = userRepository.save(
-                    User.builder()
-                            .email("gks@tkd")
-                            .name("other")
-                            .mbti(Mbti.ENFP)
-                            .gender(Gender.FEMALE)
-                            .build()
-            );
-
-            DatePeriod period = new DatePeriod(
-                    LocalDate.now().minusDays(2),
-                    LocalDate.now().minusDays(1));
             RegisterType registerType = RegisterType.SPEND;
-            List<Article> removedArticles = List.of(
-                    makeArticle(otherUser.getId(), registerType, null, period.startDate.atStartOfDay(), 1.04f),
-                    makeArticle(otherUser.getId(), registerType, null, period.endDate.atStartOfDay(), 2.0f)
-            );
             List<Article> articles = List.of(
-                    makeArticle(user.getId(), registerType, null, period.startDate.atStartOfDay(), 3.04f),
-                    makeArticle(user.getId(), registerType, null, period.endDate.atStartOfDay(), 4.0f)
+                    makeArticle(survivedUser.getId(), registerType, null, startDate.atStartOfDay(), 3.04f),
+                    makeArticle(survivedUser.getId(), registerType, null, endDate.atStartOfDay(), 4.08f)
             );
             em.flush();
 
             // when
             List<GenderSatisfactionAverageDto> dtos = genderStatisticsRepository.getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate(
                     registerType,
-                    period.startDate,
-                    period.endDate
+                    startDate,
+                    endDate
             );
 
             // then
             assertThat(
                     dtos.stream()
-                            .filter(d -> {
-                                Gender gender = d.getGender();
-                                if(user.getGender().equals(gender))
-                                    return true;
-                                return false;
-                            })
                             .map(GenderSatisfactionAverageDto::getSatisfactionAverage)
                             .toList()
-            ).containsOnly(3.5f);
-            assertThat(
-                    dtos.stream()
-                            .filter(d -> {
-                                Gender gender = d.getGender();
-                                if(otherUser.getGender().equals(gender))
-                                    return true;
-                                return false;
-                            })
-                            .map(GenderSatisfactionAverageDto::getSatisfactionAverage)
-                            .toList()
-            ).containsOnly(1.5f);
+            ).containsOnly(3.6f);
         }
     }
     Article makeArticle(Long userId, RegisterType registerType, Emotion emotion, LocalDateTime dateTime, int amount) {
@@ -764,16 +550,12 @@ class GenderStatisticsRepositoryTest {
         return article;
     }
 
+    /**
+     * Long 타입 변수를 받아 100의 자리에서 반올림하는 메서드
+     * */
     private static Long roundingAverage(Long amountAverage) {
         amountAverage += 500L;
         amountAverage = amountAverage - (amountAverage % 1000);
         return amountAverage;
-    }
-    @Getter
-    @AllArgsConstructor
-    static class DatePeriod {
-
-        private LocalDate startDate;
-        private LocalDate endDate;
     }
 }
