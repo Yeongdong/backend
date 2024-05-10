@@ -2,12 +2,12 @@ package com.example.spinlog.article.controller;
 
 import com.example.spinlog.article.dto.*;
 import com.example.spinlog.article.service.ArticleService;
+import com.example.spinlog.global.response.ApiResponseWrapper;
+import com.example.spinlog.global.response.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,10 +24,10 @@ public class ArticleController {
      * @return 작성된 게시글 객체를 포함하는 ResponseEntity
      */
     @PostMapping
-    public ResponseEntity<WriteArticleResponseDTO> create(@RequestBody WriteArticleRequestDTO article) {
-        WriteArticleResponseDTO responseDTO = articleService.createArticle(article);
+    public ApiResponseWrapper<WriteArticleResponseDto> create(@RequestBody WriteArticleRequestDto article) {
+        WriteArticleResponseDto responseDto = articleService.createArticle(article);
         log.info("게시글 작성 성공");
-        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        return ResponseUtils.ok(responseDto, "게시글 작성 성공");  // info 로그 삭제 여부에 따라 변수로 관리하던지 아니면 직접 문자열을 넣을지 판단 필요
     }
 
     /**
@@ -37,10 +37,10 @@ public class ArticleController {
      * @return 게시글 리스트를 포함하는 ResponseEntity
      */
     @GetMapping
-    public ResponseEntity<Page<ViewArticleResponseDTO>> viewList(Pageable pageable, SearchCond searchCond) {
-        Page<ViewArticleResponseDTO> responseDto = articleService.listArticles(pageable, searchCond);
+    public ApiResponseWrapper<Page<ViewArticleListResponseDto>> viewList(Pageable pageable, SearchCond searchCond) {
+        Page<ViewArticleListResponseDto> responseDto = articleService.listArticles(pageable, searchCond);
         log.info("게시글 리스트 불러오기 성공");
-        return ResponseEntity.ok(responseDto);
+        return ResponseUtils.ok(responseDto, "게시글 리스트 불러오기 성공");
     }
 
     /**
@@ -50,36 +50,36 @@ public class ArticleController {
      * @return 조회 게시글 객체를 포함하는 ResponseEntity
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ViewArticleResponseDTO> viewDetails(@PathVariable Long id) {
-        ViewArticleResponseDTO responseDTO = articleService.getArticle(id);
+    public ApiResponseWrapper<ViewArticleResponseDto> viewDetails(@PathVariable Long id) {
+        ViewArticleResponseDto responseDto = articleService.getArticle(id);
         log.info("게시글 1개 불러오기 성공");
-        return ResponseEntity.ok(responseDTO);
+        return ResponseUtils.ok(responseDto, "게시글 1개 불러오기 성공");
     }
 
     /**
      * 게시글 수정
      *
-     * @param id 업데이트 요청 데이터 Id
+     * @param id               업데이트 요청 데이터 Id
      * @param updateRequestDTO 업데이트 요청 데이터
-     * @return 수정된 게시글 객체를 포함하는 ResponseEntity
+     * @return 업데이트 성공 메시지 ResponseEntity
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<UpdateArticleResponseDTO> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequestDTO updateRequestDTO) {
-        UpdateArticleResponseDTO updatedArticle = articleService.updateArticle(id, updateRequestDTO);
+    public ApiResponseWrapper<Void> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
+        articleService.updateArticle(id, updateRequestDTO);
         log.info("게시글 업데이트 성공");
-        return ResponseEntity.ok(updatedArticle);
+        return ResponseUtils.ok("게시글 업데이트 성공");
     }
 
     /**
      * 게시글 삭제
      *
      * @param id 삭제 요청 데이터 Id
-     * @return 삭제 성공시 상태코드 204
+     * @return 삭제 성공 메시지 ResponseEntity
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArticle(@PathVariable Long id) {
+    public ApiResponseWrapper<Void> deleteArticle(@PathVariable Long id) {
         articleService.deleteArticle(id);
         log.info("ID {}의 게시글이 삭제되었습니다.", id);
-        return ResponseEntity.noContent().build();
+        return ResponseUtils.ok("게시글 삭제 성공");
     }
 }
