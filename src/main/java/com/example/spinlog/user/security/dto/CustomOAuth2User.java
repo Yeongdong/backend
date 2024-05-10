@@ -1,7 +1,9 @@
 package com.example.spinlog.user.security.dto;
 
+import com.example.spinlog.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,9 +15,12 @@ import java.util.Map;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
+@Getter
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuth2Response oAuth2Response;
+
+    private final Boolean firstLogin;
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -35,7 +40,7 @@ public class CustomOAuth2User implements OAuth2User {
         return oAuth2Response.getEmail();
     }
 
-    public String getUsername() {
-        return oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
+    public static CustomOAuth2User of(OAuth2Response oAuth2Response, Boolean isFirstLogin) {
+        return new CustomOAuth2User(oAuth2Response, isFirstLogin);
     }
 }

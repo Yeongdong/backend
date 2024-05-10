@@ -10,5 +10,4 @@ public class ProfileController {
     public String profilePage() {
         return "profile";
     }
-
 }

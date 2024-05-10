@@ -2,6 +2,7 @@ package com.example.spinlog.global.config;
 
 import com.example.spinlog.global.config.oauth2.CustomClientRegistrationRepository;
 import com.example.spinlog.global.config.oauth2.CustomOAuth2AuthorizedClientService;
+import com.example.spinlog.global.config.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.example.spinlog.user.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,11 +21,11 @@ public class SecurityConfig {
     private final CustomClientRegistrationRepository customClientRegistrationRepository;
     private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
     private final JdbcTemplate jdbcTemplate;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     /*
     TODO oauth2Login() 관련
         3. 로그아웃을 한 뒤 다시 로그인을 하면 자동 로그인이 되지 않게
-        4. 최초 로그인인지 판별
         5. cors 설정
      */
     @Bean
@@ -45,8 +46,9 @@ public class SecurityConfig {
                                 jdbcTemplate, customClientRegistrationRepository.clientRegistrationRepository()
                         ))
                         .userInfoEndpoint(userInfoEndpointConfig ->
-                                userInfoEndpointConfig.userService(customOAuth2UserService))
-
+                                userInfoEndpointConfig.userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
