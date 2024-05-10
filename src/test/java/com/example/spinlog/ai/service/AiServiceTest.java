@@ -54,7 +54,7 @@ class AiServiceTest {
 
     @Test
     @DisplayName("AI한마디를 요청하면 응답을 받는다.")
-    void requestAiComment_ShouldReturnAiResponseDto() {
+    void AI요청_성공() {
         // Given
         AiRequestDto aiRequestDto = AiRequestDto.builder()
                 .articleId(writeArticleResponseDto.getArticleId())
@@ -73,7 +73,7 @@ class AiServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 Article ID를 입력하면 NoSuchElementExcepiton이 발생한다.")
-    void requestAiComment_WhenArticleNotFound_ThrowsException() {
+    void AI요청_실패() {
         // Given
         AiRequestDto aiRequestDto = AiRequestDto.builder()
                 .articleId(999L)
