@@ -22,6 +22,7 @@ public class Article extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_id")
     private Long articleId; // 일기 번호
+    private Long userId;    // 회원 번호
     private String content;  // 내용
     private LocalDateTime spendDate;    // 소비 날짜
     private String event; // 사건
