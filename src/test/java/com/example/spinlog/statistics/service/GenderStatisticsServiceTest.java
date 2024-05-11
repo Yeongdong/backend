@@ -246,10 +246,10 @@ class GenderStatisticsServiceTest {
         void 레포로부터_모든_메모_데이터를_받고_이를_평면화하여_WordExtractionService에게_보낸다() throws Exception {
             // given
             List<MemoDto> memos = List.of(
-                    new MemoDto("c1", "e1", "t1", "r1", "r1", "i1"),
-                    new MemoDto("c2", "e2", "t2", "r2", "r2", "i2"),
-                    new MemoDto("c3", "e3", "t3", "r3", "r3", "i3"),
-                    new MemoDto("c4", "e4", "t4", "r4", "r4", "i4")
+                    new MemoDto("c1", "e1", "t1", "r1", "i1"),
+                    new MemoDto("c2", "e2", "t2", "r2", "i2"),
+                    new MemoDto("c3", "e3", "t3", "r3", "i3"),
+                    new MemoDto("c4", "e4", "t4", "r4", "i4")
             );
             when(genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(any(), any(), any()))
                     .thenReturn(memos)
@@ -266,7 +266,6 @@ class GenderStatisticsServiceTest {
                                     m.getThought(),
                                     m.getEvent(),
                                     m.getReason(),
-                                    m.getResult(),
                                     m.getImprovements()))
                     .toList();
             verify(wordExtractionService, times(2))

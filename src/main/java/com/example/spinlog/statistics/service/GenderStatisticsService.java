@@ -73,7 +73,6 @@ public class GenderStatisticsService {
                                                 m.getContent(),
                                                 m.getEvent(),
                                                 m.getReason(),
-                                                m.getResult(),
                                                 m.getThought(),
                                                 m.getImprovements()))
                                         .filter(Objects::nonNull)
@@ -85,7 +84,6 @@ public class GenderStatisticsService {
                                                 m.getContent(),
                                                 m.getEvent(),
                                                 m.getReason(),
-                                                m.getResult(),
                                                 m.getThought(),
                                                 m.getImprovements()))
                                         .filter(Objects::nonNull)

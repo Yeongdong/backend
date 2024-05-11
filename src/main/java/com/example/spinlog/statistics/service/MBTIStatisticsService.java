@@ -94,7 +94,6 @@ public class MBTIStatisticsService {
                                                     m.getContent(),
                                                     m.getEvent(),
                                                     m.getReason(),
-                                                    m.getResult(),
                                                     m.getThought(),
                                                     m.getImprovements()))
                                             .filter(Objects::nonNull)
@@ -115,7 +114,6 @@ public class MBTIStatisticsService {
                                                 m.getContent(),
                                                 m.getEvent(),
                                                 m.getReason(),
-                                                m.getResult(),
                                                 m.getThought(),
                                                 m.getImprovements()))
                                         .filter(Objects::nonNull)
@@ -128,7 +126,6 @@ public class MBTIStatisticsService {
                                                 m.getContent(),
                                                 m.getEvent(),
                                                 m.getReason(),
-                                                m.getResult(),
                                                 m.getThought(),
                                                 m.getImprovements()))
                                         .filter(Objects::nonNull)

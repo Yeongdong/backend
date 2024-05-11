@@ -5,54 +5,54 @@
     <select id="getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate" resultType="MBTIEmotionAmountAverageDto">
         select u.ei as mbtiFactor, a.emotion, round(avg(a.amount), -3) as amountAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, a.emotion
         union all
         select u.ns as mbtiFactor, a.emotion, round(avg(a.amount), -3) as amountAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, a.emotion
         union all
         select u.tf as mbtiFactor, a.emotion, round(avg(a.amount), -3) as amountAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, a.emotion
         union all
         select u.pj as mbtiFactor, a.emotion, round(avg(a.amount), -3) as amountAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, a.emotion
     </select>
 
     <select id="getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate" resultType="MBTIDailyAmountSumDto">
-        select u.ei as mbtiFactor, date(a.created_date) as localDate, sum(a.amount) as amountSum
+        select u.ei as mbtiFactor, date(a.spend_date) as localDate, sum(a.amount) as amountSum
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, localDate
         union all
-        select u.ns as mbtiFactor, date(a.created_date) as localDate, sum(a.amount) as amountSum
+        select u.ns as mbtiFactor, date(a.spend_date) as localDate, sum(a.amount) as amountSum
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, localDate
         union all
-        select u.tf as mbtiFactor, date(a.created_date) as localDate, sum(a.amount) as amountSum
+        select u.tf as mbtiFactor, date(a.spend_date) as localDate, sum(a.amount) as amountSum
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, localDate
         union all
-        select u.pj as mbtiFactor, date(a.created_date) as localDate, sum(a.amount) as amountSum
+        select u.pj as mbtiFactor, date(a.spend_date) as localDate, sum(a.amount) as amountSum
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor, localDate
     </select>
 
     <select id="getAllMemosByMBTIBetweenStartDateAndEndDate" resultType="MemoDto">
-        select a.content, a.event, a.thought, a.result, a.reason, a.improvements
+        select a.content, a.event, a.thought, a.reason, a.improvements
         from articles a
         <if test=' !"NONE".equals(mbti) '>
             join users u on a.user_id=u.user_id
         </if>
-        where a.created_date between #{startDate} and #{endDate}
+        where a.spend_date between #{startDate} and #{endDate}
         <if test=' !"NONE".equals(mbti) '>
             and u.mbti = #{mbti}
         </if>
@@ -61,22 +61,22 @@
     <select id="getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate" resultType="MBTISatisfactionAverageDto">
         select u.ei as mbtiFactor, round(avg(a.satisfaction), 1) as satisfactionAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor
         union all
         select u.ns as mbtiFactor, round(avg(a.satisfaction), 1) as satisfactionAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor
         union all
         select u.tf as mbtiFactor, round(avg(a.satisfaction), 1) as satisfactionAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor
         union all
         select u.pj as mbtiFactor, round(avg(a.satisfaction), 1) as satisfactionAverage
         from articles a join users_mbti_view u on(a.user_id = u.user_id)
-        where a.register_type = #{registerType} and a.created_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         group by mbtiFactor
     </select>
 </mapper>
