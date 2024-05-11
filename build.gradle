@@ -39,6 +39,9 @@ dependencies {
 	//Spring Data JDBC : OAuth2AuthorizedClientService 에 사용
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 
+	// OpenFeign: 외부 API 호출
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.6'
+
 	// ModelMapper: DTO Library
 	implementation 'org.modelmapper:modelmapper:3.1.1'
 
@@ -82,6 +85,17 @@ tasks.named('test') {
 
 jar {
 	enabled = false // plain jar 파일 제거
+}
+
+// Spring cloud(Open Feign) 버전 설정
+ext {
+	set('springCloudVersion', "2022.0.5")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
 }
 
 // Querydsl 설정부
