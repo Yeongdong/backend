@@ -6,6 +6,8 @@
 </head>
 <body>
 profile page : 로그인한 회원만 접근 가능
-<a href="/logout" role="button">Logout</a>
+<form action="/api/users/logout" method="post">
+    <input type="submit" value="logout">
+</form>
 </body>
 </html>

@@ -1,6 +1,5 @@
 package com.example.spinlog.user.security.dto;
 
-import com.example.spinlog.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +37,10 @@ public class CustomOAuth2User implements OAuth2User {
     @Override
     public String getName() {
         return oAuth2Response.getEmail();
+    }
+
+    public String getOAuth2Provider() {
+        return oAuth2Response.getProvider();
     }
 
     public static CustomOAuth2User of(OAuth2Response oAuth2Response, Boolean isFirstLogin) {

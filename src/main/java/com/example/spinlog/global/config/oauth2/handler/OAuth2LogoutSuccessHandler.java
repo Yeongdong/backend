@@ -1,5 +1,20 @@
 package com.example.spinlog.global.config.oauth2.handler;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.stereotype.Component;
 
-public class OAuth2LogoutSuccessHandler {
+import java.io.IOException;
+
+@Component
+public class OAuth2LogoutSuccessHandler implements LogoutSuccessHandler {
+
+    @Override
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        request.getSession().setAttribute("redirected", true);
+        response.sendRedirect("/api/users/logout-result");
+    }
 }

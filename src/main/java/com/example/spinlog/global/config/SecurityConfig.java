@@ -3,6 +3,8 @@ package com.example.spinlog.global.config;
 import com.example.spinlog.global.config.oauth2.CustomClientRegistrationRepository;
 import com.example.spinlog.global.config.oauth2.CustomOAuth2AuthorizedClientService;
 import com.example.spinlog.global.config.oauth2.handler.OAuth2LoginSuccessHandler;
+import com.example.spinlog.global.config.oauth2.handler.OAuth2LogoutHandler;
+import com.example.spinlog.global.config.oauth2.handler.OAuth2LogoutSuccessHandler;
 import com.example.spinlog.user.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,10 +24,13 @@ public class SecurityConfig {
     private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
     private final JdbcTemplate jdbcTemplate;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LogoutHandler oAuth2LogoutHandler;
+    private final OAuth2LogoutSuccessHandler oAuth2LogoutSuccessHandler;
 
     /*
     TODO oauth2Login() 관련
         3. 로그아웃을 한 뒤 다시 로그인을 하면 자동 로그인이 되지 않게
+            - 참고: https://docs.spring.io/spring-security/reference/servlet/authentication/logout.html
         5. cors 설정
      */
     @Bean
@@ -51,10 +56,16 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/")
+                        .logoutUrl("/api/users/logout")
+                        .addLogoutHandler(oAuth2LogoutHandler)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .clearAuthentication(true)
+                        .logoutSuccessHandler(oAuth2LogoutSuccessHandler)
+                        .permitAll()
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/oauth2/**", "/login/**").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "api/users/logout-result").permitAll()
                         .anyRequest().authenticated()
                 );
 
