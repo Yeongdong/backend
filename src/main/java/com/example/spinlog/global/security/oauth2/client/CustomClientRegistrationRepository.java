@@ -1,4 +1,4 @@
-package com.example.spinlog.global.config.oauth2;
+package com.example.spinlog.global.security.oauth2.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

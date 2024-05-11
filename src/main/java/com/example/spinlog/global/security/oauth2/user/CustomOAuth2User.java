@@ -1,4 +1,4 @@
-package com.example.spinlog.user.security.dto;
+package com.example.spinlog.global.security.oauth2.user;
 
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -1,6 +1,5 @@
-package com.example.spinlog.global.config.oauth2.handler;
+package com.example.spinlog.global.security.oauth2.handler.logout;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;

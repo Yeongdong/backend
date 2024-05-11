@@ -1,4 +1,4 @@
-package com.example.spinlog.global.config.oauth2;
+package com.example.spinlog.global.security.oauth2.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;

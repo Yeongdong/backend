@@ -1,6 +1,6 @@
-package com.example.spinlog.global.config.oauth2.handler;
+package com.example.spinlog.global.security.oauth2.handler.logout;
 
-import com.example.spinlog.user.security.dto.CustomOAuth2User;
+import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

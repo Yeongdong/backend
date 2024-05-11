@@ -1,6 +1,6 @@
-package com.example.spinlog.user.security.dto.impl;
+package com.example.spinlog.global.security.oauth2.user.impl;
 
-import com.example.spinlog.user.security.dto.OAuth2Response;
+import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
 
 import java.util.Map;
 

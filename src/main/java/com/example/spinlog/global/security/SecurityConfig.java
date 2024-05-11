@@ -1,11 +1,11 @@
-package com.example.spinlog.global.config;
+package com.example.spinlog.global.security;
 
-import com.example.spinlog.global.config.oauth2.CustomClientRegistrationRepository;
-import com.example.spinlog.global.config.oauth2.CustomOAuth2AuthorizedClientService;
-import com.example.spinlog.global.config.oauth2.handler.OAuth2LoginSuccessHandler;
-import com.example.spinlog.global.config.oauth2.handler.OAuth2LogoutHandler;
-import com.example.spinlog.global.config.oauth2.handler.OAuth2LogoutSuccessHandler;
-import com.example.spinlog.user.security.service.CustomOAuth2UserService;
+import com.example.spinlog.global.security.oauth2.client.CustomClientRegistrationRepository;
+import com.example.spinlog.global.security.oauth2.client.CustomOAuth2AuthorizedClientService;
+import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginSuccessHandler;
+import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutHandler;
+import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutSuccessHandler;
+import com.example.spinlog.global.security.oauth2.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -3,7 +3,7 @@ package com.example.spinlog.user.controller;
 import com.example.spinlog.global.response.ApiResponseWrapper;
 import com.example.spinlog.global.response.ResponseUtils;
 import com.example.spinlog.user.dto.response.LoginResponseDto;
-import com.example.spinlog.user.security.dto.CustomOAuth2User;
+import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

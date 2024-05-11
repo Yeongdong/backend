@@ -1,12 +1,12 @@
-package com.example.spinlog.user.security.service;
+package com.example.spinlog.global.security.oauth2.service;
 
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
-import com.example.spinlog.user.security.dto.CustomOAuth2User;
-import com.example.spinlog.user.security.dto.OAuth2Response;
-import com.example.spinlog.user.security.dto.impl.GoogleResponse;
-import com.example.spinlog.user.security.dto.impl.KakaoResponse;
-import com.example.spinlog.user.security.dto.impl.NaverResponse;
+import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
+import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
+import com.example.spinlog.global.security.oauth2.user.impl.GoogleResponse;
+import com.example.spinlog.global.security.oauth2.user.impl.KakaoResponse;
+import com.example.spinlog.global.security.oauth2.user.impl.NaverResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
