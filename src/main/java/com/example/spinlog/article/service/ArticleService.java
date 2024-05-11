@@ -54,7 +54,7 @@ public class ArticleService {
         log.info("ID {}의 게시글이 성공적으로 삭제되었습니다.", id);
     }
 
-    private Article findArticleById(Long id) {
+    public Article findArticleById(Long id) {
         return articleRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("ID " + id + "에 해당하는 게시글을 찾을 수 없습니다."));
     }

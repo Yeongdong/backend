@@ -70,4 +70,8 @@ public class Article extends BaseTimeEntity {
         this.amount = updateArticle.getAmount();
         this.registerType = RegisterType.valueOf(updateArticle.getRegisterType());
     }
+
+    public void addAiComment(String aiComment) {
+        this.aiComment = aiComment;
+    }
 }
