@@ -7,9 +7,6 @@ build/
 
 src/main/generated
 
-### openAI apiKey (추가) ###
-src/main/resources/openai.yml
-
 ### local profile (추가) ###
 src/main/resources/application-local.yml
 

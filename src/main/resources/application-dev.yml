@@ -1,5 +1,7 @@
 env.data: dev
 
+apiKey: ${secret_apiKey}
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -8,7 +10,7 @@ spring:
     password: ${mysql_password}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     open-in-view: false
   output:
     ansi:
