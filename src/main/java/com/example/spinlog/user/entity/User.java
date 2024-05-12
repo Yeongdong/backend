@@ -59,7 +59,7 @@ public class User extends BaseTimeEntity {
         this.authenticationName = authenticationName;
     }
 
-    public void changeProfile(String email) {
+    public void change(String email) {
         this.email = email;
     }
 }
