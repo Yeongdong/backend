@@ -11,30 +11,23 @@ import static org.springframework.security.oauth2.core.oidc.IdTokenClaimNames.SU
 @Component
 public class SocialClientRegistration {
 
-    @Value("${client_id.kakao}")
-    private String kakaoClientId;
+    @Value("${base-url}") private String baseUrl;
 
-    @Value("${client_secret.kakao}")
-    private String kakaoClientSecret;
+    @Value("${client-id.kakao}") private String kakaoClientId;
+    @Value("${client-secret.kakao}") private String kakaoClientSecret;
 
-    @Value("${client_id.naver}")
-    private String naverClientId;
+    @Value("${client-id.naver}") private String naverClientId;
+    @Value("${client-secret.naver}") private String naverClientSecret;
 
-    @Value("${client_secret.naver}")
-    private String naverClientSecret;
-
-    @Value("${client_id.google}")
-    private String googleClientId;
-
-    @Value("${client_secret.google}")
-    private String googleClientSecret;
+    @Value("${client-id.google}") private String googleClientId;
+    @Value("${client-secret.google}") private String googleClientSecret;
 
     public ClientRegistration kakaoClientRegistration() {
 
         return ClientRegistration.withRegistrationId("kakao")
                 .clientId(kakaoClientId)
                 .clientSecret(kakaoClientSecret)
-                .redirectUri("http://localhost:8080/login/oauth2/code/kakao")
+                .redirectUri(baseUrl + "/login/oauth2/code/kakao")
                 .clientAuthenticationMethod(CLIENT_SECRET_POST)
                 .authorizationGrantType(AUTHORIZATION_CODE)
                 .scope("account_email")
@@ -50,7 +43,7 @@ public class SocialClientRegistration {
         return ClientRegistration.withRegistrationId("naver")
                 .clientId(naverClientId)
                 .clientSecret(naverClientSecret)
-                .redirectUri("http://localhost:8080/login/oauth2/code/naver")
+                .redirectUri(baseUrl + "/login/oauth2/code/naver")
                 .authorizationGrantType(AUTHORIZATION_CODE)
                 .scope("email")
                 .authorizationUri("https://nid.naver.com/oauth2.0/authorize")
@@ -65,7 +58,7 @@ public class SocialClientRegistration {
         return ClientRegistration.withRegistrationId("google")
                 .clientId(googleClientId)
                 .clientSecret(googleClientSecret)
-                .redirectUri("http://localhost:8080/login/oauth2/code/google")
+                .redirectUri(baseUrl + "/login/oauth2/code/google")
                 .authorizationGrantType(AUTHORIZATION_CODE)
                 .scope("email")
                 .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
