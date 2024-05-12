@@ -62,4 +62,11 @@ public class User extends BaseTimeEntity {
     public void change(String email) {
         this.email = email;
     }
+
+    public void change(String mbti, String gender, Integer budget) {
+        this.mbti = Mbti.valueOf(mbti);
+        this.gender = Gender.valueOf(gender);
+        this.budget = budget;
+    }
+
 }
