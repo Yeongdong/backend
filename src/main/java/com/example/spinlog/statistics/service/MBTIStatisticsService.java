@@ -9,7 +9,7 @@ import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
 import com.example.spinlog.statistics.repository.dto.MemoDto;
-import com.example.spinlog.statistics.required_have_to_delete.UserInfoService;
+import com.example.spinlog.statistics.loginService.AuthenticatedUserService;
 import com.example.spinlog.user.entity.Mbti;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,13 +28,13 @@ import static java.util.stream.Collectors.groupingBy;
 public class MBTIStatisticsService {
     private final MBTIStatisticsRepository mbtiStatisticsRepository;
     private final WordExtractionService wordExtractionService;
-    private final UserInfoService userInfoService;
+    private final AuthenticatedUserService authenticatedUserService;
     private final int PERIOD_CRITERIA = 90;
 
-    public MBTIStatisticsService(MBTIStatisticsRepository mbtiStatisticsRepository, WordExtractionService wordExtractionService, UserInfoService userInfoService) {
+    public MBTIStatisticsService(MBTIStatisticsRepository mbtiStatisticsRepository, WordExtractionService wordExtractionService, AuthenticatedUserService authenticatedUserService) {
         this.mbtiStatisticsRepository = mbtiStatisticsRepository;
         this.wordExtractionService = wordExtractionService;
-        this.userInfoService = userInfoService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     public MBTIEmotionAmountAverageResponse getAmountAveragesEachMBTIAndEmotionLast90Days(
@@ -44,7 +44,7 @@ public class MBTIStatisticsService {
         List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
 
         return MBTIEmotionAmountAverageResponse.builder()
-                .mbti(userInfoService.getUserMBTI())
+                .mbti(authenticatedUserService.getUserMBTI())
                 .mbtiEmotionAmountAverages(
                         dtos.stream()
                                 .collect(
@@ -63,7 +63,7 @@ public class MBTIStatisticsService {
         List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
 
         return MBTIDailyAmountSumResponse.builder()
-                .mbti(userInfoService.getUserMBTI())
+                .mbti(authenticatedUserService.getUserMBTI())
                 .mbtiDailyAmountSums(
                         dtos.stream()
                                 .collect(
@@ -82,7 +82,7 @@ public class MBTIStatisticsService {
         List<MemoDto> memos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(Mbti.NONE.toString(), startDate, today);
 
         // 최근 90일 동안 나와 MBTI가 같은 유저가 적은 메모의 빈도수 측정
-        Mbti mbti = userInfoService.getUserMBTI();
+        Mbti mbti = authenticatedUserService.getUserMBTI();
 
         if(isNone(mbti)){
             return MBTIWordFrequencyResponse.builder()
@@ -143,7 +143,7 @@ public class MBTIStatisticsService {
             RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         return MBTISatisfactionAverageResponse.builder()
-                .mbti(userInfoService.getUserMBTI())
+                .mbti(authenticatedUserService.getUserMBTI())
                 .mbtiSatisfactionAverages(
                         mbtiStatisticsRepository
                                 .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(

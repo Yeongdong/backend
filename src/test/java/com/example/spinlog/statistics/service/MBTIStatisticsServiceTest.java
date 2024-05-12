@@ -9,7 +9,7 @@ import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
 import com.example.spinlog.statistics.repository.dto.MemoDto;
-import com.example.spinlog.statistics.required_have_to_delete.UserInfoService;
+import com.example.spinlog.statistics.loginService.AuthenticatedUserService;
 import com.example.spinlog.user.entity.Mbti;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.*;
@@ -24,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +38,7 @@ class MBTIStatisticsServiceTest {
     @Mock
     MBTIStatisticsRepository mbtiStatisticsRepository;
     @Mock
-    UserInfoService userInfoService;
+    AuthenticatedUserService authenticatedUserService;
 
     @InjectMocks
     MBTIStatisticsService statisticsService;
@@ -90,7 +89,7 @@ class MBTIStatisticsServiceTest {
 
             when(mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(any(), any(), any()))
                     .thenReturn(returned);
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.ISTJ);
 
             // when
@@ -177,7 +176,7 @@ class MBTIStatisticsServiceTest {
             );
             when(mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(any(), any(), any()))
                     .thenReturn(returned);
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.ISTJ);
 
             // when
@@ -226,7 +225,7 @@ class MBTIStatisticsServiceTest {
         void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
             LocalDate now = LocalDate.now();
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.NONE);
 
             // when
@@ -241,49 +240,25 @@ class MBTIStatisticsServiceTest {
         }
 
         @Test
-        void 레포지토리에게_MBTI_파라미터로_로그인_한_유저의_MBTI와_NONE을_전달한다() throws Exception {
-            // given
-            Mbti userMBTI = Mbti.ISTJ;
-            when(userInfoService.getUserMBTI())
-                    .thenReturn(userMBTI);
-
-            // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
-
-            // then
-            verify(mbtiStatisticsRepository, times(1))
-                    .getAllMemosByMBTIBetweenStartDateAndEndDate(
-                            eq(Mbti.NONE.toString()),
-                            any(),
-                            any());
-            verify(mbtiStatisticsRepository, times(1))
-                    .getAllMemosByMBTIBetweenStartDateAndEndDate(
-                            eq(userMBTI.toString()),
-                            any(),
-                            any());
-        }
-
-        @Test
         void UserInfoService로부터_유효하지_않은_MBTI를_받았다면_레포지토리에게_전체_유저들에_대한_메모만_요청한다() throws Exception {
             // given
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.NONE);
 
             // when
             statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
 
             // then
-            verify(mbtiStatisticsRepository, times(1)) // 호출 횟수 검증
-                    .getAllMemosByMBTIBetweenStartDateAndEndDate(any(), any(), any());
-            verify(mbtiStatisticsRepository) // 인자 맞는지 검증
+            verify(mbtiStatisticsRepository)
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(eq(Mbti.NONE.toString()), any(), any());
+            verifyNoMoreInteractions(mbtiStatisticsRepository);
         }
 
         @Test
         @DisplayName("UserInfoService로부터 로그인 한 유저의 MBTI를 받아서, 레포지토리에게 전체 유저들의 메모와, 로그인 한 유저의 MBTI에 해당하는 유저들의 메모, 데이터를 총 2번 요청한다")
         void requestDataToRepositoryTest() throws Exception {
             // given
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.ISTJ);
 
             // when
@@ -314,7 +289,7 @@ class MBTIStatisticsServiceTest {
 
             when(mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(any(), any(), any()))
                     .thenReturn(memos);
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.NONE);
 
             // when
@@ -332,14 +307,17 @@ class MBTIStatisticsServiceTest {
                     .toList();
 
             verify(wordExtractionService)
-                    .analyzeWords(argThat(argument ->
-                            areListsEqualIgnoringOrder(argument, flattedMemos)));
+                    .analyzeWords(argThat(argument -> {
+                        assertThat(argument)
+                                .containsExactlyInAnyOrderElementsOf(flattedMemos);
+                        return true;
+                    }));
         }
 
         @Test
         void WordExtractionService로부터_받은_데이터와_로그인_한_유저의_MBTI를_반환한다() throws Exception {
             // given
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.ISTJ);
             List<WordFrequency> returnedByWordExtractionService = List.of(
                     WordFrequency.builder()
@@ -412,7 +390,7 @@ class MBTIStatisticsServiceTest {
                     .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
                             any(),any(),any()))
                     .thenReturn(returned);
-            when(userInfoService.getUserMBTI())
+            when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.ISTJ);
 
 
@@ -425,15 +403,5 @@ class MBTIStatisticsServiceTest {
             assertThat(response.getMbtiSatisfactionAverages()).isEqualTo(returned);
         }
 
-    }
-
-    private boolean areListsEqualIgnoringOrder(List<String> l1, List<String> l2) {
-        return l1.stream()
-                .sorted()
-                .toList()
-                .equals(
-                        l2.stream()
-                                .sorted()
-                                .toList());
     }
 }

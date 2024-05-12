@@ -519,7 +519,7 @@ class GenderStatisticsRepositoryTest {
         }
 
         @Test
-        void 입력한_성별을_가지고_있는_유저들의_메모만_반환한다() throws Exception {
+        void 입력받은_성별에_해당하는_유저들의_메모만_반환한다() throws Exception {
             // given
             String survivedContent = "survivedContent";
             String filteredContent = "filteredContent";

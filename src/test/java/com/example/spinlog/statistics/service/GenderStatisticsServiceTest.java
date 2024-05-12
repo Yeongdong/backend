@@ -269,8 +269,11 @@ class GenderStatisticsServiceTest {
                                     m.getImprovements()))
                     .toList();
             verify(wordExtractionService, times(2))
-                    .analyzeWords(argThat((argument) ->
-                            areListsEqualIgnoringOrder(argument, flattedMemos)));
+                    .analyzeWords(argThat(argument -> {
+                        assertThat(argument)
+                                .containsExactlyInAnyOrderElementsOf(flattedMemos);
+                        return true;
+                    }));
         }
         
         @Test
@@ -350,15 +353,5 @@ class GenderStatisticsServiceTest {
             // then
             assertThat(response).isEqualTo(returned);
         }
-    }
-
-    private boolean areListsEqualIgnoringOrder(List<String> l1, List<String> l2) {
-        return l1.stream()
-                .sorted()
-                .toList()
-                .equals(
-                        l2.stream()
-                                .sorted()
-                                .toList());
     }
 }
