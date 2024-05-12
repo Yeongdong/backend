@@ -2,6 +2,18 @@ env.data: dev
 
 apiKey: ${secret_apiKey}
 
+base-url: ${base_url}
+
+client-id:
+  kakao: ${kakao_client_id}
+  naver: ${naver_client_id}
+  google: ${google_client_id}
+
+client-secret:
+  kakao: ${kakao_client_secret}
+  naver: ${naver_client_secret}
+  google: ${google_client_secret}
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
