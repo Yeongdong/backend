@@ -7,10 +7,10 @@ import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.global.entity.BaseTimeEntity;
 import com.example.spinlog.statistics.entity.MBTIFactor;
 import com.example.spinlog.statistics.repository.dto.*;
-import com.example.spinlog.statistics.required_have_to_delete.UserRepository;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
+import com.example.spinlog.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -66,13 +66,13 @@ class GenderStatisticsRepositoryTest {
     public void createTwoUserToDivideFilteringResultAndLocalDateRange() {
         survivedUser = User.builder()
                 .email("survived@email")
-                .name("survivedUser")
+                .authenticationName("survivedUser")
                 .mbti(Mbti.ISTJ)
                 .gender(survivedGender)
                 .build();
         filteredUser = User.builder()
                 .email("filtered@email")
-                .name("filteredUser")
+                .authenticationName("filteredUser")
                 .mbti(Mbti.ENFP)
                 .gender(filteredGender) // 정반대의 Gender 입력 -> 이 gender는 필터링 되는 gender
                 .build();

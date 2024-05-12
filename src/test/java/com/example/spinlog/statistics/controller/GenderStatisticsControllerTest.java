@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles("test")
 @WebMvcTest(GenderStatisticsController.class)
+@WithMockUser
 @MockBean(JpaMetamodelMappingContext.class) // @EnableJpaAuditing 때문에 추가함 TODO (이 어노테이션을 configuration으로 분리하면 없앨 수 있음)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class GenderStatisticsControllerTest {

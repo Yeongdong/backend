@@ -9,10 +9,10 @@ import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
 import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
 import com.example.spinlog.statistics.repository.dto.MBTISatisfactionAverageDto;
 import com.example.spinlog.statistics.repository.dto.MemoDto;
-import com.example.spinlog.statistics.required_have_to_delete.UserRepository;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
+import com.example.spinlog.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -81,13 +81,13 @@ class MBTIStatisticsRepositoryTest {
     public void createTwoUserToDivideFilteringResultAndLocalDateRange() {
         survivedUser = User.builder()
                 .email("survived@email")
-                .name("survivedUser")
+                .authenticationName("survivedUser")
                 .mbti(survivedMBTI)
                 .gender(Gender.MALE)
                 .build();
         filteredUser = User.builder()
                 .email("filtered@email")
-                .name("filteredUser")
+                .authenticationName("filteredUser")
                 .mbti(filteredMBTI) // 정반대의 MBTI 입력 -> 이 MBTI는 필터링 되는 MBTI
                 .gender(Gender.FEMALE)
                 .build();
