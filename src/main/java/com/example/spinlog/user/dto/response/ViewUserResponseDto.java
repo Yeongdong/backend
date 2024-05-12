@@ -1,12 +1,13 @@
 package com.example.spinlog.user.dto.response;
 
 import com.example.spinlog.user.entity.User;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
 @ToString

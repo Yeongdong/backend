@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class User extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +38,11 @@ public class User extends BaseTimeEntity {
     private String email;
 
     @Enumerated(EnumType.STRING) //TODO DB 에서 디폴트값 NONE 으로 설정
-    private Mbti mbti;
+    @Column(nullable = false)
+    private Mbti mbti = Mbti.NONE;
 
     @Enumerated(EnumType.STRING) //TODO DB 에서 디폴트값 NONE 으로 설정
+    @Column(nullable = false)
     private Gender gender;
 
     @Min(0) @Max(100_000_000) //TODO validation 코드를 entity 에 넣어도 되는지
@@ -52,6 +56,16 @@ public class User extends BaseTimeEntity {
 
     @Builder //Builder 에서 id 를 제외하기 위해, 클래스 레벨이 아닌 생성자 레벨에 @Builder 사용
     public User(String email, Mbti mbti, Gender gender, Integer budget, String authenticationName) {
+        if (mbti == null) {
+            mbti = Mbti.NONE;
+        }
+        if (gender == null) {
+            gender = Gender.NONE;
+        }
+        if (budget == null) {
+            budget = 0;
+        }
+
         this.email = email;
         this.mbti = mbti;
         this.gender = gender;
