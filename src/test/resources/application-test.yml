@@ -1,7 +1,20 @@
-env:
-  data: "test"
+apiKey: "test-key"
+
+base-url: "test-url"
+
+client-id:
+  kakao: "test-kakao"
+  naver: "test-naver"
+  google: "test-google"
+
+client-secret:
+  kakao: "test-kakao"
+  naver: "test-naver"
+  google: "test-google"
 
 spring:
+  datasource:
+    url: jdbc:h2:mem:test;MODE=MySQL
   jpa:
     hibernate:
       ddl-auto: create
@@ -14,13 +27,9 @@ spring:
       enabled: always
 
 logging.level:
-  org.hibernate.SQL: debug
+  org.hibernate:
+    SQL: debug
+    orm.jdbc.bind: trace
   com:
     example:
-      devexample:
-        dev: trace
-
-mybatis:
-  type-aliases-package: com.example.spinlog.dev
-  configuration:
-    map-underscore-to-camel-case: true
+      spinlog: trace

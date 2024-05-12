@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +27,8 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LogoutHandler oAuth2LogoutHandler;
     private final OAuth2LogoutSuccessHandler oAuth2LogoutSuccessHandler;
+
+    private final CorsConfig corsConfig;
 
     /*
     TODO oauth2Login() 관련
@@ -67,7 +70,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/oauth2/**", "/login/**", "api/users/logout-result").permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .addFilterBefore(corsConfig.corsFilter(), LogoutFilter.class);
 
         return http.build();
     }
