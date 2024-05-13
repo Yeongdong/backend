@@ -16,7 +16,7 @@ public class KomoranService {
     private final Komoran komoran;
 
     public KomoranService() {
-        this.komoran = new Komoran(DEFAULT_MODEL.FULL);
+        this.komoran = new Komoran(DEFAULT_MODEL.LIGHT);
     }
 
     public List<Token> getTokens(List<String> memos) {
