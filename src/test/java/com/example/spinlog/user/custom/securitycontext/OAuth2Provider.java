@@ -1,4 +1,4 @@
-package com.example.spinlog.custom.securitycontext;
+package com.example.spinlog.user.custom.securitycontext;
 
 import lombok.Getter;
 

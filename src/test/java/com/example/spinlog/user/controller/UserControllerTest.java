@@ -1,6 +1,6 @@
 package com.example.spinlog.user.controller;
 
-import com.example.spinlog.custom.securitycontext.WithMockCustomOAuth2User;
+import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
@@ -18,8 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.example.spinlog.custom.securitycontext.OAuth2Provider.GOOGLE;
-import static com.example.spinlog.custom.securitycontext.OAuth2Provider.KAKAO;
+import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.GOOGLE;
+import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
 import static net.minidev.json.JSONValue.toJSONString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

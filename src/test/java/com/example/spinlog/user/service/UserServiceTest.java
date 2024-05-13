@@ -1,7 +1,7 @@
 package com.example.spinlog.user.service;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
-import com.example.spinlog.custom.securitycontext.WithMockCustomOAuth2User;
+import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
 import com.example.spinlog.user.entity.Gender;
@@ -19,8 +19,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
-import static com.example.spinlog.custom.securitycontext.OAuth2Provider.KAKAO;
-import static com.example.spinlog.custom.securitycontext.OAuth2Provider.NAVER;
+import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
+import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.NAVER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

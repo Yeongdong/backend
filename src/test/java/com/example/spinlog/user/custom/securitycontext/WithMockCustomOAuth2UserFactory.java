@@ -1,4 +1,4 @@
-package com.example.spinlog.custom.securitycontext;
+package com.example.spinlog.user.custom.securitycontext;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
@@ -14,9 +14,6 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.spinlog.custom.securitycontext.OAuth2Provider.KAKAO;
-import static com.example.spinlog.custom.securitycontext.OAuth2Provider.NAVER;
-
 public class WithMockCustomOAuth2UserFactory implements WithSecurityContextFactory<WithMockCustomOAuth2User> {
 
     @Override
@@ -26,12 +23,12 @@ public class WithMockCustomOAuth2UserFactory implements WithSecurityContextFacto
         OAuth2Response oAuth2Response;
         Map<String, Object> attribute = new HashMap<>();
 
-        if (customUser.provider() == KAKAO) {
+        if (customUser.provider() == OAuth2Provider.KAKAO) {
             attribute.put("id", customUser.providerMemberId());
             attribute.put("kakao_account", Map.of("email", customUser.email()));
 
             oAuth2Response = KakaoResponse.of(attribute);
-        } else if (customUser.provider() == NAVER) {
+        } else if (customUser.provider() == OAuth2Provider.NAVER) {
             attribute.put("response", Map.of(
                     "id", customUser.providerMemberId(),
                     "email", customUser.email()
