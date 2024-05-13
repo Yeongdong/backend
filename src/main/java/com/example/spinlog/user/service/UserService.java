@@ -7,10 +7,12 @@ import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    @PreAuthorize("authentication")
     public ViewUserResponseDto findUser() {
         String authenticationName = SecurityUtils.getAuthenticationName();
 
@@ -28,6 +31,7 @@ public class UserService {
     }
 
     @Transactional
+    @PreAuthorize("authentication")
     public void updateUserInfo(UpdateUserRequestDto requestDto) {
         String authenticationName1 = SecurityUtils.getAuthenticationName();
 
