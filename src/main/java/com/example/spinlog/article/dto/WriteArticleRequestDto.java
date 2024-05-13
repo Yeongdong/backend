@@ -3,6 +3,7 @@ package com.example.spinlog.article.dto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
+import com.example.spinlog.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,8 +30,9 @@ public class WriteArticleRequestDto {
      *
      * @return 변환된 Article 엔티티
      */
-    public Article toEntity() {
+    public Article toEntity(User user) {
         return Article.builder()
+                .user(user)
                 .content(content)
                 .spendDate(LocalDateTime.parse(spendDate))
                 .event(event)
