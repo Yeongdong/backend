@@ -71,7 +71,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "api/users/logout-result").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "/api/authentication/logout-result").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(corsConfig.corsFilter(), LogoutFilter.class);

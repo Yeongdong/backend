@@ -19,12 +19,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@DynamicInsert
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
@@ -37,11 +41,13 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String email;
 
-    @Enumerated(EnumType.STRING) //TODO DB 에서 디폴트값 NONE 으로 설정
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'NONE'")
     @Column(nullable = false)
-    private Mbti mbti = Mbti.NONE;
+    private Mbti mbti;
 
-    @Enumerated(EnumType.STRING) //TODO DB 에서 디폴트값 NONE 으로 설정
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'NONE'")
     @Column(nullable = false)
     private Gender gender;
 
@@ -56,16 +62,6 @@ public class User extends BaseTimeEntity {
 
     @Builder //Builder 에서 id 를 제외하기 위해, 클래스 레벨이 아닌 생성자 레벨에 @Builder 사용
     public User(String email, Mbti mbti, Gender gender, Integer budget, String authenticationName) {
-        if (mbti == null) {
-            mbti = Mbti.NONE;
-        }
-        if (gender == null) {
-            gender = Gender.NONE;
-        }
-        if (budget == null) {
-            budget = 0;
-        }
-
         this.email = email;
         this.mbti = mbti;
         this.gender = gender;
