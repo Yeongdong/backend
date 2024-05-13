@@ -26,7 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("회원 정보 비즈니스 로직 - 카카오")
+@DisplayName("회원 정보 비즈니스 로직")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
 class UserServiceTest {
@@ -35,12 +35,12 @@ class UserServiceTest {
 
     @Mock private UserRepository userRepository;
 
-    @DisplayName("회원 정보 조회 - 카카오")
+    @DisplayName("회원 정보 조회")
     @Test
     @WithMockCustomOAuth2User(
             provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
     )
-    void givenKakaoUser_whenFindUser_thenReturnsCorrectly() {
+    void givenUser_whenFindUser_thenReturnsCorrectly() {
         // Given
         CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -73,7 +73,7 @@ class UserServiceTest {
     @WithMockCustomOAuth2User(
             provider = NAVER, email = "naveremail@kakao.com", providerMemberId = "abcde3456", isFirstLogin = false
     )
-    void givenKakaoUser_whenUpdateUserInfo_thenReturnsCorrectly() {
+    void givenUser_whenUpdateUserInfo_thenReturnsCorrectly() {
         // Given
         CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
