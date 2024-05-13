@@ -23,29 +23,28 @@ public class ArticleService {
 
 
     @Transactional
-    public WriteArticleResponseDTO createArticle(WriteArticleRequestDTO requestDTO) {
-        Article articleEntity = requestDTO.toEntity();
+    public WriteArticleResponseDto createArticle(WriteArticleRequestDto requestDto) {
+        Article articleEntity = requestDto.toEntity();
         Article saveArticle = articleRepository.save(articleEntity);
         log.info("게시글이 성공적으로 저장되었습니다. ID: {}", saveArticle.getArticleId());
-        return saveArticle.toDtoForWrite(modelMapper);
+        return WriteArticleResponseDto.from(saveArticle, modelMapper);
     }
 
     // 게시글 리스트 => 검색어 추가 수정 필요
-    public Page<ViewArticleResponseDTO> listArticles(Pageable pageable, SearchCond searchCond) {
+    public Page<ViewArticleListResponseDto> listArticles(Pageable pageable, SearchCond searchCond) {
         return articleRepository.search(searchCond, pageable);
     }
 
-    public ViewArticleResponseDTO getArticle(Long id) {
-        Article article = findArticleById(id);
-        return article.toDtoForDetails(modelMapper);
+    public ViewArticleResponseDto getArticle(Long id) {
+        Article viewArticle = findArticleById(id);
+        return ViewArticleResponseDto.from(viewArticle, modelMapper);
     }
 
     @Transactional
-    public UpdateArticleResponseDTO updateArticle(Long id, UpdateArticleRequestDTO requestDTO) {
+    public void updateArticle(Long id, UpdateArticleRequestDto requestDto) {
         Article article = findArticleById(id);
-        article.modify(requestDTO);
+        article.update(requestDto);
         log.info("ID {}의 게시글이 업데이트되었습니다.", id);
-        return article.toDtoForUpdate(modelMapper);
     }
 
     @Transactional
@@ -55,7 +54,7 @@ public class ArticleService {
         log.info("ID {}의 게시글이 성공적으로 삭제되었습니다.", id);
     }
 
-    private Article findArticleById(Long id) {
+    public Article findArticleById(Long id) {
         return articleRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("ID " + id + "에 해당하는 게시글을 찾을 수 없습니다."));
     }

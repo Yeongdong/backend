@@ -8,6 +8,7 @@ import com.example.spinlog.article.repository.ArticleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 //import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import java.util.NoSuchElementException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ActiveProfiles("test")
 @Transactional
 @SpringBootTest
 public class ArticleServiceTest {
@@ -31,25 +33,24 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_작성_테스트() {
         // Given
-        WriteArticleRequestDTO requestDTO = WriteArticleRequestDTO.builder()
+        WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
                 .content("Test Thing")
+                .spendDate("2024-04-04T11:22:33")
                 .event("Test event")
                 .thought("Test thought")
                 .emotion("ANNOYED")
-                .result("Test result")
                 .satisfaction(5F)
                 .reason("Test Reason")
                 .improvements("Test Improvements")
-                .aiComment("Test AiComment")
                 .amount(100)
                 .registerType("SPEND")
                 .build();
 
         // When
-        WriteArticleResponseDTO responseDTO = articleService.createArticle(requestDTO);
+        WriteArticleResponseDto responseDto = articleService.createArticle(requestDto);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
     //    @Test
@@ -74,10 +75,10 @@ public class ArticleServiceTest {
         articleRepository.save(article);
 
         // When
-        ViewArticleResponseDTO responseDTO = articleService.getArticle(article.getArticleId());
+        ViewArticleResponseDto responseDto = articleService.getArticle(article.getArticleId());
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(responseDto).isNotNull();
     }
 
     @Test
@@ -98,16 +99,17 @@ public class ArticleServiceTest {
                 .registerType(RegisterType.SPEND)
                 .build();
         articleRepository.save(article);
-        UpdateArticleRequestDTO updateDTO = UpdateArticleRequestDTO.builder()
+        UpdateArticleRequestDto updateDto = UpdateArticleRequestDto.builder()
+                .spendDate("2024-05-05T12:34:56")
                 .emotion(Emotion.SAD.toString())
                 .registerType(RegisterType.SAVE.toString())
                 .build();
 
         // When
-        UpdateArticleResponseDTO responseDTO = articleService.updateArticle(article.getArticleId(), updateDTO);
+        articleService.updateArticle(article.getArticleId(), updateDto);
 
         // Then
-        assertThat(responseDTO).isNotNull();
+        assertThat(article.getEmotion()).isEqualTo(Emotion.SAD);
     }
 
     @Test

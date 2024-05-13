@@ -1,15 +1,17 @@
 package com.example.spinlog.global.exception;
 
+import com.example.spinlog.global.response.ApiResponseWrapper;
+import com.example.spinlog.global.response.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.NoSuchElementException;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
     /**
@@ -18,9 +20,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleNullPointerException(NullPointerException e) {
-        log.error("NullPointerException: {}", e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Requested resource is null");
+    public ApiResponseWrapper<Void> handleNullPointerException(NullPointerException e) {
+        return ResponseUtils.error("Requested resource is null");
     }
 
     /**
@@ -29,9 +30,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleNoSuchElementException(NoSuchElementException e) {
-        log.error("NoSuchElementException: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requested resource not found");
+    public ApiResponseWrapper<Void> handleNoSuchElementException(NoSuchElementException e) {
+        return ResponseUtils.error("Requested resource not found");
     }
 
     /**
@@ -40,9 +40,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.error("IllegalArgumentException: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input");
+    public ApiResponseWrapper<Void> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseUtils.error("Invalid input");
     }
 
     /**
@@ -51,8 +50,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleGenericException(Exception e) {
-        log.error("Exception: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+    public ApiResponseWrapper<Void> handleGenericException(Exception e) {
+        log.error(e.getMessage());
+        return ResponseUtils.error("An unexpected error occurred");
     }
 }
