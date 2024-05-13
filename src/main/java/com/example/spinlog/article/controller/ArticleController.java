@@ -4,10 +4,12 @@ import com.example.spinlog.article.dto.*;
 import com.example.spinlog.article.service.ArticleService;
 import com.example.spinlog.global.response.ApiResponseWrapper;
 import com.example.spinlog.global.response.ResponseUtils;
+import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,8 +26,9 @@ public class ArticleController {
      * @return 작성된 게시글 객체를 포함하는 ResponseEntity
      */
     @PostMapping
-    public ApiResponseWrapper<WriteArticleResponseDto> create(@RequestBody WriteArticleRequestDto article) {
-        WriteArticleResponseDto responseDto = articleService.createArticle(article);
+    public ApiResponseWrapper<WriteArticleResponseDto> create(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @RequestBody WriteArticleRequestDto article) {
+        String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
+        WriteArticleResponseDto responseDto = articleService.createArticle(userName, article);
         log.info("게시글 작성 성공");
         return ResponseUtils.ok(responseDto, "게시글 작성 성공");  // info 로그 삭제 여부에 따라 변수로 관리하던지 아니면 직접 문자열을 넣을지 판단 필요
     }
@@ -46,12 +49,13 @@ public class ArticleController {
     /**
      * 게시글 1개 조회
      *
-     * @param id 조회 요청 데이터 Id
+     * @param articleId 조회 요청 데이터 Id
      * @return 조회 게시글 객체를 포함하는 ResponseEntity
      */
-    @GetMapping("/{id}")
-    public ApiResponseWrapper<ViewArticleResponseDto> viewDetails(@PathVariable Long id) {
-        ViewArticleResponseDto responseDto = articleService.getArticle(id);
+    @GetMapping("/{articleId}")
+    public ApiResponseWrapper<ViewArticleResponseDto> viewDetails(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId) {
+        String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
+        ViewArticleResponseDto responseDto = articleService.getArticle(userName, articleId);
         log.info("게시글 1개 불러오기 성공");
         return ResponseUtils.ok(responseDto, "게시글 1개 불러오기 성공");
     }
@@ -59,13 +63,14 @@ public class ArticleController {
     /**
      * 게시글 수정
      *
-     * @param id               업데이트 요청 데이터 Id
+     * @param articleId               업데이트 요청 데이터 Id
      * @param updateRequestDTO 업데이트 요청 데이터
      * @return 업데이트 성공 메시지 ResponseEntity
      */
-    @PatchMapping("/{id}")
-    public ApiResponseWrapper<Void> updateArticle(@PathVariable Long id, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
-        articleService.updateArticle(id, updateRequestDTO);
+    @PatchMapping("/{articleId}")
+    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
+        String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
+        articleService.updateArticle(userName, articleId, updateRequestDTO);
         log.info("게시글 업데이트 성공");
         return ResponseUtils.ok("게시글 업데이트 성공");
     }
@@ -73,13 +78,14 @@ public class ArticleController {
     /**
      * 게시글 삭제
      *
-     * @param id 삭제 요청 데이터 Id
+     * @param articleId 삭제 요청 데이터 Id
      * @return 삭제 성공 메시지 ResponseEntity
      */
-    @DeleteMapping("/{id}")
-    public ApiResponseWrapper<Void> deleteArticle(@PathVariable Long id) {
-        articleService.deleteArticle(id);
-        log.info("ID {}의 게시글이 삭제되었습니다.", id);
+    @DeleteMapping("/{articleId}")
+    public ApiResponseWrapper<Void> deleteArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId) {
+        String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
+        articleService.deleteArticle(userName, articleId);
+        log.info("ID {}의 게시글이 삭제되었습니다.", articleId);
         return ResponseUtils.ok("게시글 삭제 성공");
     }
 }
