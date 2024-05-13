@@ -6,6 +6,8 @@ import com.example.spinlog.article.dto.WriteArticleRequestDto;
 import com.example.spinlog.article.dto.WriteArticleResponseDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.service.ArticleService;
+import com.example.spinlog.user.entity.User;
+import com.example.spinlog.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,11 +34,17 @@ class AiServiceTest {
     @Autowired
     private ArticleService articleService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     WriteArticleResponseDto writeArticleResponseDto;
 
     @BeforeEach
     void setUp() {
-        // 게시글 생성
+        User user = User.builder()
+                .authenticationName("test")
+                .build();
+
         WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
                 .content("투썸플레이스 아이스아메리카노")
                 .spendDate("2024-04-04T11:22:33")
@@ -49,12 +57,13 @@ class AiServiceTest {
                 .amount(5000)
                 .registerType("SPEND")
                 .build();
-        writeArticleResponseDto = articleService.createArticle(requestDto);
+
+        writeArticleResponseDto = articleService.createArticle(user.getAuthenticationName(), requestDto);
     }
 
     @AfterEach
     void tearDown() {
-        articleService.deleteArticle(writeArticleResponseDto.getArticleId());
+        articleService.deleteArticle("test", writeArticleResponseDto.getArticleId());
     }
 
     @Test

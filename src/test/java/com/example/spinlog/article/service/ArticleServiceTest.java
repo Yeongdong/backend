@@ -5,6 +5,7 @@ import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
+import com.example.spinlog.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +34,10 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_작성_테스트() {
         // Given
+        User user = User.builder()
+                .authenticationName("test")
+                .build();
+
         WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
                 .content("Test Thing")
                 .spendDate("2024-04-04T11:22:33")
@@ -47,7 +52,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        WriteArticleResponseDto responseDto = articleService.createArticle(requestDto);
+        WriteArticleResponseDto responseDto = articleService.createArticle(user.getAuthenticationName(), requestDto);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -70,12 +75,15 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_1개_조회_테스트() {
         // Given
+        User user = User.builder()
+                .authenticationName("test")
+                .build();
         Article article = Article.builder()
                 .build();
         articleRepository.save(article);
 
         // When
-        ViewArticleResponseDto responseDto = articleService.getArticle(article.getArticleId());
+        ViewArticleResponseDto responseDto = articleService.getArticle(user.getAuthenticationName(), article.getArticleId());
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -84,16 +92,22 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_조회_실패_테스트() {
         // Given
+        User user = User.builder()
+                .authenticationName("test")
+                .build();
         Long articleId = 999L; // 존재하지 않는 게시글 ID
 
         // Then
-        assertThatThrownBy(() -> articleService.getArticle(articleId))
+        assertThatThrownBy(() -> articleService.getArticle(user.getAuthenticationName(), articleId))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
     public void 게시글_수정_테스트() {
         // Given
+        User user = User.builder()
+                .authenticationName("test")
+                .build();
         Article article = Article.builder()
                 .emotion(Emotion.ANNOYED)
                 .registerType(RegisterType.SPEND)
@@ -106,7 +120,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        articleService.updateArticle(article.getArticleId(), updateDto);
+        articleService.updateArticle(user.getAuthenticationName(), article.getArticleId(), updateDto);
 
         // Then
         assertThat(article.getEmotion()).isEqualTo(Emotion.SAD);
@@ -115,12 +129,15 @@ public class ArticleServiceTest {
     @Test
     public void 게시글_삭제_테스트() {
         // Given
+        User user = User.builder()
+                .authenticationName("test")
+                .build();
         Article article = Article.builder()
                 .build();
         articleRepository.save(article);
 
         // When
-        articleService.deleteArticle(article.getArticleId());
+        articleService.deleteArticle(user.getAuthenticationName(), article.getArticleId());
 
         // Then
         assertThat(articleRepository.existsById(article.getArticleId())).isFalse();
