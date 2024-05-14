@@ -25,7 +25,14 @@ public class ResponseUtils {
         return ApiResponseWrapper.<T>builder()
                 .success(false)
                 .message(message)
-//                .data(requestDTO)
+                .build();
+    }
+
+    public static <T> ApiResponseWrapper<T> error(String message, T response) {
+        return ApiResponseWrapper.<T>builder()
+                .success(false)
+                .message(message)
+                .data(response)
                 .build();
     }
 }
