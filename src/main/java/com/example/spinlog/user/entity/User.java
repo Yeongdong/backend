@@ -18,14 +18,20 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@DynamicInsert
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class User extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,10 +41,14 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String email;
 
-    @Enumerated(EnumType.STRING) //TODO DB 에서 디폴트값 NONE 으로 설정
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'NONE'")
+    @Column(nullable = false)
     private Mbti mbti;
 
-    @Enumerated(EnumType.STRING) //TODO DB 에서 디폴트값 NONE 으로 설정
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'NONE'")
+    @Column(nullable = false)
     private Gender gender;
 
     @Min(0) @Max(100_000_000) //TODO validation 코드를 entity 에 넣어도 되는지
@@ -59,7 +69,14 @@ public class User extends BaseTimeEntity {
         this.authenticationName = authenticationName;
     }
 
-    public void changeProfile(String email) {
+    public void change(String email) {
         this.email = email;
     }
+
+    public void change(String mbti, String gender, Integer budget) {
+        this.mbti = Mbti.valueOf(mbti);
+        this.gender = Gender.valueOf(gender);
+        this.budget = budget;
+    }
+
 }
