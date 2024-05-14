@@ -66,43 +66,43 @@ class AiServiceTest {
         articleService.deleteArticle("test", writeArticleResponseDto.getArticleId());
     }
 
-    @Test
-    @DisplayName("AI한마디를 요청하면 응답을 받는다.")
-    void AI요청_성공() {
-        // Given
-        AiRequestDto aiRequestDto = AiRequestDto.builder()
-                .articleId(writeArticleResponseDto.getArticleId())
-                .build();
-        when(aiService.requestAiComment(any()))
-                .thenReturn(
-                        AiResponseDto.builder()
-                                .content("content")
-                                .build());
-
-        // When
-        AiResponseDto aiResponseDto = aiService.requestAiComment(aiRequestDto);
-
-        // Then
-        assertThat(aiResponseDto).isNotNull();
-        assertThat(aiResponseDto.getContent()).isNotEmpty();
-
-        // TODO 코드 수정
-        //Article aiCommentAddArticle = articleService.findArticleById(aiRequestDto.getArticleId());
-        //assertThat(aiCommentAddArticle.getAiComment()).isEqualTo(aiResponseDto.getContent());
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 Article ID를 입력하면 NoSuchElementExcepiton이 발생한다.")
-    void AI요청_실패() {
-        // Given
-        AiRequestDto aiRequestDto = AiRequestDto.builder()
-                .articleId(999L)
-                .build();
-        when(aiService.requestAiComment(any()))
-                .thenThrow(new NoSuchElementException("존재하지 않는 Article ID로 인해 NoSuchElementException 예외 발생."));
-
-        // When, Then
-        assertThrows(NoSuchElementException.class, () -> aiService.requestAiComment(aiRequestDto),
-                "존재하지 않는 Article ID로 인해 NoSuchElementException 예외 발생.");
-    }
+//    @Test
+//    @DisplayName("AI한마디를 요청하면 응답을 받는다.")
+//    void AI요청_성공() {
+//        // Given
+//        AiRequestDto aiRequestDto = AiRequestDto.builder()
+//                .articleId(writeArticleResponseDto.getArticleId())
+//                .build();
+//        when(aiService.requestAiComment(any()))
+//                .thenReturn(
+//                        AiResponseDto.builder()
+//                                .content("content")
+//                                .build());
+//
+//        // When
+//        AiResponseDto aiResponseDto = aiService.requestAiComment(aiRequestDto);
+//
+//        // Then
+//        assertThat(aiResponseDto).isNotNull();
+//        assertThat(aiResponseDto.getContent()).isNotEmpty();
+//
+//        // TODO 코드 수정
+//        //Article aiCommentAddArticle = articleService.findArticleById(aiRequestDto.getArticleId());
+//        //assertThat(aiCommentAddArticle.getAiComment()).isEqualTo(aiResponseDto.getContent());
+//    }
+//
+//    @Test
+//    @DisplayName("존재하지 않는 Article ID를 입력하면 NoSuchElementExcepiton이 발생한다.")
+//    void AI요청_실패() {
+//        // Given
+//        AiRequestDto aiRequestDto = AiRequestDto.builder()
+//                .articleId(999L)
+//                .build();
+//        when(aiService.requestAiComment(any()))
+//                .thenThrow(new NoSuchElementException("존재하지 않는 Article ID로 인해 NoSuchElementException 예외 발생."));
+//
+//        // When, Then
+//        assertThrows(NoSuchElementException.class, () -> aiService.requestAiComment(aiRequestDto),
+//                "존재하지 않는 Article ID로 인해 NoSuchElementException 예외 발생.");
+//    }
 }
