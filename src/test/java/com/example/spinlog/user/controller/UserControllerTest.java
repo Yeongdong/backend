@@ -80,8 +80,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.email").value(responseDto.getEmail()))
                 .andExpect(jsonPath("$.data.mbti").value(responseDto.getMbti()))
                 .andExpect(jsonPath("$.data.gender").value(responseDto.getGender()))
-                .andExpect(jsonPath("$.data.budget").value(responseDto.getBudget()))
-                .andDo(print());
+                .andExpect(jsonPath("$.data.budget").value(responseDto.getBudget()));
 
         verify(userService, times(1))
                 .findUser();
@@ -145,8 +144,7 @@ class UserControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("User 정보 저장에 성공했습니다."))
-                .andExpect(jsonPath("$.data").doesNotExist())
-                .andDo(print());
+                .andExpect(jsonPath("$.data").doesNotExist());
 
         verify(userService, times(1))
                 .updateUserInfo(any(UpdateUserRequestDto.class)); //여기서도 위와 마찬가지로 any()로 클래스 타입 일치 여부를 검사

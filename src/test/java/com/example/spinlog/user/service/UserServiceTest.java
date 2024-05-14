@@ -68,7 +68,7 @@ class UserServiceTest {
         verify(userRepository, times(1)).findByAuthenticationName(authenticationName);
     }
 
-    @DisplayName("회원 정보 저장 및 수정")
+    @DisplayName("회원 정보 저장 및 변경")
     @Test
     @WithMockCustomOAuth2User(
             provider = NAVER, email = "naveremail@kakao.com", providerMemberId = "abcde3456", isFirstLogin = false
