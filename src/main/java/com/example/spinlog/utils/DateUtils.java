@@ -11,6 +11,9 @@ public class DateUtils {
     private static final String DATE_PATTERN = "yyyyMMdd";
 
     public static LocalDate parseStringToDate(String dateString) {
+        if (dateString == null) {
+            return null;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
         return LocalDate.parse(dateString, formatter);
     }

@@ -32,11 +32,17 @@ public class ParameterParser {
 
     // 쉼표로 구분된 문자열을 리스트로 파싱하는 메서드
     public static List<String> parseCommaSeparatedString(String input) {
+        if (input == null) {
+            return Collections.emptyList();
+        }
         return parseAndTrim(input);
     }
 
     // 쉼표로 구분된 실수값을 리스트로 파싱하는 메서드
     public static List<Float> parseCommaSeparatedFloat(String input) {
+        if (input == null) {
+            return Collections.emptyList();
+        }
         return parseAndTrim(input).stream()
                 .map(Float::parseFloat)
                 .toList();
