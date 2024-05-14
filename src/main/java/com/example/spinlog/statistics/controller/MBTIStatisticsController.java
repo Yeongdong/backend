@@ -45,10 +45,13 @@ public class MBTIStatisticsController {
     }
 
     @GetMapping("/api/statistics/mbti/word/frequencies")
-    public ApiResponseWrapper<MBTIWordFrequencyResponse> getWordFrequencyLast90Days(){
+    public ApiResponseWrapper<MBTIWordFrequencyResponse> getWordFrequencyLast90Days(
+            @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
                 statisticsService
-                        .getWordFrequenciesLast90Days(LocalDate.now()),
+                        .getWordFrequenciesLast90Days(
+                                LocalDate.now(),
+                                RegisterType.valueOf(registerType)),
                 "MBTI별 단어 빈도수");
     }
 

@@ -133,7 +133,39 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getWordFrequenciesEachGenderLast90Days(any());
+                    .getWordFrequenciesEachGenderLast90Days(any(), any());
+        }
+
+        @Test
+        void registerType_쿼리_파라미터를_입력하지_않으면_defaultValue로_SPEND가_입력된다() throws Exception {
+            // when
+            mockMvc.perform(get("/api/statistics/gender/word/frequencies"));
+
+            // then
+            verify(genderStatisticsService)
+                    .getWordFrequenciesEachGenderLast90Days(any(), eq(RegisterType.SPEND));
+        }
+
+        @Test
+        void 올바르지_않은_registerType_쿼리_파라미터를_입력하면_400을_반환한다() throws Exception {
+            // given
+            String invalidRegisterType = "Invalid";
+
+            // when // then
+            mockMvc.perform(
+                            get("/api/statistics/gender/word/frequencies?registerType=" + invalidRegisterType))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"SPEND", "SAVE"})
+        void registerType_쿼리_파라미터로_SPEND나_SAVE를_입력해야_한다(String registerType) throws Exception {
+            // when
+            mockMvc.perform(get("/api/statistics/gender/word/frequencies?registerType=" + registerType));
+
+            // then
+            verify(genderStatisticsService, times(1))
+                    .getWordFrequenciesEachGenderLast90Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 

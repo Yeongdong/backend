@@ -14,6 +14,6 @@ public class OAuth2LogoutSuccessHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         request.getSession().setAttribute("redirected", true);
-        response.sendRedirect("/api/users/logout-result");
+        response.sendRedirect("/api/authentication/logout-result");
     }
 }

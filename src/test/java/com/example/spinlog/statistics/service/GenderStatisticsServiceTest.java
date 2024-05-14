@@ -208,17 +208,34 @@ class GenderStatisticsServiceTest {
 
     @Nested
     class getWordFrequenciesEachGenderLast90Days {
+        @ParameterizedTest
+        @ValueSource(strings = {"SPEND", "SAVE"})
+        void RegisterType_파라미터를_그대로_레포지토리에게_전달한다(RegisterType registerType) throws Exception {
+            // when
+            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now(), registerType);
+
+            // then
+            verify(genderStatisticsRepository, times(2))
+                    .getAllMemosByGenderBetweenStartDateAndEndDate(
+                            eq(registerType),
+                            any(),
+                            any(),
+                            any()
+                    );
+        }
+
         @Test
         void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
             LocalDate now = LocalDate.now();
 
             // when
-            statisticsService.getWordFrequenciesEachGenderLast90Days(now);
+            statisticsService.getWordFrequenciesEachGenderLast90Days(now, null);
 
             // then
             verify(genderStatisticsRepository, times(2))
                     .getAllMemosByGenderBetweenStartDateAndEndDate(
+                            any(),
                             any(),
                             eq(now.minusDays(90)),
                             eq(now));
@@ -227,16 +244,18 @@ class GenderStatisticsServiceTest {
         @Test
         void 레포지토리에게_MALE에_대한_메모_정보와_FEMALE에_대한_메모_정보를_요청한다() throws Exception {
             // when
-            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now(), null);
 
             // then
             verify(genderStatisticsRepository)
                     .getAllMemosByGenderBetweenStartDateAndEndDate(
+                            any(),
                             eq(Gender.MALE),
                             any(),
                             any());
             verify(genderStatisticsRepository)
                     .getAllMemosByGenderBetweenStartDateAndEndDate(
+                            any(),
                             eq(Gender.FEMALE),
                             any(),
                             any());
@@ -251,12 +270,12 @@ class GenderStatisticsServiceTest {
                     new MemoDto("c3", "e3", "t3", "r3", "i3"),
                     new MemoDto("c4", "e4", "t4", "r4", "i4")
             );
-            when(genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(any(), any(), any()))
+            when(genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(any(), any(), any(), any()))
                     .thenReturn(memos)
                     .thenReturn(memos);
 
             // when
-            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now(), null);
 
             // then
             List<String> flattedMemos = memos.stream()
@@ -289,7 +308,7 @@ class GenderStatisticsServiceTest {
                     .thenReturn(returnedByWordExtractionService);
             
             // when
-            GenderWordFrequencyResponse response = statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now());
+            GenderWordFrequencyResponse response = statisticsService.getWordFrequenciesEachGenderLast90Days(LocalDate.now(), null);
 
             // then
             assertThat(response)

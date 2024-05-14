@@ -483,6 +483,60 @@ class MBTIStatisticsRepositoryTest {
     @Nested
     class getAllMemosByMBTIBetweenStartDateAndEndDate {
         @Test
+        void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
+            // given
+            RegisterType filteredResiterType = RegisterType.SAVE;
+            RegisterType survivedRegisterType = RegisterType.SPEND;
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(filteredResiterType)
+                                    .spendDate(startDate.atStartOfDay())
+                                    .content(filteredContent)
+                                    .build()),
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(filteredResiterType)
+                                    .spendDate(endDate.atStartOfDay())
+                                    .content(filteredContent)
+                                    .build()));
+            List<Article> survivedArticles = List.of(
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(survivedRegisterType)
+                                    .spendDate(startDate.atStartOfDay())
+                                    .content(survivedContent)
+                                    .build()),
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(survivedRegisterType)
+                                    .spendDate(endDate.atStartOfDay())
+                                    .content(survivedContent)
+                                    .build()));
+            em.flush();
+
+            // when
+            List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    survivedRegisterType,
+                    Mbti.NONE.toString(),
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(MemoDto::getContent)
+                    .containsOnly(survivedContent)
+                    .doesNotContain(filteredContent);
+        }
+
+        @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
             RegisterType registerType = RegisterType.SPEND;
@@ -522,6 +576,7 @@ class MBTIStatisticsRepositoryTest {
 
             // when
             List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    registerType,
                     Mbti.NONE.toString(),
                     startDate,
                     endDate
@@ -537,18 +592,21 @@ class MBTIStatisticsRepositoryTest {
         @Test
         void MBTI_파라미터에_해당하는_MBTI_유저들의_메모가_반환된다() throws Exception {
             // given
+            RegisterType registerType = RegisterType.SPEND;
             String survivedContent = "survivedContent";
             String filteredContent = "filteredContent";
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
                             Article.builder()
                                     .user(filteredUser)
+                                    .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(filteredContent)
                                     .build()),
                     articleRepository.save(
                             Article.builder()
                                     .user(filteredUser)
+                                    .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(filteredContent)
                                     .build()));
@@ -556,12 +614,14 @@ class MBTIStatisticsRepositoryTest {
                     articleRepository.save(
                             Article.builder()
                                     .user(survivedUser)
+                                    .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(survivedContent)
                                     .build()),
                     articleRepository.save(
                             Article.builder()
                                     .user(survivedUser)
+                                    .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(survivedContent)
                                     .build()));
@@ -569,6 +629,7 @@ class MBTIStatisticsRepositoryTest {
 
             // when
             List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    registerType,
                     survivedUser.getMbti().toString(),
                     startDate,
                     endDate
@@ -584,18 +645,21 @@ class MBTIStatisticsRepositoryTest {
         @Test
         void MBTI_파라미터로_NONE을_입력하면_모든_유저들의_메모가_반환된다() throws Exception {
             // given
+            RegisterType registerType = RegisterType.SPEND;
             String survivedContent = "survivedContent";
             String filteredContent = "filteredContent";
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
                             Article.builder()
                                     .user(filteredUser)
+                                    .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(filteredContent)
                                     .build()),
                     articleRepository.save(
                             Article.builder()
                                     .user(filteredUser)
+                                    .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(filteredContent)
                                     .build()));
@@ -603,12 +667,14 @@ class MBTIStatisticsRepositoryTest {
                     articleRepository.save(
                             Article.builder()
                                     .user(survivedUser)
+                                    .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(survivedContent)
                                     .build()),
                     articleRepository.save(
                             Article.builder()
                                     .user(survivedUser)
+                                    .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(survivedContent)
                                     .build()));
@@ -616,6 +682,7 @@ class MBTIStatisticsRepositoryTest {
 
             // when
             List<MemoDto> dtos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                    registerType,
                     Mbti.NONE.toString(),
                     startDate,
                     endDate

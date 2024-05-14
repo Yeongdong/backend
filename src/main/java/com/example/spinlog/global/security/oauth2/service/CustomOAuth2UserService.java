@@ -45,7 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (foundUser.isPresent()) { //회원가입이 되어있는 경우 (이미 로그인한 적이 있는 경우)
             log.info("User {} found", response.getProvider() + "-" + response.getEmail());
 
-            foundUser.get().changeProfile(response.getEmail());
+            foundUser.get().change(response.getEmail());
             return CustomOAuth2User.of(response, false);
         }
         //회원가입이 되어있지 않은 경우 (처음 로그인한 경우)

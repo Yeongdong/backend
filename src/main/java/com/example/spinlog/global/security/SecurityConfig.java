@@ -2,6 +2,7 @@ package com.example.spinlog.global.security;
 
 import com.example.spinlog.global.security.oauth2.client.CustomClientRegistrationRepository;
 import com.example.spinlog.global.security.oauth2.client.CustomOAuth2AuthorizedClientService;
+import com.example.spinlog.global.security.oauth2.handler.authentication.CustomAuthenticationEntryPoint;
 import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginSuccessHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutSuccessHandler;
@@ -20,13 +21,16 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomClientRegistrationRepository customClientRegistrationRepository;
     private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
     private final JdbcTemplate jdbcTemplate;
+    private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
     private final OAuth2LogoutHandler oAuth2LogoutHandler;
     private final OAuth2LogoutSuccessHandler oAuth2LogoutSuccessHandler;
+
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     private final CorsConfig corsConfig;
 
@@ -71,8 +75,13 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "api/users/logout-result").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/favicon.ico",
+                                "/api/authentication/logout-result",
+                                "/api/authentication/not-authenticated").permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .addFilterBefore(corsConfig.corsFilter(), LogoutFilter.class);
 

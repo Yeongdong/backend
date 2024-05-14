@@ -28,6 +28,7 @@ public interface GenderStatisticsRepository {
 
     // 성별 메모 가져오기
     List<MemoDto> getAllMemosByGenderBetweenStartDateAndEndDate(
+            @Param("registerType") RegisterType registerType,
             @Param("gender") Gender gender,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
