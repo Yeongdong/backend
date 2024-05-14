@@ -49,6 +49,9 @@ public class SecurityConfig {
                         .disable()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(url -> url
+                                .baseUri("/api/users/login")
+                        )
                         .clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository())
                         .authorizedClientService(customOAuth2AuthorizedClientService.oAuth2AuthorizedClientService(
                                 jdbcTemplate, customClientRegistrationRepository.clientRegistrationRepository()
