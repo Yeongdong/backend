@@ -7,10 +7,12 @@ import com.example.spinlog.global.response.ResponseUtils;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,8 +42,11 @@ public class ArticleController {
      * @return 게시글 리스트를 포함하는 ResponseEntity
      */
     @GetMapping
-    public ApiResponseWrapper<Page<ViewArticleListResponseDto>> viewList(Pageable pageable, SearchCond searchCond) {
-        Page<ViewArticleListResponseDto> responseDto = articleService.listArticles(pageable, searchCond);
+    public ApiResponseWrapper<List<ViewArticleSumDto>> viewList(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
+                                                    @PageableDefault Pageable pageable,
+                                                    SearchCond searchCond){
+        String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
+        List<ViewArticleSumDto> responseDto = articleService.listArticles(userName, pageable, searchCond);
         log.info("게시글 리스트 불러오기 성공");
         return ResponseUtils.ok(responseDto, "게시글 리스트 불러오기 성공");
     }
@@ -63,7 +68,7 @@ public class ArticleController {
     /**
      * 게시글 수정
      *
-     * @param articleId               업데이트 요청 데이터 Id
+     * @param articleId        업데이트 요청 데이터 Id
      * @param updateRequestDTO 업데이트 요청 데이터
      * @return 업데이트 성공 메시지 ResponseEntity
      */
