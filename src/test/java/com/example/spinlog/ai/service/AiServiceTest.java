@@ -85,10 +85,12 @@ class AiServiceTest {
 //        // Then
 //        assertThat(aiResponseDto).isNotNull();
 //        assertThat(aiResponseDto.getContent()).isNotEmpty();
-        // TODO 코드 수정
-        //Article aiCommentAddArticle = articleService.findArticleById(aiRequestDto.getArticleId());
-        //assertThat(aiCommentAddArticle.getAiComment()).isEqualTo(aiResponseDto.getContent());
+//
+//        // TODO 코드 수정
+//        //Article aiCommentAddArticle = articleService.findArticleById(aiRequestDto.getArticleId());
+//        //assertThat(aiCommentAddArticle.getAiComment()).isEqualTo(aiResponseDto.getContent());
 //    }
+//
 //    @Test
 //    @DisplayName("존재하지 않는 Article ID를 입력하면 NoSuchElementExcepiton이 발생한다.")
 //    void AI요청_실패() {
