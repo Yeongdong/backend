@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponseWrapper<Void> handleGenericException(Exception e) {
-        log.error(e.getMessage());
-        return ResponseUtils.error("An unexpected error occurred");
+        log.warn(e.getMessage());
+        return ResponseUtils.error(e.getMessage());
     }
 }
