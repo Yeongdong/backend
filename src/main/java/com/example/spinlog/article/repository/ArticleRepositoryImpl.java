@@ -52,9 +52,9 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .from(article)
                 .where(
                         userIdEq(user),
-                        registerTypeEq(registerTypes),
-                        emotionEq(emotions),
-                        satisfactionEq(satisfactions),
+                        registerTypeIn(registerTypes),
+                        emotionIn(emotions),
+                        satisfactionIn(satisfactions),
                         wordContains(words),
                         dateBetween(from, to)
                 )
@@ -67,9 +67,9 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .from(article)
                 .where(
                         userIdEq(user),
-                        registerTypeEq(registerTypes),
-                        emotionEq(emotions),
-                        satisfactionEq(satisfactions),
+                        registerTypeIn(registerTypes),
+                        emotionIn(emotions),
+                        satisfactionIn(satisfactions),
                         wordContains(words),
                         dateBetween(from, to)
                 );
@@ -80,15 +80,15 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         return article.user.eq(user);
     }
 
-    private BooleanExpression registerTypeEq(List<RegisterType> registerType) {
+    private BooleanExpression registerTypeIn(List<RegisterType> registerType) {
         return registerType.isEmpty() ? null : article.registerType.in(registerType);
     }
 
-    private BooleanExpression emotionEq(List<Emotion> emotion) {
+    private BooleanExpression emotionIn(List<Emotion> emotion) {
         return emotion.isEmpty() ? null : article.emotion.in(emotion);
     }
 
-    private BooleanExpression satisfactionEq(List<Float> satisfaction) {
+    private BooleanExpression satisfactionIn(List<Float> satisfaction) {
         return satisfaction.isEmpty() ? null : article.satisfaction.in(satisfaction);
     }
 
