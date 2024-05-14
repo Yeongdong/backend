@@ -28,6 +28,7 @@ public interface MBTIStatisticsRepository {
 
     // 모든 메모 가져오기
     List<MemoDto> getAllMemosByMBTIBetweenStartDateAndEndDate(
+            @Param("registerType") RegisterType registerType,
             @Param("mbti") String mbti,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);

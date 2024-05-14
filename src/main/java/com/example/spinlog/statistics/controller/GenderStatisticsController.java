@@ -43,10 +43,13 @@ public class GenderStatisticsController {
     }
 
     @GetMapping("/api/statistics/gender/word/frequencies")
-    public ApiResponseWrapper<GenderWordFrequencyResponse> getWordFrequencyEachGenderLast90Days(){
+    public ApiResponseWrapper<GenderWordFrequencyResponse> getWordFrequencyEachGenderLast90Days(
+            @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
                 genderStatisticsService
-                        .getWordFrequenciesEachGenderLast90Days(LocalDate.now()),
+                        .getWordFrequenciesEachGenderLast90Days(
+                                LocalDate.now(),
+                                RegisterType.valueOf(registerType)),
                 "성별 단어 빈도수");
     }
 
