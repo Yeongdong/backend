@@ -4,6 +4,7 @@ import com.example.spinlog.global.response.ApiResponseWrapper;
 import com.example.spinlog.global.response.ResponseUtils;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.dto.response.LoginResponseDto;
+import com.example.spinlog.user.dto.response.RedirectUriRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,6 +42,13 @@ public class AuthenticationController {
         }
 
         return ResponseUtils.error("잘못된 접근입니다."); //TODO 리팩토링
+    }
+
+    @GetMapping("/not-authenticated") // 로그인 하지 않은 사용자가 접근할 때 리다이렉트되는 페이지
+    public ApiResponseWrapper<Object> notAuthenticated(@RequestParam("redirectURI") String redirectURI) {
+        RedirectUriRequestDto requestDto = RedirectUriRequestDto.of(redirectURI);
+
+        return ResponseUtils.error("인증되지 않은 사용자의 요청입니다.", requestDto);
     }
 
 }
