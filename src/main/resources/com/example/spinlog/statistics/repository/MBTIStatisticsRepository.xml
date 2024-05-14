@@ -52,7 +52,7 @@
         <if test=' !"NONE".equals(mbti) '>
             join users u on a.user_id=u.user_id
         </if>
-        where a.spend_date between #{startDate} and #{endDate}
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
         <if test=' !"NONE".equals(mbti) '>
             and u.mbti = #{mbti}
         </if>

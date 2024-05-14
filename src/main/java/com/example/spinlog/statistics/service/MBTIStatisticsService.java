@@ -76,10 +76,15 @@ public class MBTIStatisticsService {
     }
 
     public MBTIWordFrequencyResponse getWordFrequenciesLast90Days(
-            LocalDate today){
+            LocalDate today,
+            RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         // 최근 90일동안 모든 유저가 적은 메모의 빈도수 측정
-        List<MemoDto> memos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(Mbti.NONE.toString(), startDate, today);
+        List<MemoDto> memos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                registerType,
+                Mbti.NONE.toString(),
+                startDate,
+                today);
 
         // 최근 90일 동안 나와 MBTI가 같은 유저가 적은 메모의 빈도수 측정
         Mbti mbti = authenticatedUserService.getUserMBTI();
@@ -103,7 +108,11 @@ public class MBTIStatisticsService {
                     .build();
         }
 
-        List<MemoDto> memoByMBTI = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(mbti.toString(), startDate, today);
+        List<MemoDto> memoByMBTI = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
+                registerType,
+                mbti.toString(),
+                startDate,
+                today);
 
         return MBTIWordFrequencyResponse.builder()
                 .mbti(mbti)

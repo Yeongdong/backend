@@ -221,6 +221,21 @@ class MBTIStatisticsServiceTest {
 
     @Nested
     class getWordFrequenciesLast90Days {
+        @ParameterizedTest
+        @ValueSource(strings = {"SPEND", "SAVE"})
+        void RegisterType_파라미터를_그대로_레포지토리에게_전달한다(RegisterType registerType) throws Exception {
+            // when
+            statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), registerType);
+
+            // then
+            verify(mbtiStatisticsRepository)
+                    .getAllMemosByMBTIBetweenStartDateAndEndDate(
+                            eq(registerType),
+                            any(),
+                            any(),
+                            any()
+                    );
+        }
         @Test
         void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
@@ -229,11 +244,12 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.NONE);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(now);
+            statisticsService.getWordFrequenciesLast90Days(now, RegisterType.SPEND);
 
             // then
             verify(mbtiStatisticsRepository)
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(
+                            any(),
                             any(),
                             eq(now.minusDays(90)),
                             eq(now));
@@ -246,11 +262,11 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.NONE);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
 
             // then
             verify(mbtiStatisticsRepository)
-                    .getAllMemosByMBTIBetweenStartDateAndEndDate(eq(Mbti.NONE.toString()), any(), any());
+                    .getAllMemosByMBTIBetweenStartDateAndEndDate(any(), eq(Mbti.NONE.toString()), any(), any());
             verifyNoMoreInteractions(mbtiStatisticsRepository);
         }
 
@@ -262,16 +278,18 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.ISTJ);
 
             // when
-            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
 
             // then
             verify(mbtiStatisticsRepository, times(1))
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(
+                            any(),
                             eq(Mbti.NONE.toString()),
                             any(),
                             any());
             verify(mbtiStatisticsRepository, times(1))
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(
+                            any(),
                             eq(Mbti.ISTJ.toString()),
                             any(),
                             any());
@@ -287,13 +305,13 @@ class MBTIStatisticsServiceTest {
                     new MemoDto("c4", "e4", "t4", "r4", "i4")
             );
 
-            when(mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(any(), any(), any()))
+            when(mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(any(), any(), any(), any()))
                     .thenReturn(memos);
             when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.NONE);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
 
             // then
             List<String> flattedMemos = memos.stream()
@@ -329,7 +347,7 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(returnedByWordExtractionService);
 
             // when
-            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now());
+            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
 
             // then
             assertThat(response)

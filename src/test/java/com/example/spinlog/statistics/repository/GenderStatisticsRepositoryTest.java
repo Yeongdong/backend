@@ -467,6 +467,60 @@ class GenderStatisticsRepositoryTest {
     @Nested
     class 메모를_반환하는_메서드 {
         @Test
+        void 입력받은_registerType을_기준으로_데이터를_필터링해서_반환한다() throws Exception {
+            // given
+            RegisterType filteredRegisterType = RegisterType.SAVE;
+            RegisterType survivedRegisterType = RegisterType.SPEND;
+            String survivedContent = "survivedContent";
+            String filteredContent = "filteredContent";
+            List<Article> filteredArticles = List.of(
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(filteredRegisterType)
+                                    .spendDate(startDate.atStartOfDay())
+                                    .content(filteredContent)
+                                    .build()),
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(filteredRegisterType)
+                                    .spendDate(endDate.atStartOfDay())
+                                    .content(filteredContent)
+                                    .build()));
+            List<Article> survivedArticles = List.of(
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(survivedRegisterType)
+                                    .spendDate(startDate.atStartOfDay())
+                                    .content(survivedContent)
+                                    .build()),
+                    articleRepository.save(
+                            Article.builder()
+                                    .user(survivedUser)
+                                    .registerType(survivedRegisterType)
+                                    .spendDate(endDate.atStartOfDay())
+                                    .content(survivedContent)
+                                    .build()));
+            em.flush();
+
+            // when
+            List<MemoDto> dtos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(
+                    survivedRegisterType,
+                    Gender.MALE,
+                    startDate,
+                    endDate
+            );
+
+            // then
+            assertThat(dtos)
+                    .extracting(MemoDto::getContent)
+                    .containsOnly(survivedContent)
+                    .doesNotContain(filteredContent);
+        }
+
+        @Test
         void 입력받은_startDate와_endDate를_기준으로_데이터를_필터링해서_반환한다() throws Exception {
             // given
             RegisterType registerType = RegisterType.SPEND;
@@ -506,6 +560,7 @@ class GenderStatisticsRepositoryTest {
 
             // when
             List<MemoDto> dtos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(
+                    registerType,
                     Gender.MALE,
                     startDate,
                     endDate
@@ -521,18 +576,21 @@ class GenderStatisticsRepositoryTest {
         @Test
         void 입력받은_성별에_해당하는_유저들의_메모만_반환한다() throws Exception {
             // given
+            RegisterType registerType = RegisterType.SPEND;
             String survivedContent = "survivedContent";
             String filteredContent = "filteredContent";
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
                             Article.builder()
                                     .user(filteredUser)
+                                    .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(filteredContent)
                                     .build()),
                     articleRepository.save(
                             Article.builder()
                                     .user(filteredUser)
+                                    .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(filteredContent)
                                     .build()));
@@ -540,12 +598,14 @@ class GenderStatisticsRepositoryTest {
                     articleRepository.save(
                             Article.builder()
                                     .user(survivedUser)
+                                    .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(survivedContent)
                                     .build()),
                     articleRepository.save(
                             Article.builder()
                                     .user(survivedUser)
+                                    .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(survivedContent)
                                     .build()));
@@ -553,6 +613,7 @@ class GenderStatisticsRepositoryTest {
 
             // when
             List<MemoDto> dtos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(
+                    registerType,
                     Gender.MALE,
                     startDate,
                     endDate
