@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,9 +19,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.springframework.http.HttpHeaders.*;
 
 @Configuration
 @EnableWebSecurity
@@ -49,30 +54,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-//                .cors(cors -> cors
-//                        .configurationSource(new CorsConfigurationSource() {
-//                            @Override
-//                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-//                                CorsConfiguration config = new CorsConfiguration();
-//
-//                                config.setAllowedOrigins(Collections.singletonList("https://frontend-chi-sage-83.vercel.app"));
-//                                config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
-//
-//                                /*
-//                                TODO 인증된 요청(config.setAllowedHeaders(Collections.singletonList("*")))에 대해
-//                                    Access-Control-Allow-Method/Header 는 와일드카드로 설정하면 안됨
-//                                 */
-//                                config.setAllowedMethods(Collections.singletonList("*"));
-//                                config.setAllowCredentials(true);
-//                                config.setAllowedHeaders(Collections.singletonList("*"));
-//                                config.setMaxAge(3600L);
-//
-//                                config.setExposedHeaders(Collections.singletonList("Authorization"));
-//                                config.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-//
-//                                return config;
-//                            }
-//                        }))
+                .cors(cors -> cors
+                        .configurationSource(corsConfigurationSource())
+                )
                 .csrf(csrf -> csrf
                         .disable()
                 )
@@ -116,6 +100,23 @@ public class SecurityConfig {
 //                .addFilterBefore(corsConfig.corsFilter(), LogoutFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(Arrays.asList("https://frontend-chi-sage-83.vercel.app", "http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "Set-Cookie"));
+        configuration.setExposedHeaders(Arrays.asList(AUTHORIZATION, SET_COOKIE));
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
 }
