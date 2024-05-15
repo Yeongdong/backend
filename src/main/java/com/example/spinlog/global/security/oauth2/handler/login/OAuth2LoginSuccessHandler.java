@@ -23,6 +23,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         Boolean isFirstLogin = principal.getFirstLogin();
         if(isFirstLogin)
             response.sendRedirect("http://localhost:5173?isFirstLogin=true");
-        response.sendRedirect("http://localhost:5173");
+        else
+            response.sendRedirect("http://localhost:5173");
     }
 }
