@@ -19,7 +19,7 @@ public class TemporaryAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String auth = request.getHeader("TemporaryAuth");
 
-        if(auth.equals("OurAuthValue")){
+        if(auth != null && auth.equals("OurAuthValue")){
             CustomOAuth2User user = CustomOAuth2User.builder()
                     .oAuth2Response(new OAuth2ResponseImpl())
                     .firstLogin(false)
