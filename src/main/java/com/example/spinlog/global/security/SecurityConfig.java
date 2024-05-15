@@ -49,26 +49,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors
-                        .configurationSource(new CorsConfigurationSource() {
-                            @Override
-                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                                CorsConfiguration config = new CorsConfiguration();
-
-                                config.setAllowedOrigins(Collections.singletonList("https://frontend-chi-sage-83.vercel.app"));
-                                config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
-
-                                config.setAllowedMethods(Collections.singletonList("*"));
-                                config.setAllowCredentials(true);
-                                config.setAllowedHeaders(Collections.singletonList("*"));
-                                config.setMaxAge(3600L);
-
-                                config.setExposedHeaders(Collections.singletonList("Authorization"));
-                                config.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-
-                                return config;
-                            }
-                        }))
+//                .cors(cors -> cors
+//                        .configurationSource(new CorsConfigurationSource() {
+//                            @Override
+//                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//                                CorsConfiguration config = new CorsConfiguration();
+//
+//                                config.setAllowedOrigins(Collections.singletonList("https://frontend-chi-sage-83.vercel.app"));
+//                                config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+//
+//                                /*
+//                                TODO 인증된 요청(config.setAllowedHeaders(Collections.singletonList("*")))에 대해
+//                                    Access-Control-Allow-Method/Header 는 와일드카드로 설정하면 안됨
+//                                 */
+//                                config.setAllowedMethods(Collections.singletonList("*"));
+//                                config.setAllowCredentials(true);
+//                                config.setAllowedHeaders(Collections.singletonList("*"));
+//                                config.setMaxAge(3600L);
+//
+//                                config.setExposedHeaders(Collections.singletonList("Authorization"));
+//                                config.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+//
+//                                return config;
+//                            }
+//                        }))
                 .csrf(csrf -> csrf
                         .disable()
                 )
