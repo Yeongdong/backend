@@ -10,6 +10,7 @@ import com.example.spinlog.statistics.service.dto.MBTIWordFrequencyResponse;
 import com.example.spinlog.statistics.repository.dto.MBTISatisfactionAverageDto;
 import com.example.spinlog.statistics.service.MBTIStatisticsService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -73,16 +75,19 @@ public class MBTIStatisticsController {
     }
     @GetMapping("/oauth2/sc")
     public String successCookie(HttpServletResponse response){
-        String cookieValue = "success"; // 쿠키 값 설정
-        String cookieName = "isSuccess"; // 쿠키 이름 설정
-        // 쿠키 값, 만료 시간(예: 86400초 = 1일), 경로, Secure 및 SameSite=None 설정을 포함하여 쿠키 문자열 생성
+        String cookieValue = "success";
+        String cookieName = "isSuccess";
+
         String cookieString = String.format("%s=%s; Path=/; Secure; SameSite=None", cookieName, cookieValue);
-        // 응답에 'Set-Cookie' 헤더로 쿠키 추가
+
         response.addHeader("Set-Cookie", cookieString);
         return "successCookie";
     }
     @GetMapping("/oauth2/test")
-    public String testCookie(HttpServletResponse response){
-        return "testCookie";
+    public String testCookie(HttpServletRequest request){
+        return Arrays.stream(request.getCookies())
+                .filter(c -> c.getName().equals("isSuccess"))
+                .map(c -> c.getName() + "/" + c.getValue())
+                .toList().toString();
     }
 }
