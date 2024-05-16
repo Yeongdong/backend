@@ -14,6 +14,14 @@ client-secret:
   naver: ${naver_client_secret}
   google: ${google_client_secret}
 
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
