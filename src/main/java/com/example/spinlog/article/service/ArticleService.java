@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -34,10 +33,15 @@ public class ArticleService {
         return WriteArticleResponseDto.from(savedArticle, modelMapper);
     }
 
-    public List<ViewArticleSumDto> listArticles(String userName, Pageable pageable, SearchCond searchCond) {
+    public ViewListResponseDto listArticles(String userName, Pageable pageable, SearchCondRequestDto searchCondDto) {
         User user = getUser(userName);
+        SearchCond searchCond = searchCondDto.toSearchCond();
+
         Page<ViewArticleSumDto> response = articleRepository.search(user, pageable, searchCond);
-        return response.getContent();
+        return ViewListResponseDto.builder()
+                .nextPage(!response.isLast())
+                .spendList(response.getContent())
+                .build();
     }
 
     public ViewArticleResponseDto getArticle(String userName, Long id) {
