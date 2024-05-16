@@ -23,14 +23,14 @@ public class CalendarController {
     public ApiResponseWrapper<?> mainPage(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @RequestParam String selectDate, @RequestParam String isSelectDay) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
 
-        boolean isTotalData = Boolean.parseBoolean(isSelectDay);
+        boolean isSumData = Boolean.parseBoolean(isSelectDay);
 
-        if (isTotalData) {
-            TotalCalendarResponseDto response = calendarService.requestTotal(userName, selectDate);
-            return ResponseUtils.ok(response, "메인 페이지 전체 데이터 불러오기 성공");
-        } else {
+        if (isSumData) {
             DailyCalendarResponseDto response = calendarService.requestDaily(userName, selectDate);
             return ResponseUtils.ok(response, "메인 페이지 일별 데이터 불러오기 성공");
+        } else {
+            TotalCalendarResponseDto response = calendarService.requestTotal(userName, selectDate);
+            return ResponseUtils.ok(response, "메인 페이지 전체 데이터 불러오기 성공");
         }
     }
 }

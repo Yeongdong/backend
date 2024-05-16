@@ -12,8 +12,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -32,7 +30,7 @@ public class ArticleController {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
         WriteArticleResponseDto responseDto = articleService.createArticle(userName, article);
         log.info("게시글 작성 성공");
-        return ResponseUtils.ok(responseDto, "게시글 작성 성공");  // info 로그 삭제 여부에 따라 변수로 관리하던지 아니면 직접 문자열을 넣을지 판단 필요
+        return ResponseUtils.ok(responseDto, "게시글 작성 성공");
     }
 
     /**
@@ -42,11 +40,11 @@ public class ArticleController {
      * @return 게시글 리스트를 포함하는 ResponseEntity
      */
     @GetMapping
-    public ApiResponseWrapper<List<ViewArticleSumDto>> viewList(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
-                                                    @PageableDefault Pageable pageable,
-                                                    SearchCond searchCond){
+    public ApiResponseWrapper<ViewListResponseDto> viewList(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
+                                                            @PageableDefault Pageable pageable,
+                                                            SearchCondRequestDto searchCond) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
-        List<ViewArticleSumDto> responseDto = articleService.listArticles(userName, pageable, searchCond);
+        ViewListResponseDto responseDto = articleService.listArticles(userName, pageable, searchCond);
         log.info("게시글 리스트 불러오기 성공");
         return ResponseUtils.ok(responseDto, "게시글 리스트 불러오기 성공");
     }

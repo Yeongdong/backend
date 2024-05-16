@@ -5,8 +5,6 @@ import com.example.spinlog.article.dto.ViewArticleSumDto;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.user.entity.User;
-import com.example.spinlog.utils.DateUtils;
-import com.example.spinlog.utils.ParameterParser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -32,16 +30,28 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
     @Override
     public Page<ViewArticleSumDto> search(User user, Pageable pageable, SearchCond cond) {
+        List<ViewArticleSumDto> content = getArticleList(user, pageable, cond.getRegisterTypes(), cond.getEmotions(), cond.getSatisfactions(), cond.getWords(), cond.getFrom(), cond.getTo());
+        JPAQuery<Long> count = getTotalCount(user, cond.getRegisterTypes(), cond.getEmotions(), cond.getSatisfactions(), cond.getWords(), cond.getFrom(), cond.getTo());
 
-        List<RegisterType> registerTypes = ParameterParser.parseRegisterTypes(cond.getRegisterType());
-        List<Emotion> emotions = ParameterParser.parseEmotions(cond.getEmotion());
-        List<Float> satisfactions = ParameterParser.parseCommaSeparatedFloat(cond.getSatisfaction());
-        List<String> words = ParameterParser.decodeAndParse(cond.getWord());
-        LocalDate from = DateUtils.parseStringToDate(cond.getFrom());
-        LocalDate to = DateUtils.parseStringToDate(cond.getTo());
+        return PageableExecutionUtils.getPage(content, pageable, count::fetchOne);
+    }
 
-        // 게시글 가져오는 쿼리
-        List<ViewArticleSumDto> content = queryFactory
+    private JPAQuery<Long> getTotalCount(User user, List<RegisterType> registerTypes, List<Emotion> emotions, List<Float> satisfactions, List<String> words, LocalDate from, LocalDate to) {
+        return queryFactory
+                .select(article.count())
+                .from(article)
+                .where(
+                        userEq(user),
+                        registerTypeIn(registerTypes),
+                        emotionIn(emotions),
+                        satisfactionIn(satisfactions),
+                        wordContains(words),
+                        dateBetween(from, to)
+                );
+    }
+
+    private List<ViewArticleSumDto> getArticleList(User user, Pageable pageable, List<RegisterType> registerTypes, List<Emotion> emotions, List<Float> satisfactions, List<String> words, LocalDate from, LocalDate to) {
+        return queryFactory
                 .select(Projections.constructor(ViewArticleSumDto.class,
                         article.articleId,
                         article.content,
@@ -51,32 +61,20 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         article.registerType))
                 .from(article)
                 .where(
-                        userIdEq(user),
+                        userEq(user),
                         registerTypeIn(registerTypes),
                         emotionIn(emotions),
                         satisfactionIn(satisfactions),
                         wordContains(words),
                         dateBetween(from, to)
                 )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .orderBy(article.spendDate.desc())
                 .fetch();
-
-        // 전체 카운트 쿼리
-        JPAQuery<Long> count = queryFactory
-                .select(article.count())
-                .from(article)
-                .where(
-                        userIdEq(user),
-                        registerTypeIn(registerTypes),
-                        emotionIn(emotions),
-                        satisfactionIn(satisfactions),
-                        wordContains(words),
-                        dateBetween(from, to)
-                );
-        return PageableExecutionUtils.getPage(content, pageable, count::fetchOne);
     }
 
-    private BooleanExpression userIdEq(User user) {
+    private BooleanExpression userEq(User user) {
         return article.user.eq(user);
     }
 
