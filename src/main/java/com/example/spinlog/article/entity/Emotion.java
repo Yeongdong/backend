@@ -9,7 +9,7 @@ public enum Emotion {
     SAD("SAD"),    //슬픔
     SORRY("SORRY"),  //죄책감
     EXCITED("EXCITED"),    //기분좋은
-    FLUTTERED("FLUTTERED"),    //설렘
+    FLUTTER("FLUTTER"),    //설렘
     PROUD("PROUD"),  //뿌듯
     EVADED("EVADED"), //모르겠어요
     SHY("SHY"); //부끄러움

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -92,7 +93,7 @@ public class CalendarService {
         int totalDaySave = calculateTotalAmountByType(articlesOnDate, RegisterType.SAVE);
 
         return MonthSpend.builder()
-                .date(date)
+                .date(date.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
                 .daySpend(totalDaySpend)
                 .daySave(totalDaySave)
                 .build();
