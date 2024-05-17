@@ -91,7 +91,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/oauth2/**", "/favicon.ico",
+                        .requestMatchers("/", "/oauth2/**", "/favicon.ico", "/error",
                                 "/api/authentication/logout-result",
                                 "/api/authentication/not-authenticated").permitAll()
                         .anyRequest().authenticated()
@@ -100,7 +100,6 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .addFilterAfter(new TemporaryAuthFilter(), ExceptionTranslationFilter.class);
-//                .addFilterBefore(corsConfig.corsFilter(), LogoutFilter.class);
 
         return http.build();
     }
@@ -110,10 +109,13 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOriginPatterns(Arrays.asList("https://frontend-chi-sage-83.vercel.app", "http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "https://frontend-chi-sage-83.vercel.app",
+                "http://localhost:5173",
+                "https://spinlog.swygbro.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "Set-Cookie", "TemporaryAuth"));
-        configuration.setExposedHeaders(Arrays.asList(AUTHORIZATION, SET_COOKIE, "TemporaryAuth"));
+        //configuration.setExposedHeaders(Arrays.asList(AUTHORIZATION, SET_COOKIE, "TemporaryAuth"));
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
