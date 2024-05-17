@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -14,9 +15,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 public class TemporaryAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if(SecurityContextHolder.getContext() != null &&
+                SecurityContextHolder.getContext().getAuthentication() != null) {
+            log.info("already authentication object exists");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        log.info("authentication object is not inserted");
         String auth = request.getHeader("TemporaryAuth");
 
         if(auth != null && auth.equals("OurAuthValue")){
