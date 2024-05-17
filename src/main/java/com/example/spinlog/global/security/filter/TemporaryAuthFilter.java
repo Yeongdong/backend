@@ -29,9 +29,9 @@ public class TemporaryAuthFilter extends OncePerRequestFilter {
         }
 
         log.info("authentication object is not inserted");
-        String auth = request.getHeader("TemporaryAuth");
+        String temporary = request.getHeader("TemporaryAuth");
 
-        if(auth != null && auth.equals("OurAuthValue")){
+        if(temporary != null && temporary.equals("OurAuthValue")){
             CustomOAuth2User user = CustomOAuth2User.builder()
                     .oAuth2Response(new OAuth2ResponseImpl())
                     .firstLogin(false)
