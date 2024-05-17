@@ -6,11 +6,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -19,8 +20,9 @@ import java.io.IOException;
 public class TemporaryAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(SecurityContextHolder.getContext() != null &&
-                SecurityContextHolder.getContext().getAuthentication() != null) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth != null &&
+                !(auth instanceof AnonymousAuthenticationToken)) {
             log.info("already authentication object exists");
             filterChain.doFilter(request, response);
             return;
