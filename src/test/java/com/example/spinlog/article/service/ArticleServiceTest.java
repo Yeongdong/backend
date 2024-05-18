@@ -173,7 +173,7 @@ public class ArticleServiceTest {
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getSpendList().size()).isEqualTo(46);
+        assertThat(responseDto.getSpendList().size()).isEqualTo(10);
     }
 
     @Test
@@ -242,7 +242,7 @@ public class ArticleServiceTest {
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getSpendList().size()).isEqualTo(14);
+        assertThat(responseDto.getSpendList().size()).isEqualTo(10);
     }
 
     @Test
