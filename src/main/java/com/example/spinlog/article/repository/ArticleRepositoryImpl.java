@@ -96,6 +96,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
             BooleanExpression condition = article.content.contains(word)
                     .or(article.event.contains(word))
                     .or(article.thought.contains(word))
+                    .or(article.improvements.contains(word))
                     .or(article.reason.contains(word));
             wordConditions = (wordConditions != null) ? wordConditions.and(condition) : condition;
         }
