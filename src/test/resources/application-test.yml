@@ -1,4 +1,5 @@
 apiKey: "test-key"
+morphemeApiKey: "test-morp-key"
 
 base-url: "test-url"
 

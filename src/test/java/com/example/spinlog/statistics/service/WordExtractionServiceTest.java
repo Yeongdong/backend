@@ -1,7 +1,7 @@
 package com.example.spinlog.statistics.service;
 
+import com.example.spinlog.statistics.service.dto.Token;
 import com.example.spinlog.statistics.service.dto.WordFrequency;
-import kr.co.shineware.nlp.komoran.model.Token;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Order;
@@ -12,8 +12,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,46 +31,46 @@ class WordExtractionServiceTest {
     WordExtractionService wordExtractionService;
 
     @Mock
-    KomoranService komoranService;
-    
+    MorphemeExtractionService morphemeExtractionService;
+
     @Test
     @Order(1)
-    void 메모_리스트를_파라미터로_받아_그대로_KomoranService에게_전달한다() throws Exception {
+    void 파라미터를_그대로_BeforeApiService에게_넘긴다() throws Exception {
         // given
-        List<String> parameter = List.of("Hello", "Komoran");
-        
+        List<String> memos = List.of("memo1", "memo2", "memo3");
+
         // when
-        wordExtractionService.analyzeWords(parameter);
-        
+        wordExtractionService.analyzeWords(memos);
+
         // then
-        verify(komoranService)
-                .getTokens(eq(parameter));
+        verify(morphemeExtractionService)
+                .extractTokensFromMemos(eq(memos));
     }
 
     @Test
     @Order(2)
-    void KomoranService로부터_토큰들을_받아_키워드만_추출한다() throws Exception {
+    void BeforeApiService로부터_토큰들을_받아_키워드만_추출한다() throws Exception {
         /**
-         * 키워드 리스트(외부 라이브러리에서 제공하는 키워드 형태소)
+         * 키워드 리스트(키워드 형태소)
          * NNG, NNP, NP, VV, VA, SL
          * */
 
         // given
         List<Token> keywords = List.of(
-                new Token("단어1", "NNG", 0, 0),
-                new Token("단어2", "NNP", 0, 0),
-                new Token("단어3", "NP", 0, 0),
-                new Token("단어4", "SL", 0, 0)
+                new Token("단어1", "NNG"),
+                new Token("단어2", "NNP"),
+                new Token("단어3", "NP"),
+                new Token("단어4", "SL")
         );
         List<Token> nonKeywords = List.of(
-                new Token("단어6", "XXX", 0, 0),
-                new Token("단어7", "XXX", 0, 0)
+                new Token("단어6", "XXX"),
+                new Token("단어7", "XXX")
         );
         List<Token> returned = Stream
                 .concat(keywords.stream(), nonKeywords.stream())
                 .toList();
 
-        when(komoranService.getTokens(any()))
+        when(morphemeExtractionService.extractTokensFromMemos(any()))
                 .thenReturn(returned);
 
         // when
@@ -99,14 +100,14 @@ class WordExtractionServiceTest {
 
         // given
         List<Token> keywords = List.of(
-                new Token("단어1", "NNG", 0, 0),
-                new Token("단어2", "NNP", 0, 0),
-                new Token("단어3", "NP", 0, 0),
-                new Token("동사", "VV", 0, 0),
-                new Token("형용사", "VA", 0, 0)
+                new Token("단어1", "NNG"),
+                new Token("단어2", "NNP"),
+                new Token("단어3", "NP"),
+                new Token("동사", "VV"),
+                new Token("형용사", "VA")
         );
 
-        when(komoranService.getTokens(any()))
+        when(morphemeExtractionService.extractTokensFromMemos(any()))
                 .thenReturn(keywords);
 
         // when
@@ -127,15 +128,17 @@ class WordExtractionServiceTest {
     void 단어들의_빈도수를_세서_반환한다() throws Exception {
         // given
         List<Token> keywords = List.of(
-                new Token("단어1", "NNG", 0, 0),
-                new Token("단어1", "NNG", 0, 0),
-                new Token("단어1", "NNG", 0, 0),
-                new Token("단어2", "NNP", 0, 0),
-                new Token("단어2", "NNP", 0, 0),
-                new Token("단어2", "NNP", 0, 0)
+                new Token("단어1", "NNG"),
+                new Token("단어1", "NNG"),
+                new Token("단어1", "NNG"),
+                new Token("단어2", "NNP"),
+                new Token("단어2", "NNP"),
+                new Token("단어2", "NNP")
         );
 
-        when(komoranService.getTokens(any()))
+        /*when(morphemeApiClient.extractTokensFromMemos(any()))
+                .thenReturn(keywords);*/
+        when(morphemeExtractionService.extractTokensFromMemos(any()))
                 .thenReturn(keywords);
 
         // when
@@ -153,5 +156,32 @@ class WordExtractionServiceTest {
         assertThat(results)
                 .extracting(WordFrequency::getFrequency)
                 .allMatch((f) -> f == 3L);
+    }
+
+    @Test
+    @Order(5)
+    void 단어빈도수를_빈도수의_내림차순으로_상위_20개만_반환한다() {
+        // Given
+        List<String> memos = IntStream.range(0, 30)
+                .mapToObj(i -> "word" + i)
+                .collect(Collectors.toList());
+        List<Token> tokens = memos.stream()
+                .map(memo -> new Token(memo, "NNG"))
+                .collect(Collectors.toList());
+
+        when(morphemeExtractionService.extractTokensFromMemos(any()))
+                .thenReturn(tokens);
+
+        // When
+        List<WordFrequency> actualWordFrequencies = wordExtractionService.analyzeWords(memos);
+
+        // Then
+        assertThat(actualWordFrequencies).hasSize(20);
+        assertThat(isSortedDescending(actualWordFrequencies)).isTrue();
+    }
+
+    private boolean isSortedDescending(List<WordFrequency> wordFrequencies) {
+        return IntStream.range(0, wordFrequencies.size() - 1)
+                .allMatch(i -> wordFrequencies.get(i).getFrequency() >= wordFrequencies.get(i + 1).getFrequency());
     }
 }
