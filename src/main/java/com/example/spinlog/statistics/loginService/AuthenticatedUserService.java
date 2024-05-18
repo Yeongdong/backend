@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticatedUserService {
     private final UserRepository userRepository;
     public Mbti getUserMBTI() {
-        // TODO 컨트롤러 레이어로 리팩토링
         CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String authenticationName = oAuth2User.getOAuth2Response().getAuthenticationName();
         User user = userRepository

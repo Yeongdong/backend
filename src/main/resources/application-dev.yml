@@ -1,6 +1,7 @@
 env.data: dev
 
 apiKey: ${secret_apiKey}
+morphemeApiKey: ${morphemeAPIKey}
 
 base-url: ${base_url}
 
