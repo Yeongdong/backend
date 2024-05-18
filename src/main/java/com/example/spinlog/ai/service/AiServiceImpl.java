@@ -24,13 +24,19 @@ public class AiServiceImpl implements AiService {
     private final static String AI_MODEL = "gpt-3.5-turbo";
     private final static String AI_ROLE = "system";
     private final static String USER_ROLE = "user";
-    private final static String MESSAGE_TO_AI = "You are collecting emotional and consumption data from users in their 20s and 30s. Connect emotions and consumption and provide users with consumption-related advice in one sentence in Korean.";
+    private final static String MESSAGE_TO_AI = "Your identity is as an advice giver.\n" +
+            "This data shows that people in their 20s and 30s made consumption due to emotional expression. Could you give me some advice on the connection between emotions and consumption?\n" +
+            "===Please answer by referring to the rules below==\n" +
+            "First of all, empathize with the user. At this time, mention emotions, events, and purchase details.\n" +
+            "Please tell us 3 areas for improvement along with reasons.\n" +
+            "Please use a total of 50 Korean words.\n" +
+            "Speak in a friendly manner, as if you were talking to a friend.";
 
     @Value("${apiKey}")
     private String apiKey;
 
     /**
-     * AI 코멘트를 요청하고, 결과 반횐.
+     * AI 코멘트를 요청하고, 결과 반환
      *
      * @param requestDto 요청 DTO
      * @return AI 응답 DTO
