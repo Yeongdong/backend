@@ -61,6 +61,7 @@ dependencies {
 
 	// querydsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner:4.1.2'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
@@ -84,6 +85,7 @@ dependencies {
 
 	// word cloud
 	implementation 'com.github.shin285:KOMORAN:3.3.9'
+
 }
 
 tasks.named('test') {
