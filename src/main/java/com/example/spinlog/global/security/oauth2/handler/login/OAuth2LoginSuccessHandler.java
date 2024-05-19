@@ -22,8 +22,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
         Boolean isFirstLogin = principal.getFirstLogin();
         if(isFirstLogin)
-            response.sendRedirect("http://localhost:5173?isFirstLogin=true");
+            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=true");
         else
-            response.sendRedirect("http://localhost:5173");
+            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth");
     }
 }

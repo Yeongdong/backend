@@ -16,12 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/authentication")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationController {
 
-    @GetMapping("/login-result")
+    @GetMapping("/api/authentication/login-result")
     public ApiResponseWrapper<LoginResponseDto> login(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
         LoginResponseDto requestDto = LoginResponseDto.of(oAuth2User.getFirstLogin());
 
@@ -32,7 +31,7 @@ public class AuthenticationController {
         return ResponseUtils.ok(requestDto, "로그인에 성공했습니다.");
     }
 
-    @GetMapping("/logout-result")
+    @GetMapping("/api/authentication/logout-result")
     public ApiResponseWrapper<Object> logout(HttpServletRequest request, HttpServletResponse httpResponse) {
         Boolean isRedirected = (Boolean) request.getSession().getAttribute("redirected");
 
@@ -44,11 +43,15 @@ public class AuthenticationController {
         return ResponseUtils.error("잘못된 접근입니다."); //TODO 리팩토링
     }
 
-    @GetMapping("/not-authenticated") // 로그인 하지 않은 사용자가 접근할 때 리다이렉트되는 페이지
+    @GetMapping("/api/authentication/not-authenticated") // 로그인 하지 않은 사용자가 접근할 때 리다이렉트되는 페이지
     public ApiResponseWrapper<Object> notAuthenticated(@RequestParam("redirectURI") String redirectURI) {
         RedirectUriRequestDto requestDto = RedirectUriRequestDto.of(redirectURI);
 
         return ResponseUtils.error("인증되지 않은 사용자의 요청입니다.", requestDto);
     }
 
+    @GetMapping("/error")
+    public ApiResponseWrapper<String> errorMapping(){
+        return ResponseUtils.error("에러");
+    }
 }
