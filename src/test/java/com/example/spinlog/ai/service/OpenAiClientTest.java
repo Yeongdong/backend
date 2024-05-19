@@ -1,63 +1,45 @@
 package com.example.spinlog.ai.service;
 
-import com.example.spinlog.ai.dto.*;
+import com.example.spinlog.ai.dto.AiRequestDto;
+import com.example.spinlog.ai.dto.CommentRequest;
+import com.example.spinlog.ai.dto.CommentResponse;
+import com.example.spinlog.ai.dto.Message;
 import com.example.spinlog.article.dto.WriteArticleRequestDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
-import com.example.spinlog.article.service.ArticleService;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {WireMockConfig.class})
 @ActiveProfiles("test")
-@TestPropertySource(locations = "classpath:application-test.yml")
 @Transactional
-@Slf4j
-public class AiServiceTest {
+public class OpenAiClientTest {
 
-    @Value("${apiKey}")
-    private String testApiKey;
+    private final static String AI_MODEL = "gpt-3.5-turbo";
+    private final static String AI_ROLE = "system";
+    private final static String USER_ROLE = "user";
+    private final static String MESSAGE_TO_AI = "You are collecting emotional and consumption data from users in their 20s and 30s. Connect emotions and consumption and provide users with consumption-related advice in one sentence in Korean.";
 
-    @Autowired
+    @MockBean
     private OpenAiClient openAiClient;
-
-    @Mock
-    private ArticleService articleService;
-
-    @InjectMocks
-    private AiServiceImpl aiService;
-
-    @Autowired
-    private WireMockServer wireMockServer;
 
     @Autowired  // userId가 필요해 Autowired 설정
     private UserRepository userRepository;
@@ -65,27 +47,11 @@ public class AiServiceTest {
     @Autowired  // articleId가 필요해 Autowired 설정
     private ArticleRepository articleRepository;
 
-    private final static String AI_MODEL = "gpt-3.5-turbo";
-    private final static String AI_ROLE = "system";
-    private final static String USER_ROLE = "user";
-    private final static String MESSAGE_TO_AI = "Your identity is as an advice giver.\n" +
-            "This data shows that people in their 20s and 30s made consumption due to emotional expression. Could you give me some advice on the connection between emotions and consumption?\n" +
-            "===Please answer by referring to the rules below==\n" +
-            "First of all, empathize with the user. At this time, mention emotions, events, and purchase details.\n" +
-            "Please tell us 3 areas for improvement along with reasons.\n" +
-            "Please use a total of 50 Korean words.\n" +
-            "Speak in a friendly manner, as if you were talking to a friend.";
-
-    @BeforeEach
-    void setUp() {
-        AiMocks.setupAiMockResponse(wireMockServer);
-    }
-
     @Test
     @WithMockCustomOAuth2User(
             provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
     )
-    void api_요청_성공_테스트() throws IOException {
+    void testGetAiComment() {
         // Given
         CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String authenticationName = oAuth2User.getOAuth2Response().getAuthenticationName();
@@ -116,7 +82,8 @@ public class AiServiceTest {
                 .articleId(article.getArticleId())
                 .build();
 
-        List<Message> messages = new ArrayList<>();
+        String authorization = "test-key";
+
         Message message1 = Message.builder()
                 .role(AI_ROLE)
                 .content(MESSAGE_TO_AI)
@@ -125,16 +92,21 @@ public class AiServiceTest {
                 .role(USER_ROLE)
                 .content(requestDto.toString())
                 .build();
-        messages.add(message1);
-        messages.add(message2);
+        List<Message> messages = Arrays.asList(message1, message2);
 
         CommentRequest commentRequest = CommentRequest.builder()
                 .model(AI_MODEL)
                 .messages(messages)
                 .build();
+        CommentResponse fakeResponse = new CommentResponse();
 
-        CommentResponse commentResponse = openAiClient.getAiComment(testApiKey, commentRequest);
+        when(openAiClient.getAiComment(authorization, commentRequest))
+                .thenReturn(fakeResponse);
 
-        assertThat(commentResponse).isNotNull();
+        // When
+        CommentResponse response = openAiClient.getAiComment(authorization, commentRequest);
+
+        // Then
+        assertThat(response).isNotNull();
     }
 }
