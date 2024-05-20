@@ -34,7 +34,7 @@ public class ArticleController {
     }
 
     /**
-     * 게시글 리스트 => 쿼리 추가 수정 필요
+     * 게시글 리스트
      *
      * @param pageable 페이지값, searchCondition 검색조건
      * @return 게시글 리스트를 포함하는 ResponseEntity
