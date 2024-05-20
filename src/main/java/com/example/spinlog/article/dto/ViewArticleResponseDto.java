@@ -1,6 +1,7 @@
 package com.example.spinlog.article.dto;
 
 import com.example.spinlog.article.entity.Article;
+import com.example.spinlog.utils.NullDataConverter;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 
@@ -19,6 +20,11 @@ public class ViewArticleResponseDto {
     private String registerType;
 
     public static ViewArticleResponseDto from(Article viewArticle, ModelMapper modelMapper) {
-        return modelMapper.map(viewArticle, ViewArticleResponseDto.class);
+        ViewArticleResponseDto responseDto = modelMapper.map(viewArticle, ViewArticleResponseDto.class);
+
+        String nullChecked = NullDataConverter.convertString(responseDto.getAiComment());
+        responseDto.setAiComment(nullChecked);
+
+        return responseDto;
     }
 }

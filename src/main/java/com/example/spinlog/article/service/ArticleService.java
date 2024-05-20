@@ -29,6 +29,7 @@ public class ArticleService {
         User user = getUser(userName);
         Article articleEntity = requestDto.toEntity(user);
         Article savedArticle = articleRepository.save(articleEntity);
+        user.addArticle(savedArticle);
         log.info("게시글이 성공적으로 저장되었습니다. ID: {}", savedArticle.getArticleId());
         return WriteArticleResponseDto.from(savedArticle, modelMapper);
     }
@@ -66,6 +67,7 @@ public class ArticleService {
         Article deleteArticle = findArticleById(id);
         validateUserArticle(user, deleteArticle);
         articleRepository.delete(deleteArticle);
+        user.removeArticle(deleteArticle);
         log.info("ID {}의 게시글이 성공적으로 삭제되었습니다.", id);
     }
 

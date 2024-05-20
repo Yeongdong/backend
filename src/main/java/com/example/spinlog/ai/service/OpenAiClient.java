@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@FeignClient(name = "OpenAiClient", url = "https://api.openai.com/v1/chat/completions")
+@FeignClient(name = "OpenAiClient", url = "${openai.url}")
 public interface OpenAiClient {
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     CommentResponse getAiComment(@RequestHeader("Authorization") String authorization, @RequestBody CommentRequest commentRequest);

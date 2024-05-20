@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,4 +78,13 @@ public class User extends BaseTimeEntity {
         this.budget = budget;
     }
 
+    public void addArticle(Article article) {
+        articles.add(article);
+        article.setUser(this);
+    }
+
+    public void removeArticle(Article article) {
+        articles.remove(article);
+        article.setUser(null);
+    }
 }
