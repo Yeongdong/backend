@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.spinlog.statistics.repository.GenderStatisticsRepository">
+    <select id="getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate" resultType="GenderEmotionAmountAverageDto">
+        select u.gender, a.emotion, round(avg(a.amount), -3) as amountAverage
+        from articles a join users u on(a.user_id = u.user_id)
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
+        group by u.gender, a.emotion
+    </select>
+
+    <select id="getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate" resultType="GenderDailyAmountSumDto">
+        select u.gender, date(a.spend_date) as localDate, sum(a.amount) as amountSum
+        from articles a join users u on(a.user_id = u.user_id)
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
+        group by u.gender, localDate
+    </select>
+
+    <select id="getAllMemosByGenderBetweenStartDateAndEndDate" resultType="MemoDto">
+        select a.content, a.event, a.thought, a.reason, a.improvements
+        from articles a join users u on(a.user_id = u.user_id)
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate} and u.gender = #{gender}
+    </select>
+
+    <select id="getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate" resultType="GenderSatisfactionAverageDto">
+        select u.gender, round(avg(a.satisfaction), 1) as satisfactionAverage
+        from articles a join users u on(a.user_id = u.user_id)
+        where a.register_type = #{registerType} and a.spend_date between #{startDate} and #{endDate}
+        group by u.gender
+    </select>
+</mapper>

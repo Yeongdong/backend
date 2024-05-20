@@ -1,10 +1,5 @@
 package com.example.spinlog.global.response;
 
-import com.example.spinlog.global.exception.codes.ErrorCode;
-
-import java.util.Collections;
-import java.util.List;
-
 public class ResponseUtils {
 
     // 요청 성공 => 응답 데이터 O
@@ -26,21 +21,18 @@ public class ResponseUtils {
     }
 
     // 에러 발생
-    public static <T> ApiResponseWrapper<T> error(ErrorCode errorCode, ErrorResponse errorResponse) {
+    public static <T> ApiResponseWrapper<T> error(String message) {
         return ApiResponseWrapper.<T>builder()
                 .success(false)
-                .message(errorCode.getMessage())
-                .data(null)
-                .errors(List.of(errorResponse))
+                .message(message)
                 .build();
     }
 
-    public static <T> ApiResponseWrapper<T> error(ErrorCode errorCode) {
+    public static <T> ApiResponseWrapper<T> error(String message, T response) {
         return ApiResponseWrapper.<T>builder()
                 .success(false)
-                .message(errorCode.getMessage())
-                .data(null)
-                .errors(Collections.emptyList())
+                .message(message)
+                .data(response)
                 .build();
     }
 }

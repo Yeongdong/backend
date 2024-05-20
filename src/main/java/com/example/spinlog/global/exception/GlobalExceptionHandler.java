@@ -1,36 +1,47 @@
 package com.example.spinlog.global.exception;
 
-import com.example.spinlog.global.exception.codes.ErrorCode;
 import com.example.spinlog.global.response.ApiResponseWrapper;
-import com.example.spinlog.global.response.ErrorResponse;
 import com.example.spinlog.global.response.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
     /**
-     * 유효성 검사에 실패시 발생하는 예외를 처리하는 메서드
+     * NullPointerException 예외 처리
+     * 해당 예외가 발생하면 HTTP 400 Bad Request 상태 코드 반환
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponseWrapper<ErrorResponse>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("MethodArgumentNotValidException", e);
-        ErrorResponse response = ErrorResponse.of(e.getBindingResult());
-        return ResponseEntity.badRequest().body(ResponseUtils.error(ErrorCode.INVALID_INPUT_VALUE, response));
+    @ExceptionHandler(NullPointerException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponseWrapper<Void> handleNullPointerException(NullPointerException e) {
+        return ResponseUtils.error("Requested resource is null");
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<ApiResponseWrapper<ErrorResponse>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.error("MethodArgumentTypeMismatchException", e);
-        return ResponseEntity.badRequest().body(ResponseUtils.error(ErrorCode.INVALID_TYPE_VALUE));
+    /**
+     * NoSuchElementException 예외 처리
+     * 해당 예외가 발생하면 HTTP 404 Not Found 상태 코드 반환
+     */
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponseWrapper<Void> handleNoSuchElementException(NoSuchElementException e) {
+        return ResponseUtils.error("Requested resource not found");
+    }
+
+    /**
+     * IllegalArgumentException 예외 처리
+     * 해당 예외가 발생하면 HTTP 400 Bad Request 상태 코드 반환
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponseWrapper<Void> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseUtils.error("Invalid input");
     }
 
     /**
@@ -39,8 +50,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public <T> ResponseEntity<ApiResponseWrapper<ErrorResponse>> handleGenericException(Exception e) {
-        log.error("Exception: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseUtils.error(ErrorCode.INTERNAL_SERVER_ERROR));
+    public ApiResponseWrapper<Void> handleGenericException(Exception e) {
+        log.warn(e.getMessage());
+        return ResponseUtils.error(e.getMessage());
     }
 }
