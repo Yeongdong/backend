@@ -1,39 +1,26 @@
 package com.example.spinlog.dashboard.service;
 
-import com.example.spinlog.article.dto.ViewArticleResponseDto;
-import com.example.spinlog.article.dto.WriteArticleRequestDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.dashboard.dto.DashboardResponseDto;
-import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
-import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
-import com.example.spinlog.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -64,7 +51,11 @@ class DashboardServiceTest {
                 .budget(12345)
                 .authenticationName("testUser")
                 .build();
+    }
 
+    @Test
+    void 게시글_빈값_조회() {
+        // Given
         article1 = Article.builder()
                 .user(user)
                 .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0))
@@ -80,11 +71,7 @@ class DashboardServiceTest {
                 .build();
 
         user.addArticle(article1);
-    }
 
-    @Test
-    void 게시글_빈값_조회() {
-        // Given
         when(userRepository.findByAuthenticationName("testUser")).thenReturn(Optional.ofNullable(user));
 
         DashboardResponseDto responseDto = dashboardService.requestData("testUser", "20240510", "SAVE");
@@ -134,9 +121,9 @@ class DashboardServiceTest {
 
         DashboardResponseDto responseDto = dashboardService.requestData("testUser", "20240510", "SPEND");
 
-        assertEquals(3.75f, responseDto.getSatisfactionAverage());
-        assertEquals(2, responseDto.getEmotionAmountTotal().size());
-        assertEquals(2, responseDto.getDailyAmount().size());
+        assertThat(responseDto.getSatisfactionAverage()).isEqualTo(3.75F);
+        assertThat(responseDto.getEmotionAmountTotal().size()).isEqualTo(2);
+        assertThat(responseDto.getDailyAmount().size()).isEqualTo(2);
 
         verify(userRepository, times(1)).findByAuthenticationName("testUser");
     }
