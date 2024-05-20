@@ -79,4 +79,13 @@ public class User extends BaseTimeEntity {
         this.budget = budget;
     }
 
+    public void addArticle(Article article) {
+        articles.add(article);
+        article.setUser(this);
+    }
+
+    public void removeArticle(Article article) {
+        articles.remove(article);
+        article.setUser(null);
+    }
 }
