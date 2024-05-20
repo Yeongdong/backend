@@ -33,9 +33,9 @@ public class UserService {
     @Transactional
     @PreAuthorize("authentication")
     public void updateUserInfo(UpdateUserRequestDto requestDto) {
-        String authenticationName1 = SecurityUtils.getAuthenticationName();
+        String authenticationName = SecurityUtils.getAuthenticationName();
 
-        User foundUser = getUser(authenticationName1);
+        User foundUser = getUser(authenticationName);
         foundUser.change(requestDto.getMbti(), requestDto.getGender() ,requestDto.getBudget());
     }
 
