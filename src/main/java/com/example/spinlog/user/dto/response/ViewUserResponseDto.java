@@ -21,12 +21,12 @@ public class ViewUserResponseDto {
 
     private final Integer budget;
 
-    public static ViewUserResponseDto of(User user) {
+    public static ViewUserResponseDto of(User user, Integer budget) {
         return ViewUserResponseDto.builder()
                 .email(user.getEmail())
                 .mbti(user.getMbti().name())
                 .gender(user.getGender().name())
-                .budget(user.getBudget())
+                .budget(budget)
                 .build();
     }
 

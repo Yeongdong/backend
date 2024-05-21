@@ -12,11 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static org.springframework.security.oauth2.core.OAuth2ErrorCodes.INVALID_CLIENT;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +75,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return GoogleResponse.of(oAuth2User.getAttributes());
         }
 
-        throw new OAuth2AuthenticationException("Unsupported OAuth2Provider: " + oAuth2Provider);
+        throw new OAuth2AuthenticationException(new OAuth2Error(INVALID_CLIENT), "Unsupported provider: " + oAuth2Provider);
     }
 }

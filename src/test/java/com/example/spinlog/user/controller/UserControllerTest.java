@@ -1,9 +1,10 @@
 package com.example.spinlog.user.controller;
 
-import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
+import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
+import com.example.spinlog.user.entity.Budget;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
@@ -18,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDate;
+
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.GOOGLE;
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
 import static net.minidev.json.JSONValue.toJSONString;
@@ -31,7 +34,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,9 +59,9 @@ class UserControllerTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.INFP)
                 .gender(Gender.MALE)
-                .budget(99_999_999)
                 .build();
-        ViewUserResponseDto responseDto = ViewUserResponseDto.of(user);
+        user.addCurrentMonthBudget(99_999_999, LocalDate.now());
+        ViewUserResponseDto responseDto = ViewUserResponseDto.of(user, 99_999_999);
 
         when(userService.findUser())
                 .thenReturn(responseDto);
@@ -99,14 +101,14 @@ class UserControllerTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.ESTJ)
                 .gender(Gender.FEMALE)
-                .budget(12_345_678)
                 .authenticationName(oAuth2User.getOAuth2Response().getAuthenticationName())
                 .build();
+        Budget budget = user.addCurrentMonthBudget(12_345_678, LocalDate.now());
 
         System.out.println("user.getEmail() = " + user.getEmail());
         System.out.println("user.getMbti() = " + user.getMbti());
         System.out.println("user.getGender() = " + user.getGender());
-        System.out.println("user.getBudget() = " + user.getBudget());
+        System.out.println("user.getBudget() = " + budget.getBudget());
         System.out.println("user.getAuthenticationName() = " + user.getAuthenticationName());
 
         UpdateUserRequestDto requestDto = UpdateUserRequestDto.builder()
@@ -122,8 +124,8 @@ class UserControllerTest {
         */
         doAnswer(invocation -> {
             user.change(requestDto.getMbti(),
-                        requestDto.getGender(),
-                        requestDto.getBudget());
+                        requestDto.getGender());
+            budget.change(requestDto.getBudget());
             return null;
         }).when(userService).updateUserInfo(any(UpdateUserRequestDto.class));
 
@@ -151,7 +153,9 @@ class UserControllerTest {
 
         assertThat(user)
                 .hasFieldOrPropertyWithValue("mbti", Mbti.valueOf(requestDto.getMbti()))
-                .hasFieldOrPropertyWithValue("gender", Gender.valueOf(requestDto.getGender()))
+                .hasFieldOrPropertyWithValue("gender", Gender.valueOf(requestDto.getGender()));
+
+        assertThat(budget)
                 .hasFieldOrPropertyWithValue("budget", requestDto.getBudget());
     }
 

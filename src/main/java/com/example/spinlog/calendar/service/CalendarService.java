@@ -32,7 +32,7 @@ public class CalendarService {
 
         LocalDate parsedDate = DateUtils.parseStringToDate(selectDate);
 
-        Budget budget = Budget.of(user);
+        BudgetDto budgetDto = BudgetDto.of(user, parsedDate);
 
         List<MonthSpend> monthSpendList = createMonthSpendList(parsedDate, articles);
 
@@ -42,7 +42,7 @@ public class CalendarService {
                 .toList();
 
         return TotalCalendarResponseDto.builder()
-                .budget(budget)
+                .budgetDto(budgetDto)
                 .monthSpendList(monthSpendList)
                 .daySpendList(daySpendList)
                 .build();
