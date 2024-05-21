@@ -26,7 +26,7 @@ import java.time.LocalDate;
 @DynamicInsert
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BudgetEntity extends BaseTimeEntity {
+public class Budget extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "budget_id")
@@ -47,7 +47,7 @@ public class BudgetEntity extends BaseTimeEntity {
     private User user;
 
     @Builder
-    public BudgetEntity(Integer budget, Integer year, Integer month, User user) {
+    public Budget(Integer budget, Integer year, Integer month, User user) {
         this.budget = budget;
         this.year = year;
         this.month = month;

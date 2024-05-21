@@ -3,7 +3,7 @@ package com.example.spinlog.user.service;
 import com.example.spinlog.global.security.utils.SecurityUtils;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
-import com.example.spinlog.user.entity.BudgetEntity;
+import com.example.spinlog.user.entity.Budget;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class UserService {
         String authenticationName = SecurityUtils.getAuthenticationName();
 
         User foundUser = getUser(authenticationName);
-        BudgetEntity budget = foundUser.getCurrentMonthBudget();
+        Budget budget = foundUser.getCurrentMonthBudget();
 
         foundUser.change(requestDto.getMbti(), requestDto.getGender());
         budget.change(requestDto.getBudget());

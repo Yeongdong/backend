@@ -4,7 +4,7 @@ import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
-import com.example.spinlog.user.entity.BudgetEntity;
+import com.example.spinlog.user.entity.Budget;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.GOOGLE;
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
@@ -104,7 +103,7 @@ class UserControllerTest {
                 .gender(Gender.FEMALE)
                 .authenticationName(oAuth2User.getOAuth2Response().getAuthenticationName())
                 .build();
-        BudgetEntity budget = user.addCurrentMonthBudget(12_345_678, LocalDate.now());
+        Budget budget = user.addCurrentMonthBudget(12_345_678, LocalDate.now());
 
         System.out.println("user.getEmail() = " + user.getEmail());
         System.out.println("user.getMbti() = " + user.getMbti());

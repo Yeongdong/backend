@@ -48,7 +48,6 @@ class DashboardServiceTest {
                 .email("test@example.com")
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .budget(12345)
                 .authenticationName("testUser")
                 .build();
     }

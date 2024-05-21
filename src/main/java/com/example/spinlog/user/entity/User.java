@@ -23,7 +23,6 @@ import org.hibernate.annotations.DynamicInsert;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "users")
@@ -57,7 +56,7 @@ public class User extends BaseTimeEntity {
     private List<Article> articles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BudgetEntity> budgets = new ArrayList<>();
+    private List<Budget> budgets = new ArrayList<>();
 
     @Builder //Builder 에서 id 를 제외하기 위해, 클래스 레벨이 아닌 생성자 레벨에 @Builder 사용
     public User(String email, Mbti mbti, Gender gender, String authenticationName) {
@@ -85,7 +84,7 @@ public class User extends BaseTimeEntity {
         articles.remove(article);
         article.setUser(null);
     }
-    public BudgetEntity getCurrentMonthBudget() {
+    public Budget getCurrentMonthBudget() {
         LocalDate now = LocalDate.now();
 
         return budgets.stream()
@@ -96,8 +95,8 @@ public class User extends BaseTimeEntity {
                 );
     }
 
-    public BudgetEntity addCurrentMonthBudget(Integer budgetValue, LocalDate now) {
-        BudgetEntity budget = BudgetEntity.builder()
+    public Budget addCurrentMonthBudget(Integer budgetValue, LocalDate now) {
+        Budget budget = Budget.builder()
                 .budget(budgetValue)
                 .year(now.getYear())
                 .month(now.getMonthValue())
@@ -108,7 +107,7 @@ public class User extends BaseTimeEntity {
         return budget;
     }
 
-    public BudgetEntity getBudgetOf(LocalDate localDate) {
+    public Budget getBudgetOf(LocalDate localDate) {
         return budgets.stream()
                 .filter(budget -> budget.isMonthOf(localDate))
                 .findFirst()

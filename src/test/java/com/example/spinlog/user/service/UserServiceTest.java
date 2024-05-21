@@ -4,7 +4,7 @@ import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
-import com.example.spinlog.user.entity.BudgetEntity;
+import com.example.spinlog.user.entity.Budget;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
@@ -88,7 +88,7 @@ class UserServiceTest {
                 .authenticationName(authenticationName)
                 .build();
 
-        BudgetEntity budget = user.addCurrentMonthBudget(67890, LocalDate.now());
+        Budget budget = user.addCurrentMonthBudget(67890, LocalDate.now());
 
         when(userRepository.findByAuthenticationName(authenticationName))
                 .thenReturn(Optional.of(user));
