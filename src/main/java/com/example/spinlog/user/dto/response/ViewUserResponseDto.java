@@ -1,7 +1,6 @@
 package com.example.spinlog.user.dto.response;
 
 import com.example.spinlog.user.entity.User;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,12 +21,12 @@ public class ViewUserResponseDto {
 
     private final Integer budget;
 
-    public static ViewUserResponseDto of(@NotNull User user) {
+    public static ViewUserResponseDto of(User user, Integer budget) {
         return ViewUserResponseDto.builder()
                 .email(user.getEmail())
                 .mbti(user.getMbti().name())
                 .gender(user.getGender().name())
-                .budget(user.getBudget())
+                .budget(budget)
                 .build();
     }
 

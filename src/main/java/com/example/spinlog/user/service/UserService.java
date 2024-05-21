@@ -3,6 +3,7 @@ package com.example.spinlog.user.service;
 import com.example.spinlog.global.security.utils.SecurityUtils;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
+import com.example.spinlog.user.entity.BudgetEntity;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
@@ -27,16 +27,20 @@ public class UserService {
         String authenticationName = SecurityUtils.getAuthenticationName();
 
         User foundUser = getUser(authenticationName);
-        return ViewUserResponseDto.of(foundUser);
+        Integer budget = foundUser.getCurrentMonthBudget().getBudget();
+
+        return ViewUserResponseDto.of(foundUser, budget);
     }
 
-    @Transactional
     @PreAuthorize("authentication")
     public void updateUserInfo(UpdateUserRequestDto requestDto) {
         String authenticationName = SecurityUtils.getAuthenticationName();
 
         User foundUser = getUser(authenticationName);
-        foundUser.change(requestDto.getMbti(), requestDto.getGender() ,requestDto.getBudget());
+        BudgetEntity budget = foundUser.getCurrentMonthBudget();
+
+        foundUser.change(requestDto.getMbti(), requestDto.getGender());
+        budget.change(requestDto.getBudget());
     }
 
     private User getUser(String authenticationName) {

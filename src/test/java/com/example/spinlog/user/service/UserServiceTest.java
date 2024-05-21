@@ -4,6 +4,7 @@ import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.dto.request.UpdateUserRequestDto;
 import com.example.spinlog.user.dto.response.ViewUserResponseDto;
+import com.example.spinlog.user.entity.BudgetEntity;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
@@ -49,9 +51,10 @@ class UserServiceTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .budget(12345)
                 .authenticationName(authenticationName)
                 .build();
+
+        user.addCurrentMonthBudget(12345, LocalDate.now());
 
         when(userRepository.findByAuthenticationName(authenticationName))
                 .thenReturn(Optional.of(user));
@@ -82,9 +85,10 @@ class UserServiceTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .budget(12345)
                 .authenticationName(authenticationName)
                 .build();
+
+        BudgetEntity budget = user.addCurrentMonthBudget(67890, LocalDate.now());
 
         when(userRepository.findByAuthenticationName(authenticationName))
                 .thenReturn(Optional.of(user));
@@ -101,7 +105,8 @@ class UserServiceTest {
         assertThat(user)
                 .hasFieldOrPropertyWithValue("email", "naveremail@kakao.com")
                 .hasFieldOrPropertyWithValue("mbti", Mbti.ENFJ)
-                .hasFieldOrPropertyWithValue("gender", Gender.FEMALE)
+                .hasFieldOrPropertyWithValue("gender", Gender.FEMALE);
+        assertThat(budget)
                 .hasFieldOrPropertyWithValue("budget", 67890);
         verify(userRepository, times(1)).findByAuthenticationName(authenticationName);
     }

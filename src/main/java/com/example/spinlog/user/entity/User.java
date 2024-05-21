@@ -12,8 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,10 +19,11 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "users")
@@ -51,21 +50,20 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Gender gender;
 
-    @Min(0) @Max(100_000_000) //TODO validation 코드를 entity 에 넣어도 되는지
-    private Integer budget;
-
     @Column(nullable = false, unique = true)
     private String authenticationName; //oauth2 provider + "_" + oauth2 provider id
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Article> articles = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BudgetEntity> budgets = new ArrayList<>();
+
     @Builder //Builder 에서 id 를 제외하기 위해, 클래스 레벨이 아닌 생성자 레벨에 @Builder 사용
-    public User(String email, Mbti mbti, Gender gender, Integer budget, String authenticationName) {
+    public User(String email, Mbti mbti, Gender gender, String authenticationName) {
         this.email = email;
         this.mbti = mbti;
         this.gender = gender;
-        this.budget = budget;
         this.authenticationName = authenticationName;
     }
 
@@ -73,10 +71,38 @@ public class User extends BaseTimeEntity {
         this.email = email;
     }
 
-    public void change(String mbti, String gender, Integer budget) {
+    public void change(String mbti, String gender) {
         this.mbti = Mbti.valueOf(mbti);
         this.gender = Gender.valueOf(gender);
-        this.budget = budget;
     }
 
+    public BudgetEntity getCurrentMonthBudget() {
+        LocalDate now = LocalDate.now();
+
+        return budgets.stream()
+                .filter(budget -> budget.isMonthOf(now))
+                .findFirst()
+                .orElseGet(() ->
+                        addCurrentMonthBudget(0, now)
+                );
+    }
+
+    public BudgetEntity addCurrentMonthBudget(Integer budgetValue, LocalDate now) {
+        BudgetEntity budget = BudgetEntity.builder()
+                .budget(budgetValue)
+                .year(now.getYear())
+                .month(now.getMonthValue())
+                .user(this)
+                .build();
+        this.budgets.add(budget);
+
+        return budget;
+    }
+
+    public BudgetEntity getBudgetOf(LocalDate localDate) {
+        return budgets.stream()
+                .filter(budget -> budget.isMonthOf(localDate))
+                .findFirst()
+                .orElse(null);
+    }
 }

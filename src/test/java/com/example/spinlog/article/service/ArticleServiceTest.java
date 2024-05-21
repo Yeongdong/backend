@@ -1,6 +1,11 @@
 package com.example.spinlog.article.service;
 
-import com.example.spinlog.article.dto.*;
+import com.example.spinlog.article.dto.SearchCondRequestDto;
+import com.example.spinlog.article.dto.UpdateArticleRequestDto;
+import com.example.spinlog.article.dto.ViewArticleResponseDto;
+import com.example.spinlog.article.dto.ViewListResponseDto;
+import com.example.spinlog.article.dto.WriteArticleRequestDto;
+import com.example.spinlog.article.dto.WriteArticleResponseDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
@@ -11,7 +16,6 @@ import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +26,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
@@ -58,7 +62,6 @@ public class ArticleServiceTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .budget(12345)
                 .authenticationName(authenticationName)
                 .build();
         user = userRepository.save(buildUser);
@@ -284,7 +287,6 @@ public class ArticleServiceTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .budget(12345)
                 .authenticationName(authenticationName)
                 .build();
         User diffUser = userRepository.save(buildUser);

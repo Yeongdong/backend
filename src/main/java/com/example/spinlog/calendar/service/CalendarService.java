@@ -32,7 +32,7 @@ public class CalendarService {
 
         LocalDate parsedDate = DateUtils.parseStringToDate(selectDate);
 
-        Budget budget = Budget.of(user);
+        Budget budget = Budget.of(user, parsedDate);
 
         List<MonthSpend> monthSpendList = createMonthSpendList(parsedDate, articles);
 
