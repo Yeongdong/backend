@@ -76,6 +76,15 @@ public class User extends BaseTimeEntity {
         this.gender = Gender.valueOf(gender);
     }
 
+    public void addArticle(Article article) {
+        articles.add(article);
+        article.setUser(this);
+    }
+
+    public void removeArticle(Article article) {
+        articles.remove(article);
+        article.setUser(null);
+    }
     public BudgetEntity getCurrentMonthBudget() {
         LocalDate now = LocalDate.now();
 
