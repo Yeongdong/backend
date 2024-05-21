@@ -8,13 +8,13 @@ import java.util.List;
 
 @Data
 public class TotalCalendarResponseDto {
-    private Budget budget;
+    private BudgetDto budgetDto;
     private List<MonthSpend> monthSpendList;
     private List<DaySpend> daySpendList;
 
     @Builder
-    public TotalCalendarResponseDto(Budget budget, List<MonthSpend> monthSpendList, List<DaySpend> daySpendList) {
-        this.budget = budget;
+    public TotalCalendarResponseDto(BudgetDto budgetDto, List<MonthSpend> monthSpendList, List<DaySpend> daySpendList) {
+        this.budgetDto = budgetDto;
         this.monthSpendList = NullDataConverter.convertList(monthSpendList);
         this.daySpendList = NullDataConverter.convertList(daySpendList);
     }

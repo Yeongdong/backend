@@ -6,8 +6,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class SecurityUtils {
 
     public static String getAuthenticationName() {
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return oAuth2User.getOAuth2Response().getAuthenticationName();
+        try {
+            CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return oAuth2User.getOAuth2Response().getAuthenticationName();
+        } catch (NullPointerException e) {
+            throw new SecurityException("The SecurityContextHolder doesn't contain the instance of CustomOAuth2User." ,e);
+        }
     }
 
 }
