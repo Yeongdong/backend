@@ -302,8 +302,25 @@ public class ArticleServiceTest {
     )
     void 게시글_수정() {
         UpdateArticleRequestDto updateDto = UpdateArticleRequestDto.builder()
+                //private String content;
+                //    private String event;
+                //    private String spendDate;
+                //    private String thought;
+                //    private String emotion;
+                //    private Float satisfaction;
+                //    private String reason;
+                //    private String improvements;
+                //    private Integer amount;
+                //    private String registerType;
+                .content("Test Content")
+                .event("Test event")
                 .spendDate("2024-05-05T12:34:56")
+                .thought("Test thought")
                 .emotion(Emotion.SAD.toString())
+                .satisfaction(5F)
+                .reason("Test Reason")
+                .improvements("Test Improvements")
+                .amount(123)
                 .registerType(RegisterType.SAVE.toString())
                 .build();
 
