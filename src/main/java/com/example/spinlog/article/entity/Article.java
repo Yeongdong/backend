@@ -5,6 +5,8 @@ import com.example.spinlog.global.entity.BaseTimeEntity;
 import com.example.spinlog.user.entity.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,19 +31,40 @@ public class Article extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;  // 회원
+
+    @NotEmpty
     private String content;  // 내용
+
+    @NotNull
     private LocalDateTime spendDate;    // 소비 날짜
+
+    @Nullable
     private String event; // 사건
+
+    @Nullable
     private String thought; // 생각
+
     @Enumerated(EnumType.STRING)
+    @NotNull
     private Emotion emotion; // 감정
+
+    @NotNull
     private Float satisfaction; // 만족도
+
+    @Nullable
     private String reason; // 이유
+
+    @Nullable
     private String improvements; // 개선점
+
     @Nullable
     private String aiComment; // AI 한마디
+
+    @NotNull
     private Integer amount; // 금액
+
     @Enumerated(EnumType.STRING)
+    @NotNull
     private RegisterType registerType; // 지출과 소비
 
     @Builder

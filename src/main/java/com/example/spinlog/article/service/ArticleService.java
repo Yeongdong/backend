@@ -3,6 +3,9 @@ package com.example.spinlog.article.service;
 import com.example.spinlog.article.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
+import com.example.spinlog.global.error.exception.article.ArticleNotFoundException;
+import com.example.spinlog.global.error.exception.user.UnauthorizedArticleRequestException;
+import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 @Service
 @Slf4j
@@ -73,17 +74,17 @@ public class ArticleService {
 
     public Article findArticleById(Long id) {
         return articleRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("ID " + id + "에 해당하는 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ArticleNotFoundException(String.valueOf(id)));
     }
 
     private User getUser(String userName) {
         return userRepository.findByAuthenticationName(userName)
-                .orElseThrow(() -> new NoSuchElementException(userName + "에 해당하는 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException(userName));
     }
 
     private void validateUserArticle(User user, Article article) {
         if (!article.getUser().equals(user)) {
-            throw new IllegalArgumentException("해당 게시글에 대한 권한이 없습니다.");
+            throw new UnauthorizedArticleRequestException("해당 게시글에 대한 권한이 없습니다.");
         }
     }
 }

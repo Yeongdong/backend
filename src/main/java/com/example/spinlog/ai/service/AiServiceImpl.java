@@ -3,6 +3,7 @@ package com.example.spinlog.ai.service;
 import com.example.spinlog.ai.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.service.ArticleService;
+import com.example.spinlog.global.error.exception.ai.EmptyCommentException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -99,7 +100,7 @@ public class AiServiceImpl implements AiService {
                 .stream()
                 .findFirst()
                 .map(choice -> choice.getMessage().getContent())
-                .orElseThrow(() -> new IllegalStateException("AI 한마디 가져오기 실패"));
+                .orElseThrow(() -> new EmptyCommentException("fail to get ai comment"));
         log.debug("AI 한마디를 성공적으로 요청했습니다.");
         return aiComment;
     }

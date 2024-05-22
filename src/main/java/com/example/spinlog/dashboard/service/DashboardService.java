@@ -5,6 +5,7 @@ import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.dashboard.dto.DailyAmount;
 import com.example.spinlog.dashboard.dto.DashboardResponseDto;
 import com.example.spinlog.dashboard.dto.EmotionAmount;
+import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import com.example.spinlog.utils.DateUtils;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +61,7 @@ public class DashboardService {
     private User getUser(String userName) {
         return userRepository.findByAuthenticationName(userName).stream()
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException(userName + "에 해당하는 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException(userName));
     }
 
     private List<Article> filterArticlesByDateAndRegisterType(List<Article> articles, LocalDate parsedDate, String registerType) {
