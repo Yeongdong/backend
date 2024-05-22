@@ -49,6 +49,7 @@ public class GenderStatisticsService {
                 .entrySet().stream()
                 .map((e) ->
                         GenderEmotionAmountAverageResponse.of(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(GenderEmotionAmountAverageResponse::getGender))
                 .toList();
     }
 
@@ -84,6 +85,7 @@ public class GenderStatisticsService {
                 .entrySet().stream()
                 .map((e) ->
                         GenderDailyAmountSumResponse.of(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(GenderDailyAmountSumResponse::getGender))
                 .toList();
     }
 

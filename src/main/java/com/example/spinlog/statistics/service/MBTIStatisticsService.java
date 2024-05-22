@@ -57,6 +57,7 @@ public class MBTIStatisticsService {
                                 .entrySet().stream()
                                 .map((e) ->
                                         MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage.of(e.getKey(), e.getValue()))
+                                .sorted(Comparator.comparing(MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage::getMbtiFactor))
                                 .toList())
                 .build();
     }
@@ -95,6 +96,7 @@ public class MBTIStatisticsService {
                                 .entrySet().stream()
                                 .map((e) ->
                                         MBTIDailyAmountSumResponse.MBTIDailyAmountSum.of(e.getKey(), e.getValue()))
+                                .sorted(Comparator.comparing(MBTIDailyAmountSumResponse.MBTIDailyAmountSum::getMbtiFactor))
                                 .toList())
                 .build();
     }
