@@ -1,23 +1,27 @@
 package com.example.spinlog.statistics.service;
 
+import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
+import com.example.spinlog.statistics.entity.MBTIFactor;
+import com.example.spinlog.statistics.repository.dto.*;
 import com.example.spinlog.statistics.service.dto.MBTIDailyAmountSumResponse;
 import com.example.spinlog.statistics.service.dto.MBTIEmotionAmountAverageResponse;
 import com.example.spinlog.statistics.service.dto.MBTISatisfactionAverageResponse;
 import com.example.spinlog.statistics.service.dto.MBTIWordFrequencyResponse;
 import com.example.spinlog.statistics.repository.MBTIStatisticsRepository;
-import com.example.spinlog.statistics.repository.dto.MBTIDailyAmountSumDto;
-import com.example.spinlog.statistics.repository.dto.MBTIEmotionAmountAverageDto;
-import com.example.spinlog.statistics.repository.dto.MemoDto;
 import com.example.spinlog.statistics.loginService.AuthenticatedUserService;
+import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -42,11 +46,12 @@ public class MBTIStatisticsService {
             RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MBTIEmotionAmountAverageDto> dtos = mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
+        List<MBTIEmotionAmountAverageDto> dtosWithZeroPadding = addZeroAverageForMissingGenderEmotionPairs(dtos);
 
         return MBTIEmotionAmountAverageResponse.builder()
                 .mbti(authenticatedUserService.getUserMBTI())
                 .mbtiEmotionAmountAverages(
-                        dtos.stream()
+                        dtosWithZeroPadding.stream()
                                 .collect(
                                         groupingBy(MBTIEmotionAmountAverageDto::getMbtiFactor))
                                 .entrySet().stream()
@@ -56,16 +61,35 @@ public class MBTIStatisticsService {
                 .build();
     }
 
+    private List<MBTIEmotionAmountAverageDto> addZeroAverageForMissingGenderEmotionPairs(List<MBTIEmotionAmountAverageDto> dtos) {
+        Stream<MBTIEmotionAmountAverageDto> zeroStream = Arrays.stream(Emotion.values())
+                .flatMap(e ->
+                        Arrays.stream(MBTIFactor.values())
+                                .map(f -> new MBTIEmotionAmountAverageDto(f, e, 0L)))
+                .filter(zeroDto -> dtos.stream()
+                        .noneMatch(dto -> dto.getMbtiFactor() == zeroDto.getMbtiFactor()
+                                && dto.getEmotion() == zeroDto.getEmotion()));
+
+        Comparator<MBTIEmotionAmountAverageDto> byMbtiFactorAndEmotion = Comparator
+                .comparing(MBTIEmotionAmountAverageDto::getMbtiFactor)
+                .thenComparing(MBTIEmotionAmountAverageDto::getEmotion);
+
+        return Stream.concat(dtos.stream(), zeroStream)
+                .sorted(byMbtiFactorAndEmotion)
+                .toList();
+    }
+
     public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast90Days(
             LocalDate today,
             RegisterType registerType) {
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MBTIDailyAmountSumDto> dtos = mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
+        List<MBTIDailyAmountSumDto> dtosWithZeroPadding = addZeroAverageForMissingGenderLocalDatePairs(dtos);
 
         return MBTIDailyAmountSumResponse.builder()
                 .mbti(authenticatedUserService.getUserMBTI())
                 .mbtiDailyAmountSums(
-                        dtos.stream()
+                        dtosWithZeroPadding.stream()
                                 .collect(
                                         groupingBy(MBTIDailyAmountSumDto::getMbtiFactor))
                                 .entrySet().stream()
@@ -73,6 +97,30 @@ public class MBTIStatisticsService {
                                         MBTIDailyAmountSumResponse.MBTIDailyAmountSum.of(e.getKey(), e.getValue()))
                                 .toList())
                 .build();
+    }
+
+    private List<MBTIDailyAmountSumDto> addZeroAverageForMissingGenderLocalDatePairs(List<MBTIDailyAmountSumDto> dtos) {
+        Stream<LocalDate> localDateRanges = IntStream.rangeClosed(1, PERIOD_CRITERIA)
+                .mapToObj(i -> LocalDate.now().minusDays(i));
+        Stream<MBTIDailyAmountSumDto> zeroStream = localDateRanges
+                .flatMap(d ->
+                        Arrays.stream(MBTIFactor.values())
+                                .map(f -> new MBTIDailyAmountSumDto(f, d, 0L)))
+                .filter(zeroDto -> dtos.stream()
+                        .noneMatch(dto -> dto.getMbtiFactor() == zeroDto.getMbtiFactor()
+                                && dto.getLocalDate().equals(zeroDto.getLocalDate())));
+
+        Comparator<MBTIDailyAmountSumDto> byMbtiFactorAndLocalDate = Comparator
+                .comparing(MBTIDailyAmountSumDto::getMbtiFactor)
+                .thenComparing(MBTIDailyAmountSumDto::getLocalDate);
+
+        return Stream.concat(
+                dtos.stream()
+                        .filter(d ->
+                                !d.getLocalDate().equals(LocalDate.now())),
+                zeroStream)
+                .sorted(byMbtiFactorAndLocalDate)
+                .toList();
     }
 
     public MBTIWordFrequencyResponse getWordFrequenciesLast90Days(

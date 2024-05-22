@@ -1,5 +1,6 @@
 package com.example.spinlog.statistics.service;
 
+import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.statistics.repository.GenderStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.*;
@@ -13,8 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -37,7 +41,9 @@ public class GenderStatisticsService {
         List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.
                 getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
 
-        return dtos.stream()
+        List<GenderEmotionAmountAverageDto> dtosWithZeroPadding = addZeroAverageForMissingGenderEmotionPairs(dtos);
+
+        return dtosWithZeroPadding.stream()
                 .collect(
                         groupingBy(GenderEmotionAmountAverageDto::getGender))
                 .entrySet().stream()
@@ -46,17 +52,63 @@ public class GenderStatisticsService {
                 .toList();
     }
 
+    private List<GenderEmotionAmountAverageDto> addZeroAverageForMissingGenderEmotionPairs(List<GenderEmotionAmountAverageDto> dtos) {
+        Stream<GenderEmotionAmountAverageDto> zeroStream = Arrays.stream(Emotion.values())
+                .flatMap(e ->
+                        Arrays.stream(Gender.values())
+                                .filter(g -> !g.equals(Gender.NONE))
+                                .map(g -> new GenderEmotionAmountAverageDto(g, e, 0L)))
+                .filter(zeroDto -> dtos.stream()
+                        .noneMatch(dto -> dto.getGender() == zeroDto.getGender()
+                                && dto.getEmotion() == zeroDto.getEmotion()));
+
+        Comparator<GenderEmotionAmountAverageDto> byGenderAndEmotion = Comparator
+                .comparing(GenderEmotionAmountAverageDto::getGender)
+                .thenComparing(GenderEmotionAmountAverageDto::getEmotion);
+
+        return Stream.concat(dtos.stream(), zeroStream)
+                .sorted(byGenderAndEmotion)
+                .toList();
+    }
+
     public List<GenderDailyAmountSumResponse> getAmountSumsEachGenderAndDayLast90Days(LocalDate today, RegisterType registerType) {
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<GenderDailyAmountSumDto> dtos = genderStatisticsRepository
                 .getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
 
-        return dtos.stream()
+        List<GenderDailyAmountSumDto> dtosWithZeroPadding = addZeroAverageForMissingGenderLocalDatePairs(dtos);
+
+        return dtosWithZeroPadding.stream()
                 .collect(
                         groupingBy(GenderDailyAmountSumDto::getGender))
                 .entrySet().stream()
                 .map((e) ->
                         GenderDailyAmountSumResponse.of(e.getKey(), e.getValue()))
+                .toList();
+    }
+
+    private List<GenderDailyAmountSumDto> addZeroAverageForMissingGenderLocalDatePairs(List<GenderDailyAmountSumDto> dtos) {
+        Stream<LocalDate> localDateRanges = IntStream.rangeClosed(1, PERIOD_CRITERIA)
+                .mapToObj(i -> LocalDate.now().minusDays(i));
+        Stream<GenderDailyAmountSumDto> zeroStream = localDateRanges
+                .flatMap(d ->
+                        Arrays.stream(Gender.values())
+                                .filter(g -> !g.equals(Gender.NONE))
+                                .map(g -> new GenderDailyAmountSumDto(g, d, 0L)))
+                .filter(zeroDto -> dtos.stream()
+                        .noneMatch(dto -> dto.getGender() == zeroDto.getGender()
+                                && dto.getLocalDate().equals(zeroDto.getLocalDate())));
+
+        Comparator<GenderDailyAmountSumDto> byGenderAndLocalDate = Comparator
+                .comparing(GenderDailyAmountSumDto::getGender)
+                .thenComparing(GenderDailyAmountSumDto::getLocalDate);
+
+        return Stream.concat(
+                dtos.stream()
+                        .filter(d ->
+                                !d.getLocalDate().equals(LocalDate.now())),
+                zeroStream)
+                .sorted(byGenderAndLocalDate)
                 .toList();
     }
 
