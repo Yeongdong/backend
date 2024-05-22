@@ -92,6 +92,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/oauth2/**", "/favicon.ico", "/error",
+                                "/actuator/**",
                                 "/api/authentication/logout-result",
                                 "/api/authentication/not-authenticated").permitAll()
                         .anyRequest().authenticated()
