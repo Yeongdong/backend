@@ -10,6 +10,8 @@ import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
+import com.example.spinlog.global.error.exception.article.ArticleNotFoundException;
+import com.example.spinlog.global.error.exception.user.UnauthorizedArticleRequestException;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
 import com.example.spinlog.user.entity.Gender;
@@ -26,9 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -271,7 +271,7 @@ public class ArticleServiceTest {
 
         // When, Then
         assertThatThrownBy(() -> articleService.getArticle(user.getAuthenticationName(), articleId))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(ArticleNotFoundException.class);
     }
 
     @Test
@@ -291,11 +291,9 @@ public class ArticleServiceTest {
                 .build();
         User diffUser = userRepository.save(buildUser);
 
-        Long articleId = 2L;
-
         // When
-        assertThatThrownBy(() -> articleService.getArticle(diffUser.getAuthenticationName(), articleId))
-                .isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> articleService.getArticle(diffUser.getAuthenticationName(), article.getArticleId()))
+                .isInstanceOf(UnauthorizedArticleRequestException.class);
     }
 
     @Test
