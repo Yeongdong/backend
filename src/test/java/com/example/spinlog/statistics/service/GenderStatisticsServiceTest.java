@@ -4,10 +4,7 @@ import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.statistics.repository.GenderStatisticsRepository;
 import com.example.spinlog.statistics.repository.dto.*;
-import com.example.spinlog.statistics.service.dto.GenderDailyAmountSumResponse;
-import com.example.spinlog.statistics.service.dto.GenderEmotionAmountAverageResponse;
-import com.example.spinlog.statistics.service.dto.GenderWordFrequencyResponse;
-import com.example.spinlog.statistics.service.dto.WordFrequency;
+import com.example.spinlog.statistics.service.dto.*;
 import com.example.spinlog.user.entity.Gender;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -22,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,20 +90,65 @@ class GenderStatisticsServiceTest {
                     statisticsService.getAmountAveragesEachGenderAndEmotionLast90Days(LocalDate.now(), null);
 
             // then
-            assertThat(responses)
+            List<GenderEmotionAmountAverageResponse> responsesWithZeroFiltering = filterNonZeroAndNonEmptyAverages(responses);
+
+            assertThat(responsesWithZeroFiltering)
                     .hasSize(2);
 
             List<Gender> genders = returned.stream()
                     .map(GenderEmotionAmountAverageDto::getGender)
                     .distinct()
                     .toList();
-            assertThat(responses)
+            assertThat(responsesWithZeroFiltering)
                     .extracting(GenderEmotionAmountAverageResponse::getGender)
                     .containsExactlyInAnyOrderElementsOf(genders);
 
-            for(var response: responses){
+            for(var response: responsesWithZeroFiltering){
                 assertEmotionAmountAveragesGroupedByGender(response, returned);
             }
+        }
+
+        @Test
+        void 레포지토리로부터_받은_데이터에_zero_padding을_수행한다() throws Exception {
+            // given
+            List<GenderEmotionAmountAverageDto> returned = List.of(
+                    new GenderEmotionAmountAverageDto(Gender.MALE, Emotion.PROUD, 1L),
+                    new GenderEmotionAmountAverageDto(Gender.MALE, Emotion.SAD, 2L)
+            );
+
+            when(genderStatisticsRepository.getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(any(), any(), any()))
+                    .thenReturn(returned);
+
+            // when
+            List<GenderEmotionAmountAverageResponse> responses =
+                    statisticsService.getAmountAveragesEachGenderAndEmotionLast90Days(LocalDate.now(), null);
+
+            // then
+            assertThat(responses)
+                    .extracting(GenderEmotionAmountAverageResponse::getGender)
+                    .containsExactlyInAnyOrderElementsOf(List.of(Gender.MALE, Gender.FEMALE));
+            assertThat(responses)
+                    .extracting(GenderEmotionAmountAverageResponse::getEmotionAmountAverages)
+                    .allMatch(list ->
+                            list.stream()
+                                    .map(GenderEmotionAmountAverageResponse.EmotionAmountAverage::getEmotion)
+                                    .allMatch(Arrays.asList(Emotion.values())::contains));
+        }
+
+        private static List<GenderEmotionAmountAverageResponse> filterNonZeroAndNonEmptyAverages(List<GenderEmotionAmountAverageResponse> responses) {
+            return responses.stream()
+                    .map(r -> {
+                        List<GenderEmotionAmountAverageResponse.EmotionAmountAverage> list =
+                                r.getEmotionAmountAverages().stream()
+                                        .filter(ea -> ea.getAmountAverage() != 0)
+                                        .toList();
+                        return GenderEmotionAmountAverageResponse.builder()
+                                .gender(r.getGender())
+                                .emotionAmountAverages(list)
+                                .build();
+                    })
+                    .filter(r -> !r.getEmotionAmountAverages().isEmpty())
+                    .toList();
         }
 
         private static void assertEmotionAmountAveragesGroupedByGender(
@@ -160,9 +204,9 @@ class GenderStatisticsServiceTest {
         void 레포지토리로부터_성별_일별_금액_총합_데이터를_받아_성별로_grouping해서_반환한다() throws Exception {
             // given
             List<GenderDailyAmountSumDto> returned = List.of(
-                    new GenderDailyAmountSumDto(Gender.MALE, LocalDate.now(), 1L),
+                    new GenderDailyAmountSumDto(Gender.MALE, LocalDate.now().minusDays(2L), 1L),
                     new GenderDailyAmountSumDto(Gender.MALE, LocalDate.now().minusDays(1L), 2L),
-                    new GenderDailyAmountSumDto(Gender.FEMALE, LocalDate.now(), 3L),
+                    new GenderDailyAmountSumDto(Gender.FEMALE, LocalDate.now().minusDays(2L), 3L),
                     new GenderDailyAmountSumDto(Gender.FEMALE, LocalDate.now().minusDays(1L), 4L)
             );
             when(genderStatisticsRepository.getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(any(), any(), any()))
@@ -173,20 +217,68 @@ class GenderStatisticsServiceTest {
                     statisticsService.getAmountSumsEachGenderAndDayLast90Days(LocalDate.now(), null);
 
             // then
-            assertThat(responses)
+            List<GenderDailyAmountSumResponse> responsesWithZeroFiltering = filterNonZeroAndNonEmptySums(responses);
+
+            assertThat(responsesWithZeroFiltering)
                     .hasSize(2);
 
             List<Gender> genders = returned.stream()
                     .map(GenderDailyAmountSumDto::getGender)
                     .distinct()
                     .toList();
-            assertThat(responses)
+            assertThat(responsesWithZeroFiltering)
                     .extracting(GenderDailyAmountSumResponse::getGender)
                     .containsExactlyInAnyOrderElementsOf(genders);
 
-            for(var response: responses){
+            for(var response: responsesWithZeroFiltering){
                 assertDailyAmountSumGroupedByGender(response, returned);
             }
+        }
+
+        @Test
+        void 레포지토리로부터_받은_데이터에_zero_padding을_수행한다() throws Exception {
+            // given
+            List<GenderDailyAmountSumDto> returned = List.of(
+                    new GenderDailyAmountSumDto(Gender.MALE, LocalDate.now().minusDays(2L), 1L),
+                    new GenderDailyAmountSumDto(Gender.MALE, LocalDate.now().minusDays(1L), 2L)
+            );
+            when(genderStatisticsRepository.getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(any(), any(), any()))
+                    .thenReturn(returned);
+
+            // when
+            List<GenderDailyAmountSumResponse> responses =
+                    statisticsService.getAmountSumsEachGenderAndDayLast90Days(LocalDate.now(), null);
+
+            // then
+            assertThat(responses)
+                    .extracting(GenderDailyAmountSumResponse::getGender)
+                    .containsExactlyInAnyOrderElementsOf(List.of(Gender.MALE, Gender.FEMALE));
+
+            List<LocalDate> localDateRanges = IntStream.rangeClosed(1, 90)
+                    .mapToObj(i -> LocalDate.now().minusDays(i))
+                    .toList();
+
+            for(GenderDailyAmountSumResponse r: responses){
+                assertThat(r.getDailyAmountSums())
+                        .extracting("date")
+                        .containsExactlyInAnyOrderElementsOf(localDateRanges);
+            }
+        }
+
+        private static List<GenderDailyAmountSumResponse> filterNonZeroAndNonEmptySums(List<GenderDailyAmountSumResponse> responses) {
+            return responses.stream()
+                    .map(r -> {
+                        List<GenderDailyAmountSumResponse.DailyAmountSum> list =
+                                r.getDailyAmountSums().stream()
+                                        .filter(ea -> ea.getAmountSum() != 0)
+                                        .toList();
+                        return GenderDailyAmountSumResponse.builder()
+                                .gender(r.getGender())
+                                .dailyAmountSums(list)
+                                .build();
+                    })
+                    .filter(r -> !r.getDailyAmountSums().isEmpty())
+                    .toList();
         }
 
         private static void assertDailyAmountSumGroupedByGender(
