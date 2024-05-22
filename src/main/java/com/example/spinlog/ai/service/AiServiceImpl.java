@@ -30,10 +30,10 @@ public class AiServiceImpl implements AiService {
             "Please follow the rules below when responding.\n" +
             "\n" +
             "Include an empathetic response based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details).\n" +
-            "Give three improvement suggestions.\n" +
+            "Give a improvement suggestions.\n" +
             "Provide advice based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details). Also, explain why you recommend each suggestion.\n" +
-            "Example: If you feel (emotion) and want to (action), how about trying this? Improvement suggestion 1, Improvement suggestion 2, Improvement suggestion 3\n" +
-            "Use 50 Korean words.\n" +
+            "Example: If you feel (emotion) and want to (action), how about trying this? Improvement suggestion" +
+            "Use up to 100 Korean characters.\n" +
             "Speak in a friendly tone as if talking to a friend, using the informal polite speech style (~해요) instead of the formal style (~다나까).\n" +
             "Include references to the latest trends, memes, or news in Korea.";
 
