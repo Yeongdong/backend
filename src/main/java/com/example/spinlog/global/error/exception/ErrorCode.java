@@ -12,6 +12,7 @@ public enum ErrorCode {
     INVALID_TYPE_VALUE("Invalid Type Value"),
     HANDLE_ACCESS_DENIED("Access is Denied"),
     NULL_POINTER("Null Pointer"),
+    BAD_REQUEST("Bad Request"),
 
     // business
     NOT_FOUND("Entity not found"),
@@ -26,7 +27,7 @@ public enum ErrorCode {
     EMPTY_COMMENT("AI Comment is empty"),
 
     // user
-    USER_NOT_FOUND("User not found");
+    USER_NOT_FOUND("User not found"), ;
 
     private final String message;
 
