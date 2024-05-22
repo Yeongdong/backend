@@ -67,6 +67,10 @@ dependencies {
 	// Mysql
 	implementation 'com.mysql:mysql-connector-j'
 
+	// monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// h2
 	runtimeOnly 'com.h2database:h2'
 	compileOnly 'org.projectlombok:lombok'
