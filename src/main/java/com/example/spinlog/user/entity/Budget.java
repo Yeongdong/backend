@@ -36,10 +36,10 @@ public class Budget extends BaseTimeEntity {
     @ColumnDefault("0")
     private Integer budget;
 
-    @Column(updatable = false)
+    @Column(name = "budget_year", updatable = false)
     private Integer year;
 
-    @Column(updatable = false)
+    @Column(name = "budget_month", updatable = false)
     private Integer month;
 
     @ManyToOne(fetch = FetchType.LAZY)
