@@ -11,8 +11,8 @@ public enum Emotion {
     EXCITED("EXCITED"),    //기분좋은
     FLUTTER("FLUTTER"),    //설렘
     PROUD("PROUD"),  //뿌듯
-    EVADED("EVADED"), //모르겠어요
-    SHY("SHY"); //부끄러움
+    SHY("SHY"), //부끄러움
+    EVADED("EVADED"); //모르겠어요
 
     Emotion(String name) {
     }

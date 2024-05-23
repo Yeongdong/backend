@@ -92,38 +92,42 @@ class GenderStatisticsRepositoryTest {
             Emotion emotion = Emotion.PROUD;
             List<Article> removedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(startDate.atStartOfDay().minusSeconds(1L))
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay().plusSeconds(1L))
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -150,38 +154,42 @@ class GenderStatisticsRepositoryTest {
             Emotion emotion = Emotion.PROUD;
             List<Article> removedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(filteredRegisterType)
                                     .emotion(emotion)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(filteredRegisterType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .emotion(emotion)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -208,29 +216,32 @@ class GenderStatisticsRepositoryTest {
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(2000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(3000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             Long amountAverage = (long) articles.stream()
                     .map(Article::getAmount)
                     .reduce(Integer::sum)
@@ -263,29 +274,32 @@ class GenderStatisticsRepositoryTest {
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1100)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(2200)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(3300)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             Long amountAverage = (long) articles.stream()
                     .map(Article::getAmount)
                     .reduce(Integer::sum)
@@ -317,34 +331,38 @@ class GenderStatisticsRepositoryTest {
             RegisterType registerType = RegisterType.SPEND;
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay().minusSeconds(1L))
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay().plusSeconds(1L))
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -370,34 +388,38 @@ class GenderStatisticsRepositoryTest {
             RegisterType survivedRegisterType = RegisterType.SAVE;
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(filteredRegisterType)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(filteredRegisterType)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -423,29 +445,32 @@ class GenderStatisticsRepositoryTest {
             Emotion emotion = Emotion.PROUD;
             List<Article> articles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(2000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .emotion(emotion)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(3000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             long sum = articles.stream()
                     .mapToLong(Article::getAmount)
                     .reduce(Long::sum).orElseGet(() -> -1L);
@@ -475,34 +500,38 @@ class GenderStatisticsRepositoryTest {
             String filteredContent = "filteredContent";
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(filteredRegisterType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(filteredContent)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(filteredRegisterType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(filteredContent)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(survivedContent)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(survivedContent)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -528,34 +557,38 @@ class GenderStatisticsRepositoryTest {
             String filteredContent = "filteredContent";
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay().minusSeconds(1L))
                                     .content(filteredContent)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay().plusSeconds(1L))
                                     .content(filteredContent)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(survivedContent)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(survivedContent)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -581,34 +614,38 @@ class GenderStatisticsRepositoryTest {
             String filteredContent = "filteredContent";
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(filteredContent)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(filteredContent)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .content(survivedContent)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .content(survivedContent)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -634,34 +671,38 @@ class GenderStatisticsRepositoryTest {
             RegisterType registerType = RegisterType.SPEND;
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay().minusSeconds(1L))
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay().plusSeconds(1L))
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -685,34 +726,38 @@ class GenderStatisticsRepositoryTest {
             RegisterType survivedRegisterType = RegisterType.SPEND;
             List<Article> filteredArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(filteredRegisterType)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(filteredUser)
                                     .registerType(filteredRegisterType)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             List<Article> survivedArticles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .spendDate(startDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(survivedRegisterType)
                                     .spendDate(endDate.atStartOfDay())
                                     .amount(1000)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
@@ -736,19 +781,21 @@ class GenderStatisticsRepositoryTest {
             RegisterType registerType = RegisterType.SPEND;
             List<Article> articles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .satisfaction(3.0f)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .satisfaction(4.0f)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             Float satisfactionAverage = articles.stream()
                     .map(Article::getSatisfaction)
                     .reduce(Float::sum)
@@ -778,19 +825,21 @@ class GenderStatisticsRepositoryTest {
             RegisterType registerType = RegisterType.SPEND;
             List<Article> articles = List.of(
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .satisfaction(3.04f)
-                                    .build()),
+                                    .build()
+                                    .createArticle()),
                     articleRepository.save(
-                            Article.builder()
+                            ArticleFactory.builder()
                                     .user(survivedUser)
                                     .registerType(registerType)
                                     .spendDate(endDate.atStartOfDay())
                                     .satisfaction(4.08f)
-                                    .build()));
+                                    .build()
+                                    .createArticle()));
             em.flush();
 
             // when
