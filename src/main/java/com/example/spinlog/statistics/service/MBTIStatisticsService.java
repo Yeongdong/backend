@@ -33,7 +33,7 @@ public class MBTIStatisticsService {
     private final MBTIStatisticsRepository mbtiStatisticsRepository;
     private final WordExtractionService wordExtractionService;
     private final AuthenticatedUserService authenticatedUserService;
-    private final int PERIOD_CRITERIA = 90;
+    private final int PERIOD_CRITERIA = 30;
 
     public MBTIStatisticsService(MBTIStatisticsRepository mbtiStatisticsRepository, WordExtractionService wordExtractionService, AuthenticatedUserService authenticatedUserService) {
         this.mbtiStatisticsRepository = mbtiStatisticsRepository;
@@ -41,7 +41,7 @@ public class MBTIStatisticsService {
         this.authenticatedUserService = authenticatedUserService;
     }
 
-    public MBTIEmotionAmountAverageResponse getAmountAveragesEachMBTIAndEmotionLast90Days(
+    public MBTIEmotionAmountAverageResponse getAmountAveragesEachMBTIAndEmotionLast30Days(
             LocalDate today,
             RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
@@ -80,7 +80,7 @@ public class MBTIStatisticsService {
                 .toList();
     }
 
-    public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast90Days(
+    public MBTIDailyAmountSumResponse getAmountSumsEachMBTIAndDayLast30Days(
             LocalDate today,
             RegisterType registerType) {
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
@@ -125,18 +125,18 @@ public class MBTIStatisticsService {
                 .toList();
     }
 
-    public MBTIWordFrequencyResponse getWordFrequenciesLast90Days(
+    public MBTIWordFrequencyResponse getWordFrequenciesLast30Days(
             LocalDate today,
             RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
-        // 최근 90일동안 모든 유저가 적은 메모의 빈도수 측정
+        // 최근 30일동안 모든 유저가 적은 메모의 빈도수 측정
         List<MemoDto> memos = mbtiStatisticsRepository.getAllMemosByMBTIBetweenStartDateAndEndDate(
                 registerType,
                 Mbti.NONE.toString(),
                 startDate,
                 today);
 
-        // 최근 90일 동안 나와 MBTI가 같은 유저가 적은 메모의 빈도수 측정
+        // 최근 30일 동안 나와 MBTI가 같은 유저가 적은 메모의 빈도수 측정
         Mbti mbti = authenticatedUserService.getUserMBTI();
 
         if(isNone(mbti)){
@@ -197,7 +197,7 @@ public class MBTIStatisticsService {
         return mbti == null || mbti == Mbti.NONE;
     }
 
-    public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast90Days(
+    public MBTISatisfactionAverageResponse getSatisfactionAveragesEachMBTILast30Days(
             LocalDate today,
             RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);

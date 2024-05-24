@@ -34,14 +34,14 @@ class MBTIStatisticsControllerTest {
     @Nested
     class MBTI별_감정별_금액_평균_통계_API {
         @Test
-        @DisplayName("/api/statistics/mbti/emotion/amounts/average 로 요청하면 getAmountAveragesEachMBTIAndEmotionLast90Days 메서드가 실행된다.")
+        @DisplayName("/api/statistics/mbti/emotion/amounts/average 로 요청하면 getAmountAveragesEachMBTIAndEmotionLast30Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getAmountAverage_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/emotion/amounts/average"));
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getAmountAveragesEachMBTIAndEmotionLast90Days(any(), any());
+                    .getAmountAveragesEachMBTIAndEmotionLast30Days(any(), any());
         }
 
         @Test
@@ -51,7 +51,7 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService)
-                    .getAmountAveragesEachMBTIAndEmotionLast90Days(any(), eq(RegisterType.SPEND));
+                    .getAmountAveragesEachMBTIAndEmotionLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -73,21 +73,21 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getAmountAveragesEachMBTIAndEmotionLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getAmountAveragesEachMBTIAndEmotionLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 
     @Nested
     class MBTI별_일별_금액_총합_통계_API {
         @Test
-        @DisplayName("/api/statistics/mbti/daily/amounts/sum 로 요청하면 getAmountSumsEachMBTIAndDayLast90Days 메서드가 실행된다.")
+        @DisplayName("/api/statistics/mbti/daily/amounts/sum 로 요청하면 getAmountSumsEachMBTIAndDayLast30Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getAmountSums_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/daily/amounts/sum"));
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getAmountSumsEachMBTIAndDayLast90Days(any(), any());
+                    .getAmountSumsEachMBTIAndDayLast30Days(any(), any());
         }
 
         @Test
@@ -97,7 +97,7 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService)
-                    .getAmountSumsEachMBTIAndDayLast90Days(any(), eq(RegisterType.SPEND));
+                    .getAmountSumsEachMBTIAndDayLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -119,21 +119,21 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getAmountSumsEachMBTIAndDayLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getAmountSumsEachMBTIAndDayLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 
     @Nested
     class MBTI별_단어_빈도수_통계_API {
         @Test
-        @DisplayName("/api/statistics/mbti/word/frequencies 로 요청하면 getWordFrequenciesLast90Days 메서드가 실행된다.")
+        @DisplayName("/api/statistics/mbti/word/frequencies 로 요청하면 getWordFrequenciesLast30Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getWordFrequencies_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/word/frequencies"));
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getWordFrequenciesLast90Days(any(), any());
+                    .getWordFrequenciesLast30Days(any(), any());
         }
 
         @Test
@@ -143,7 +143,7 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService)
-                    .getWordFrequenciesLast90Days(any(), eq(RegisterType.SPEND));
+                    .getWordFrequenciesLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -165,21 +165,21 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getWordFrequenciesLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getWordFrequenciesLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 
     @Nested
     class MBTI별_만족도_평균_통계_API {
         @Test
-        @DisplayName("/api/statistics/mbti/satisfactions/average 로 요청하면 getSatisfactionAveragesEachMBTILast90Days 메서드가 실행된다.")
+        @DisplayName("/api/statistics/mbti/satisfactions/average 로 요청하면 getSatisfactionAveragesEachMBTILast30Days 메서드가 실행된다.")
         void 아래_path로_요청하면_statisticsService의_getSatisfactionAverages_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/mbti/satisfactions/average"));
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getSatisfactionAveragesEachMBTILast90Days(any(), any());
+                    .getSatisfactionAveragesEachMBTILast30Days(any(), any());
         }
 
         @Test
@@ -189,7 +189,7 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService)
-                    .getSatisfactionAveragesEachMBTILast90Days(any(), eq(RegisterType.SPEND));
+                    .getSatisfactionAveragesEachMBTILast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -210,7 +210,7 @@ class MBTIStatisticsControllerTest {
 
             // then
             verify(mbtiStatisticsService, times(1))
-                    .getSatisfactionAveragesEachMBTILast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getSatisfactionAveragesEachMBTILast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 }
