@@ -29,9 +29,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String queryParameter = "&token=" + sessionId;
 
         if(isFirstLogin)
-            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=true" + queryParameter);
+            response.sendRedirect("https://localhost:5173/auth?isFirstLogin=true" + queryParameter);
         else
-            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=false" + queryParameter);
+            response.sendRedirect("https://localhost:5173/auth?isFirstLogin=false" + queryParameter);
     }
 
     private static String createSession(CustomOAuth2User principal) {
