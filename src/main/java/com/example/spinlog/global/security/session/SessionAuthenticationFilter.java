@@ -27,6 +27,12 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String sessionId = request.getHeader("authorization");
+
+        if(sessionId == null){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         Optional<CustomSession> session = CustomSessionManager.getSession(sessionId);
 
         if(session.isEmpty()){
