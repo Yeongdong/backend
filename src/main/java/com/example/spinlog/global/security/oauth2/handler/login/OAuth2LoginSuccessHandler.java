@@ -29,9 +29,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String queryParameter = "&token=" + sessionId;
 
         if(isFirstLogin)
-            response.sendRedirect("https://localhost:5173/auth?isFirstLogin=true" + queryParameter);
+            response.sendRedirect("http://localhost:5173/auth?isFirstLogin=true" + queryParameter);
         else
-            response.sendRedirect("https://localhost:5173/auth?isFirstLogin=false" + queryParameter);
+            response.sendRedirect("http://localhost:5173/auth?isFirstLogin=false" + queryParameter);
     }
 
     private static String createSession(CustomOAuth2User principal) {
