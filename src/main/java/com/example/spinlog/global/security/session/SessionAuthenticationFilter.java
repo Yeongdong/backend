@@ -29,8 +29,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         String sessionId = request.getHeader("authorization");
         Optional<CustomSession> session = CustomSessionManager.getSession(sessionId);
 
-        log.info("sessions: "+ CustomSessionManager.sessions);
-
         if(session.isEmpty()){
             filterChain.doFilter(request, response);
             return;
