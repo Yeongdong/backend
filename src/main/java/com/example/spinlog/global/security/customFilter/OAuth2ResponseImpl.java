@@ -1,4 +1,4 @@
-package com.example.spinlog.global.security.filter;
+package com.example.spinlog.global.security.customFilter;
 
 import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
 

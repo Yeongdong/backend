@@ -1,4 +1,4 @@
-package com.example.spinlog.global.security.filter;
+package com.example.spinlog.global.security.customFilter;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import jakarta.servlet.FilterChain;
@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
