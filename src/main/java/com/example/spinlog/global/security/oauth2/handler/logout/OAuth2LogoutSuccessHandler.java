@@ -14,10 +14,8 @@ public class OAuth2LogoutSuccessHandler implements LogoutSuccessHandler {
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        request.getSession().setAttribute("redirected", true);
-        response.sendRedirect("/api/authentication/logout-result");
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 
-        // TODO 세션 삭제
         String sessionId = request.getHeader("Authorization");
         CustomSessionManager.getSession(sessionId)
                 .ifPresent(session -> CustomSessionManager.deleteSession(sessionId));
