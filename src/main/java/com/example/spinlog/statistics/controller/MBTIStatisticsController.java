@@ -29,41 +29,41 @@ public class MBTIStatisticsController {
     private final MBTIStatisticsService statisticsService;
 
     @GetMapping("/api/statistics/mbti/emotion/amounts/average")
-    public ApiResponseWrapper<MBTIEmotionAmountAverageResponse> getAmountAverageEachMBTIAndEmotionLast90Days(
+    public ApiResponseWrapper<MBTIEmotionAmountAverageResponse> getAmountAverageEachMBTIAndEmotionLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
-                statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(
+                statisticsService.getAmountAveragesEachMBTIAndEmotionLast30Days(
                         LocalDate.now(),
                         RegisterType.valueOf(registerType)),
                 "MBTI별 감정별 금액 평균");
     }
 
     @GetMapping("/api/statistics/mbti/daily/amounts/sum")
-    public ApiResponseWrapper<MBTIDailyAmountSumResponse> getAmountSumsEachMBTIAndDayLast90Days(
+    public ApiResponseWrapper<MBTIDailyAmountSumResponse> getAmountSumsEachMBTIAndDayLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType) {
         return ResponseUtils.ok(
-                statisticsService.getAmountSumsEachMBTIAndDayLast90Days(
+                statisticsService.getAmountSumsEachMBTIAndDayLast30Days(
                         LocalDate.now(),
                         RegisterType.valueOf(registerType)),
                 "MBTI별 일별 금액 총합");
     }
 
     @GetMapping("/api/statistics/mbti/word/frequencies")
-    public ApiResponseWrapper<MBTIWordFrequencyResponse> getWordFrequencyLast90Days(
+    public ApiResponseWrapper<MBTIWordFrequencyResponse> getWordFrequencyLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
                 statisticsService
-                        .getWordFrequenciesLast90Days(
+                        .getWordFrequenciesLast30Days(
                                 LocalDate.now(),
                                 RegisterType.valueOf(registerType)),
                 "MBTI별 단어 빈도수");
     }
 
     @GetMapping("/api/statistics/mbti/satisfactions/average")
-    public ApiResponseWrapper<MBTISatisfactionAverageResponse> getSatisfactionAveragesEachMBTILast90Days(
+    public ApiResponseWrapper<MBTISatisfactionAverageResponse> getSatisfactionAveragesEachMBTILast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
-                statisticsService.getSatisfactionAveragesEachMBTILast90Days(
+                statisticsService.getSatisfactionAveragesEachMBTILast30Days(
                         LocalDate.now(),
                         RegisterType.valueOf(registerType)),
                 "MBTI별 만족도 평균");
