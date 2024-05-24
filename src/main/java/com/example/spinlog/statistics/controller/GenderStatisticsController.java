@@ -23,41 +23,41 @@ import java.util.List;
 public class GenderStatisticsController {
     private final GenderStatisticsService genderStatisticsService;
     @GetMapping("/api/statistics/gender/emotion/amounts/average")
-    public ApiResponseWrapper<List<GenderEmotionAmountAverageResponse>> getAmountAveragesEachGenderAndEmotionLast90Days(
+    public ApiResponseWrapper<List<GenderEmotionAmountAverageResponse>> getAmountAveragesEachGenderAndEmotionLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
-                genderStatisticsService.getAmountAveragesEachGenderAndEmotionLast90Days(
+                genderStatisticsService.getAmountAveragesEachGenderAndEmotionLast30Days(
                         LocalDate.now(),
                         RegisterType.valueOf(registerType)),
                 "성별 감정별 금액 평균");
     }
 
     @GetMapping("/api/statistics/gender/daily/amounts/sum")
-    public ApiResponseWrapper<List<GenderDailyAmountSumResponse>> getAmountSumsEachGenderAndDayLast90Days(
+    public ApiResponseWrapper<List<GenderDailyAmountSumResponse>> getAmountSumsEachGenderAndDayLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
-                genderStatisticsService.getAmountSumsEachGenderAndDayLast90Days(
+                genderStatisticsService.getAmountSumsEachGenderAndDayLast30Days(
                         LocalDate.now(),
                         RegisterType.valueOf(registerType)),
                 "성별 일별 금액 총합");
     }
 
     @GetMapping("/api/statistics/gender/word/frequencies")
-    public ApiResponseWrapper<GenderWordFrequencyResponse> getWordFrequencyEachGenderLast90Days(
+    public ApiResponseWrapper<GenderWordFrequencyResponse> getWordFrequencyEachGenderLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
                 genderStatisticsService
-                        .getWordFrequenciesEachGenderLast90Days(
+                        .getWordFrequenciesEachGenderLast30Days(
                                 LocalDate.now(),
                                 RegisterType.valueOf(registerType)),
                 "성별 단어 빈도수");
     }
 
     @GetMapping("/api/statistics/gender/satisfactions/average")
-    public ApiResponseWrapper<List<GenderSatisfactionAverageDto>> getSatisfactionAveragesEachGenderLast90Days(
+    public ApiResponseWrapper<List<GenderSatisfactionAverageDto>> getSatisfactionAveragesEachGenderLast30Days(
             @RequestParam(defaultValue = "SPEND") String registerType){
         return ResponseUtils.ok(
-                genderStatisticsService.getSatisfactionAveragesEachGenderLast90Days(
+                genderStatisticsService.getSatisfactionAveragesEachGenderLast30Days(
                         LocalDate.now(),
                         RegisterType.valueOf(registerType)),
                 "성별 만족도 평균");

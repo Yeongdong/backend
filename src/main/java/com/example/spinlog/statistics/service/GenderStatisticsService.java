@@ -29,14 +29,14 @@ import static java.util.stream.Collectors.groupingBy;
 public class GenderStatisticsService {
     private final GenderStatisticsRepository genderStatisticsRepository;
     private final WordExtractionService wordExtractionService;
-    private final int PERIOD_CRITERIA = 90;
+    private final int PERIOD_CRITERIA = 30;
 
     public GenderStatisticsService(GenderStatisticsRepository genderStatisticsRepository, WordExtractionService wordExtractionService) {
         this.genderStatisticsRepository = genderStatisticsRepository;
         this.wordExtractionService = wordExtractionService;
     }
 
-    public List<GenderEmotionAmountAverageResponse> getAmountAveragesEachGenderAndEmotionLast90Days(LocalDate today, RegisterType registerType){
+    public List<GenderEmotionAmountAverageResponse> getAmountAveragesEachGenderAndEmotionLast30Days(LocalDate today, RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<GenderEmotionAmountAverageDto> dtos = genderStatisticsRepository.
                 getAmountAveragesEachGenderAndEmotionBetweenStartDateAndEndDate(registerType, startDate, today);
@@ -72,7 +72,7 @@ public class GenderStatisticsService {
                 .toList();
     }
 
-    public List<GenderDailyAmountSumResponse> getAmountSumsEachGenderAndDayLast90Days(LocalDate today, RegisterType registerType) {
+    public List<GenderDailyAmountSumResponse> getAmountSumsEachGenderAndDayLast30Days(LocalDate today, RegisterType registerType) {
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<GenderDailyAmountSumDto> dtos = genderStatisticsRepository
                 .getAmountSumsEachGenderAndDayBetweenStartDateAndEndDate(registerType, startDate, today);
@@ -114,7 +114,7 @@ public class GenderStatisticsService {
                 .toList();
     }
 
-    public GenderWordFrequencyResponse getWordFrequenciesEachGenderLast90Days(LocalDate today, RegisterType registerType){
+    public GenderWordFrequencyResponse getWordFrequenciesEachGenderLast30Days(LocalDate today, RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         List<MemoDto> maleMemos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(registerType, Gender.MALE, startDate, today);
         List<MemoDto> femaleMemos = genderStatisticsRepository.getAllMemosByGenderBetweenStartDateAndEndDate(registerType, Gender.FEMALE, startDate, today);
@@ -149,7 +149,7 @@ public class GenderStatisticsService {
         return mbti == null || mbti == Mbti.NONE;
     }
 
-    public List<GenderSatisfactionAverageDto> getSatisfactionAveragesEachGenderLast90Days(LocalDate today, RegisterType registerType){
+    public List<GenderSatisfactionAverageDto> getSatisfactionAveragesEachGenderLast30Days(LocalDate today, RegisterType registerType){
         LocalDate startDate = today.minusDays(PERIOD_CRITERIA);
         return genderStatisticsRepository.getSatisfactionAveragesEachGenderBetweenStartDateAndEndDate(registerType, startDate, today);
     }
