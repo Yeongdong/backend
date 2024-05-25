@@ -2,6 +2,8 @@ package com.example.spinlog.global.security.session;
 
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Slf4j
 public class CustomSessionManager {
     private static final Map<String, CustomSession> sessions = new ConcurrentHashMap<>();
 
@@ -36,5 +39,13 @@ public class CustomSessionManager {
             return Optional.of(session);
         }
         return Optional.empty();
+    }
+
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 2)
+    public void deleteExpiredSessions() {
+        log.info("deleteExpiredSessions, before size: " + sessions.size());
+        sessions.entrySet().removeIf(entry -> entry.getValue()
+                .getLastAccessedTime()
+                .isBefore(LocalDateTime.now().minusHours(1)));
     }
 }
