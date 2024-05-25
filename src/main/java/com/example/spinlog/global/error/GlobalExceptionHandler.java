@@ -49,7 +49,6 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * TODO ExceptionHandler 추가, 안쓰이는 API 삭제
      * 지원하지 않는 HTTP 메서드로 요청 시
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
