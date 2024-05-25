@@ -3,6 +3,10 @@ package com.example.spinlog.ai.service;
 import com.example.spinlog.ai.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.service.ArticleService;
+import com.example.spinlog.global.exception.BusinessException;
+import com.example.spinlog.global.exception.codes.ErrorCode;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -92,6 +96,8 @@ public class AiServiceImpl implements AiService {
      * @param commentRequest 요청 객체
      * @return AI 코멘트
      */
+    @CircuitBreaker(name = "openAiClient", fallbackMethod = "fallbackGetAiComment")
+    @Retry(name = "openAiClient")
     private String getAiComment(CommentRequest commentRequest) {
         String aiComment = openAiClient
                 .getAiComment(apiKey, commentRequest)
@@ -102,6 +108,11 @@ public class AiServiceImpl implements AiService {
                 .orElseThrow(() -> new IllegalStateException("AI 한마디 가져오기 실패"));
         log.debug("AI 한마디를 성공적으로 요청했습니다.");
         return aiComment;
+    }
+
+    private String fallbackGetAiComment(Throwable t) {
+        log.error("Fallback method for getAiComment due to : {}", t.getMessage(), t);
+        throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     /**

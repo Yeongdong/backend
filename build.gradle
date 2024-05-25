@@ -42,6 +42,12 @@ dependencies {
 	// OpenFeign: 외부 API 호출
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.6'
 
+	// Resilience4j: 외부 API 에러시 사용
+	implementation 'io.github.resilience4j:resilience4j-spring-boot2:1.7.1'
+	implementation 'io.github.resilience4j:resilience4j-feign:1.7.1'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+
 	// ModelMapper: DTO Library
 	implementation 'org.modelmapper:modelmapper:3.1.1'
 
