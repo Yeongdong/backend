@@ -43,9 +43,10 @@ public class CustomSessionManager {
 
     @Scheduled(fixedRate = 1000 * 60 * 60 * 2)
     public void deleteExpiredSessions() {
-        log.info("deleteExpiredSessions, before size: " + sessions.size());
+        int beforeDeletion = sessions.size();
         sessions.entrySet().removeIf(entry -> entry.getValue()
                 .getLastAccessedTime()
                 .isBefore(LocalDateTime.now().minusHours(1)));
+        log.info("deleteExpiredSessions, " + beforeDeletion + " -> " + sessions.size());
     }
 }

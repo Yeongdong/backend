@@ -22,12 +22,10 @@ public class TemporaryAuthFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth != null &&
                 !(auth instanceof AnonymousAuthenticationToken)) {
-            log.info("already authentication object exists");
             filterChain.doFilter(request, response);
             return;
         }
 
-        log.info("authentication object is not inserted");
         String temporary = request.getHeader("TemporaryAuth");
 
         if(temporary != null && temporary.equals("OurAuthValue")){
