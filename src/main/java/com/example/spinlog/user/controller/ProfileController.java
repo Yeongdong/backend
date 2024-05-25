@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ProfileController { //TODO 배포 시 삭제
 
-    @GetMapping("/profile")
+    //@GetMapping("/profile")
     public String profilePage() {
         return "profile";
     }
