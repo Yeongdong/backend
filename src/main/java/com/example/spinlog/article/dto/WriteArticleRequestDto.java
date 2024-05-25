@@ -4,6 +4,7 @@ import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.user.entity.User;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,15 +17,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WriteArticleRequestDto {
+    @NotEmpty
     private String content;
+    @NotEmpty
     private String spendDate;
+    @NotEmpty
     private String event;
+    @NotEmpty
     private String thought;
+    @NotEmpty
     private String emotion;
+    @NotEmpty
     private Float satisfaction;
+    @NotEmpty
     private String reason;
+    @NotEmpty
     private String improvements;
+    @NotEmpty
     private Integer amount;
+    @NotEmpty
     private String registerType;
 
     /**

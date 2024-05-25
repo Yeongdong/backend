@@ -5,6 +5,7 @@ import com.example.spinlog.article.service.ArticleService;
 import com.example.spinlog.global.response.ApiResponseWrapper;
 import com.example.spinlog.global.response.ResponseUtils;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public class ArticleController {
      * @return 작성된 게시글 객체를 포함하는 ResponseEntity
      */
     @PostMapping
-    public ApiResponseWrapper<WriteArticleResponseDto> create(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @RequestBody WriteArticleRequestDto article) {
+    public ApiResponseWrapper<WriteArticleResponseDto> create(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @RequestBody @Valid WriteArticleRequestDto article) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
         WriteArticleResponseDto responseDto = articleService.createArticle(userName, article);
         log.info("게시글 작성 성공");
@@ -71,7 +72,7 @@ public class ArticleController {
      * @return 업데이트 성공 메시지 ResponseEntity
      */
     @PatchMapping("/{articleId}")
-    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
+    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody @Valid UpdateArticleRequestDto updateRequestDTO) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
         articleService.updateArticle(userName, articleId, updateRequestDTO);
         log.info("게시글 업데이트 성공");
