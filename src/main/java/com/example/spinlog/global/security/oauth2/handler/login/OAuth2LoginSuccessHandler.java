@@ -1,6 +1,7 @@
 package com.example.spinlog.global.security.oauth2.handler.login;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
+import com.example.spinlog.global.security.session.CustomSessionManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,20 +11,34 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+    private final CustomSessionManager customSessionManager;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         //response.sendRedirect("/api/authentication/login-result");
         CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
         Boolean isFirstLogin = principal.getFirstLogin();
+
+        String sessionId = createSession(principal);
+
+        String queryParameter = "&token=" + sessionId;
+
         if(isFirstLogin)
-            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=true");
+            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=true" + queryParameter);
         else
-            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth");
+            response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=false" + queryParameter);
+    }
+
+    private String createSession(CustomOAuth2User principal) {
+        String sessionId = UUID.randomUUID().toString();
+        String authenticationName = principal.getOAuth2Response().getAuthenticationName();
+        customSessionManager.createSession(sessionId, authenticationName);
+        return sessionId;
     }
 }

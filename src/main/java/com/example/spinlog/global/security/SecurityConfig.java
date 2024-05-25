@@ -1,6 +1,6 @@
 package com.example.spinlog.global.security;
 
-import com.example.spinlog.global.security.filter.TemporaryAuthFilter;
+import com.example.spinlog.global.security.customFilter.TemporaryAuthFilter;
 import com.example.spinlog.global.security.oauth2.client.CustomClientRegistrationRepository;
 import com.example.spinlog.global.security.oauth2.client.CustomOAuth2AuthorizedClientService;
 import com.example.spinlog.global.security.oauth2.handler.authentication.CustomAuthenticationEntryPoint;
@@ -8,26 +8,26 @@ import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginSucce
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutSuccessHandler;
 import com.example.spinlog.global.security.oauth2.service.CustomOAuth2UserService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.spinlog.global.security.session.CustomSessionManager;
+import com.example.spinlog.global.security.session.SessionAuthenticationFilter;
+import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.springframework.http.HttpHeaders.*;
 
 @Configuration
 @EnableWebSecurity
@@ -45,6 +45,9 @@ public class SecurityConfig {
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
+    private final UserRepository userRepository;
+    private final CustomSessionManager customSessionManager;
+
 //    private final CorsConfig corsConfig;
 
     /*
@@ -56,6 +59,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors
                         .configurationSource(corsConfigurationSource())
                 )
@@ -84,9 +89,8 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/users/logout")
                         .addLogoutHandler(oAuth2LogoutHandler)
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .clearAuthentication(true)
+                        //.invalidateHttpSession(true)
+                        //.clearAuthentication(true)
                         .logoutSuccessHandler(oAuth2LogoutSuccessHandler)
                         .permitAll()
                 )
@@ -100,6 +104,7 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
+                .addFilterBefore(new SessionAuthenticationFilter(userRepository, customSessionManager), LogoutFilter.class)
                 .addFilterAfter(new TemporaryAuthFilter(), ExceptionTranslationFilter.class);
 
         return http.build();
