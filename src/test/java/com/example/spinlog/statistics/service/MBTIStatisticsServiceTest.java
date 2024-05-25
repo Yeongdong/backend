@@ -23,7 +23,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,20 +46,20 @@ class MBTIStatisticsServiceTest {
     MBTIStatisticsService statisticsService;
 
     @Nested
-    class getAmountAveragesEachMBTIAndEmotionLast90Days{
+    class getAmountAveragesEachMBTIAndEmotionLast30Days{
         @Test
-        void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
+        void LocalDate_파라미터를_받아서_30일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
             LocalDate now = LocalDate.now();
 
             // when
-            statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(now, null);
+            statisticsService.getAmountAveragesEachMBTIAndEmotionLast30Days(now, null);
 
             // then
             verify(mbtiStatisticsRepository)
                     .getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(
                             any(),
-                            eq(now.minusDays(90)),
+                            eq(now.minusDays(30)),
                             eq(now));
         }
 
@@ -65,7 +67,7 @@ class MBTIStatisticsServiceTest {
         @ValueSource(strings = {"SPEND", "SAVE"})
         void RegisterType_파라미터를_그대로_레포지토리에게_전달한다(RegisterType registerType) throws Exception {
             // when
-            statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate.now(), registerType);
+            statisticsService.getAmountAveragesEachMBTIAndEmotionLast30Days(LocalDate.now(), registerType);
 
             // then
             verify(mbtiStatisticsRepository)
@@ -94,28 +96,81 @@ class MBTIStatisticsServiceTest {
 
             // when
             MBTIEmotionAmountAverageResponse response =
-                    statisticsService.getAmountAveragesEachMBTIAndEmotionLast90Days(LocalDate.now(), null);
+                    statisticsService.getAmountAveragesEachMBTIAndEmotionLast30Days(LocalDate.now(), null);
 
             // then
             assertThat(response.getMbti())
                     .isEqualTo(Mbti.ISTJ);
 
             List<MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage> responseList = response.getMbtiEmotionAmountAverages();
-            assertThat(responseList)
+            List<MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage> responseListWithZeroFiltering =
+                    filterNonZeroAndNonEmptyAverages(responseList);
+
+            assertThat(responseListWithZeroFiltering)
                     .hasSize(2);
 
             List<MBTIFactor> mbtiFactors = returned.stream()
                     .map(MBTIEmotionAmountAverageDto::getMbtiFactor)
                     .distinct()
                     .toList();
-            assertThat(responseList)
+            assertThat(responseListWithZeroFiltering)
                     .extracting(MBTIEmotionAmountAverageResponse
                             .MBTIEmotionAmountAverage::getMbtiFactor)
                     .containsExactlyInAnyOrderElementsOf(mbtiFactors);
 
-            for(var r: responseList){
+            for(var r: responseListWithZeroFiltering){
                 assertEmotionAmountAverageGroupedByMBTI(r, returned);
             }
+        }
+
+        @Test
+        void 레포지토리로부터_데이터를_받아_zero_padding을_수행한다() throws Exception {
+            // given
+            List<MBTIEmotionAmountAverageDto> returned = List.of(
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.I, Emotion.PROUD, 1L),
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.I, Emotion.SAD, 2L),
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.E, Emotion.PROUD, 3L),
+                    new MBTIEmotionAmountAverageDto(MBTIFactor.E, Emotion.SAD, 4L)
+            );
+            List<Boolean> visited = new ArrayList<>(returned.size());
+
+            when(mbtiStatisticsRepository.getAmountAveragesEachMBTIAndEmotionBetweenStartDateAndEndDate(any(), any(), any()))
+                    .thenReturn(returned);
+
+            // when
+            MBTIEmotionAmountAverageResponse response =
+                    statisticsService.getAmountAveragesEachMBTIAndEmotionLast30Days(LocalDate.now(), null);
+
+            // then
+            List<MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage> responseList = response.getMbtiEmotionAmountAverages();
+
+            assertThat(responseList)
+                    .extracting(MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage::getMbtiFactor)
+                    .containsExactlyInAnyOrder(MBTIFactor.values());
+            assertThat(responseList)
+                    .extracting(MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage::getEmotionAmountAverages)
+                    .allMatch(list ->
+                            list.stream()
+                                    .map(MBTIEmotionAmountAverageResponse.EmotionAmountAverage::getEmotion)
+                                    .allMatch(Arrays.asList(Emotion.values())::contains));
+        }
+
+        private static List<MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage> filterNonZeroAndNonEmptyAverages(
+                List<MBTIEmotionAmountAverageResponse.MBTIEmotionAmountAverage> responses) {
+            return responses.stream()
+                    .map(r -> {
+                        List<MBTIEmotionAmountAverageResponse.EmotionAmountAverage> list =
+                                r.getEmotionAmountAverages().stream()
+                                        .filter(ea -> ea.getAmountAverage() != 0)
+                                        .toList();
+                        return MBTIEmotionAmountAverageResponse
+                                .MBTIEmotionAmountAverage.builder()
+                                .mbtiFactor(r.getMbtiFactor())
+                                .emotionAmountAverages(list)
+                                .build();
+                    })
+                    .filter(r -> !r.getEmotionAmountAverages().isEmpty())
+                    .toList();
         }
 
         private static void assertEmotionAmountAverageGroupedByMBTI(
@@ -133,20 +188,20 @@ class MBTIStatisticsServiceTest {
     }
 
     @Nested
-    class getAmountSumsEachMBTIAndDayLast90Days {
+    class getAmountSumsEachMBTIAndDayLast30Days {
         @Test
-        void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
+        void LocalDate_파라미터를_받아서_30일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
             LocalDate now = LocalDate.now();
 
             // when
-            statisticsService.getAmountSumsEachMBTIAndDayLast90Days(now, null);
+            statisticsService.getAmountSumsEachMBTIAndDayLast30Days(now, null);
 
             // then
             verify(mbtiStatisticsRepository)
                     .getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(
                             any(),
-                            eq(now.minusDays(90)),
+                            eq(now.minusDays(30)),
                             eq(now));
         }
 
@@ -154,7 +209,7 @@ class MBTIStatisticsServiceTest {
         @ValueSource(strings = {"SPEND", "SAVE"})
         void RegisterType_파라미터를_그대로_레포지토리에게_전달한다(RegisterType registerType) throws Exception {
             // when
-            statisticsService.getAmountSumsEachMBTIAndDayLast90Days(LocalDate.now(), registerType);
+            statisticsService.getAmountSumsEachMBTIAndDayLast30Days(LocalDate.now(), registerType);
 
             // then
             verify(mbtiStatisticsRepository)
@@ -169,9 +224,9 @@ class MBTIStatisticsServiceTest {
         void 레포지토리로부터_MBTI별_일별_금액_총합_데이터를_받아_MBTI_별로_grouping해서_로그인_한_유저의_MBTI와_함께_반환한다() throws Exception {
             // given
             List<MBTIDailyAmountSumDto> returned = List.of(
-                    new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now(), 1L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now().minusDays(2L), 1L),
                     new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now().minusDays(1L), 2L),
-                    new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now(), 3L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now().minusDays(2L), 3L),
                     new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now().minusDays(1L), 4L)
             );
             when(mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(any(), any(), any()))
@@ -181,28 +236,90 @@ class MBTIStatisticsServiceTest {
 
             // when
             MBTIDailyAmountSumResponse response =
-                    statisticsService.getAmountSumsEachMBTIAndDayLast90Days(LocalDate.now(), null);
+                    statisticsService.getAmountSumsEachMBTIAndDayLast30Days(LocalDate.now(), null);
 
             // then
             assertThat(response.getMbti())
                     .isEqualTo(Mbti.ISTJ);
 
             List<MBTIDailyAmountSumResponse.MBTIDailyAmountSum> responseList = response.getMbtiDailyAmountSums();
-            assertThat(responseList)
+            List<MBTIDailyAmountSumResponse.MBTIDailyAmountSum> responseListWithZeroFiltering =
+                    filterNonZeroAndNonEmptySums(responseList);
+
+            assertThat(responseListWithZeroFiltering)
                     .hasSize(2);
 
             List<MBTIFactor> mbtiFactors = returned.stream()
                     .map(MBTIDailyAmountSumDto::getMbtiFactor)
                     .distinct()
                     .toList();
-            assertThat(responseList)
+            assertThat(responseListWithZeroFiltering)
                     .extracting(MBTIDailyAmountSumResponse
                             .MBTIDailyAmountSum::getMbtiFactor)
                     .containsExactlyInAnyOrderElementsOf(mbtiFactors);
 
-            for(var r: responseList){
+            for(var r: responseListWithZeroFiltering){
                 assertDailyAmountSumGroupedByMBTI(r, returned);
             }
+        }
+
+        @Test
+        void 레포지토리로부터_데이터를_받아_zero_padding을_수행한다() throws Exception {
+            // given
+            List<MBTIDailyAmountSumDto> returned = List.of(
+                    new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now().minusDays(2L), 1L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.I, LocalDate.now().minusDays(1L), 2L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now().minusDays(2L), 3L),
+                    new MBTIDailyAmountSumDto(MBTIFactor.E, LocalDate.now().minusDays(1L), 4L)
+            );
+            when(mbtiStatisticsRepository.getAmountSumsEachMBTIAndDayBetweenStartDateAndEndDate(any(), any(), any()))
+                    .thenReturn(returned);
+            when(authenticatedUserService.getUserMBTI())
+                    .thenReturn(Mbti.ISTJ);
+
+            // when
+            MBTIDailyAmountSumResponse response =
+                    statisticsService.getAmountSumsEachMBTIAndDayLast30Days(LocalDate.now(), null);
+
+            // then
+            assertThat(response.getMbti())
+                    .isEqualTo(Mbti.ISTJ);
+
+            List<MBTIDailyAmountSumResponse.MBTIDailyAmountSum> responseList = response.getMbtiDailyAmountSums();
+
+            assertThat(responseList)
+                    .extracting(MBTIDailyAmountSumResponse.MBTIDailyAmountSum::getMbtiFactor)
+                    .containsExactlyInAnyOrder(MBTIFactor.values());
+
+            List<LocalDate> localDateRanges = IntStream.rangeClosed(1, 30)
+                    .mapToObj(i -> LocalDate.now().minusDays(i))
+                    .toList();
+
+            for(MBTIDailyAmountSumResponse.MBTIDailyAmountSum r: responseList){
+                List<LocalDate> dates = r.getDailyAmountSums().stream()
+                        .map(MBTIDailyAmountSumResponse.DailyAmountSum::getDate)
+                        .toList();
+                assertThat(dates)
+                        .containsExactlyInAnyOrderElementsOf(localDateRanges);
+            }
+        }
+
+        private static List<MBTIDailyAmountSumResponse.MBTIDailyAmountSum> filterNonZeroAndNonEmptySums(
+                List<MBTIDailyAmountSumResponse.MBTIDailyAmountSum> responses) {
+            return responses.stream()
+                    .map(r -> {
+                        List<MBTIDailyAmountSumResponse.DailyAmountSum> list =
+                                r.getDailyAmountSums().stream()
+                                        .filter(ea -> ea.getAmountSum() != 0)
+                                        .toList();
+                        return MBTIDailyAmountSumResponse
+                                .MBTIDailyAmountSum.builder()
+                                .mbtiFactor(r.getMbtiFactor())
+                                .dailyAmountSums(list)
+                                .build();
+                    })
+                    .filter(r -> !r.getDailyAmountSums().isEmpty())
+                    .toList();
         }
 
         private static void assertDailyAmountSumGroupedByMBTI(
@@ -220,12 +337,12 @@ class MBTIStatisticsServiceTest {
     }
 
     @Nested
-    class getWordFrequenciesLast90Days {
+    class getWordFrequenciesLast30Days {
         @ParameterizedTest
         @ValueSource(strings = {"SPEND", "SAVE"})
         void RegisterType_파라미터를_그대로_레포지토리에게_전달한다(RegisterType registerType) throws Exception {
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), registerType);
+            statisticsService.getWordFrequenciesLast30Days(LocalDate.now(), registerType);
 
             // then
             verify(mbtiStatisticsRepository)
@@ -237,21 +354,21 @@ class MBTIStatisticsServiceTest {
                     );
         }
         @Test
-        void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
+        void LocalDate_파라미터를_받아서_30일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
             LocalDate now = LocalDate.now();
             when(authenticatedUserService.getUserMBTI())
                     .thenReturn(Mbti.NONE);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(now, RegisterType.SPEND);
+            statisticsService.getWordFrequenciesLast30Days(now, RegisterType.SPEND);
 
             // then
             verify(mbtiStatisticsRepository)
                     .getAllMemosByMBTIBetweenStartDateAndEndDate(
                             any(),
                             any(),
-                            eq(now.minusDays(90)),
+                            eq(now.minusDays(30)),
                             eq(now));
         }
 
@@ -262,7 +379,7 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.NONE);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
+            statisticsService.getWordFrequenciesLast30Days(LocalDate.now(), null);
 
             // then
             verify(mbtiStatisticsRepository)
@@ -278,7 +395,7 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.ISTJ);
 
             // when
-            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
+            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast30Days(LocalDate.now(), null);
 
             // then
             verify(mbtiStatisticsRepository, times(1))
@@ -311,7 +428,7 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(Mbti.NONE);
 
             // when
-            statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
+            statisticsService.getWordFrequenciesLast30Days(LocalDate.now(), null);
 
             // then
             List<String> flattedMemos = memos.stream()
@@ -347,7 +464,7 @@ class MBTIStatisticsServiceTest {
                     .thenReturn(returnedByWordExtractionService);
 
             // when
-            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast90Days(LocalDate.now(), null);
+            MBTIWordFrequencyResponse response = statisticsService.getWordFrequenciesLast30Days(LocalDate.now(), null);
 
             // then
             assertThat(response)
@@ -363,20 +480,20 @@ class MBTIStatisticsServiceTest {
     }
 
     @Nested
-    class getSatisfactionAveragesEachMBTILast90Days {
+    class getSatisfactionAveragesEachMBTILast30Days {
         @Test
-        void LocalDate_파라미터를_받아서_90일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
+        void LocalDate_파라미터를_받아서_30일_전_LocalDate와_해당_LocalDate를_레포지토리에게_전달한다() throws Exception {
             // given
             LocalDate now = LocalDate.now();
 
             // when
-            statisticsService.getSatisfactionAveragesEachMBTILast90Days(now, null);
+            statisticsService.getSatisfactionAveragesEachMBTILast30Days(now, null);
 
             // then
             verify(mbtiStatisticsRepository)
                     .getSatisfactionAveragesEachMBTIBetweenStartDateAndEndDate(
                             any(),
-                            eq(now.minusDays(90)),
+                            eq(now.minusDays(30)),
                             eq(now));
         }
 
@@ -384,7 +501,7 @@ class MBTIStatisticsServiceTest {
         @ValueSource(strings = {"SPEND", "SAVE"})
         void RegisterType_파라미터를_그대로_레포지토리에게_전달한다(RegisterType registerType) throws Exception {
             // when
-            statisticsService.getSatisfactionAveragesEachMBTILast90Days(LocalDate.now(), registerType);
+            statisticsService.getSatisfactionAveragesEachMBTILast30Days(LocalDate.now(), registerType);
 
             // then
             verify(mbtiStatisticsRepository)
@@ -414,7 +531,7 @@ class MBTIStatisticsServiceTest {
 
             // when
             MBTISatisfactionAverageResponse response = statisticsService
-                    .getSatisfactionAveragesEachMBTILast90Days(LocalDate.now(), null);
+                    .getSatisfactionAveragesEachMBTILast30Days(LocalDate.now(), null);
 
             // then
             assertThat(response.getMbti()).isEqualTo(Mbti.ISTJ);

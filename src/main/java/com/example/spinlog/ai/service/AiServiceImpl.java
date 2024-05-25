@@ -3,8 +3,9 @@ package com.example.spinlog.ai.service;
 import com.example.spinlog.ai.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.service.ArticleService;
-import com.example.spinlog.global.exception.BusinessException;
-import com.example.spinlog.global.exception.codes.ErrorCode;
+import com.example.spinlog.global.error.exception.BusinessException;
+import com.example.spinlog.global.error.exception.ErrorCode;
+import com.example.spinlog.global.error.exception.ai.EmptyCommentException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,17 @@ public class AiServiceImpl implements AiService {
     private final static String AI_MODEL = "gpt-3.5-turbo";
     private final static String AI_ROLE = "system";
     private final static String USER_ROLE = "user";
-    private final static String MESSAGE_TO_AI = "Your identity is as an advice giver.\n" +
-            "This data shows that people in their 20s and 30s made consumption due to emotional expression. Could you give me some advice on the connection between emotions and consumption?\n" +
-            "===Please answer by referring to the rules below==\n" +
-            "First of all, empathize with the user. At this time, mention emotions, events, and purchase details.\n" +
-            "Please tell us 3 areas for improvement along with reasons.\n" +
-            "Please use a total of 50 Korean words.\n" +
-            "Speak in a friendly manner, as if you were talking to a friend.";
+    private final static String MESSAGE_TO_AI = "Your role is to give advice.\n" +
+            "The data is from a person in their 20s or 30s who made a purchase due to emotional expression. You need to provide empathy and advice based on the data.\n" +
+            "Please follow the rules below when responding.\n" +
+            "\n" +
+            "Include an empathetic response based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details).\n" +
+            "Give a improvement suggestions.\n" +
+            "Provide advice based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details). Also, explain why you recommend each suggestion.\n" +
+            "Example: If you feel (emotion) and want to (action), how about trying this? Improvement suggestion" +
+            "Use up to 100 Korean characters.\n" +
+            "Speak in a friendly tone as if talking to a friend, using the informal polite speech style (~해요) instead of the formal style (~다나까).\n" +
+            "Include references to the latest trends, memes, or news in Korea.";
 
     @Value("${apiKey}")
     private String apiKey;
@@ -105,14 +110,14 @@ public class AiServiceImpl implements AiService {
                 .stream()
                 .findFirst()
                 .map(choice -> choice.getMessage().getContent())
-                .orElseThrow(() -> new IllegalStateException("AI 한마디 가져오기 실패"));
+                .orElseThrow(() -> new EmptyCommentException("fail to get ai comment"));
         log.debug("AI 한마디를 성공적으로 요청했습니다.");
         return aiComment;
     }
 
     private String fallbackGetAiComment(Throwable t) {
         log.error("Fallback method for getAiComment due to : {}", t.getMessage(), t);
-        throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        throw new BusinessException(ErrorCode.AI_NETWORK.name(), ErrorCode.AI_NETWORK);
     }
 
     /**

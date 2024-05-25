@@ -59,7 +59,6 @@ public class OpenAiClientTest {
                 .email(oAuth2User.getName())
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .budget(12345)
                 .authenticationName(authenticationName)
                 .build();
         User user = userRepository.save(buildUser);

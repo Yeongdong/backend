@@ -34,14 +34,14 @@ class GenderStatisticsControllerTest {
     @Nested
     class 성별_감정별_금액_평균_통계_API {
         @Test
-        @DisplayName("/api/statistics/gender/emotion/amounts/average 로 요청하면 getAmountAveragesEachGenderAndEmotionLast90Days 메서드가 실행 된다.")
+        @DisplayName("/api/statistics/gender/emotion/amounts/average 로 요청하면 getAmountAveragesEachGenderAndEmotionLast30Days 메서드가 실행 된다.")
         void 아래_path로_요청하면_genderStatisticsService의_getAmountAverages_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/gender/emotion/amounts/average"));
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getAmountAveragesEachGenderAndEmotionLast90Days(any(), any());
+                    .getAmountAveragesEachGenderAndEmotionLast30Days(any(), any());
         }
 
         @Test
@@ -51,7 +51,7 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService)
-                    .getAmountAveragesEachGenderAndEmotionLast90Days(any(), eq(RegisterType.SPEND));
+                    .getAmountAveragesEachGenderAndEmotionLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -73,21 +73,21 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getAmountAveragesEachGenderAndEmotionLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getAmountAveragesEachGenderAndEmotionLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 
     @Nested
     class 성별_일별_금액_총합_통계_API {
         @Test
-        @DisplayName("/api/statistics/gender/daily/amounts/sum 로 요청하면 getAmountSumsEachGenderAndDayLast90Days 메서드가 실행 된다.")
+        @DisplayName("/api/statistics/gender/daily/amounts/sum 로 요청하면 getAmountSumsEachGenderAndDayLast30Days 메서드가 실행 된다.")
         void 아래_path로_요청하면_genderStatisticsService의_getAmountSums_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/gender/daily/amounts/sum"));
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getAmountSumsEachGenderAndDayLast90Days(any(), any());
+                    .getAmountSumsEachGenderAndDayLast30Days(any(), any());
         }
 
         @Test
@@ -97,7 +97,7 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService)
-                    .getAmountSumsEachGenderAndDayLast90Days(any(), eq(RegisterType.SPEND));
+                    .getAmountSumsEachGenderAndDayLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -119,21 +119,21 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getAmountSumsEachGenderAndDayLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getAmountSumsEachGenderAndDayLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 
     @Nested
     class 성별_단어_빈도수_통계_API {
         @Test
-        @DisplayName("/api/statistics/gender/word/frequencies 로 요청하면 getWordFrequenciesEachGenderLast90Days 메서드가 실행 된다.")
+        @DisplayName("/api/statistics/gender/word/frequencies 로 요청하면 getWordFrequenciesEachGenderLast30Days 메서드가 실행 된다.")
         void 아래_path로_요청하면_genderStatisticsService의_getWordFrequencies_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/gender/word/frequencies"));
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getWordFrequenciesEachGenderLast90Days(any(), any());
+                    .getWordFrequenciesEachGenderLast30Days(any(), any());
         }
 
         @Test
@@ -143,7 +143,7 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService)
-                    .getWordFrequenciesEachGenderLast90Days(any(), eq(RegisterType.SPEND));
+                    .getWordFrequenciesEachGenderLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -165,21 +165,21 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getWordFrequenciesEachGenderLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getWordFrequenciesEachGenderLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 
     @Nested
     class 성별_만족도_평균_통계_API {
         @Test
-        @DisplayName("/api/statistics/gender/satisfactions/average 로 요청하면 getSatisfactionAveragesEachGenderLast90Days 메서드가 실행 된다.")
+        @DisplayName("/api/statistics/gender/satisfactions/average 로 요청하면 getSatisfactionAveragesEachGenderLast30Days 메서드가 실행 된다.")
         void 아래_path로_요청하면_genderStatisticsService의_getSatisfactionAverages_메서드가_실행된다() throws Exception {
             // when
             mockMvc.perform(get("/api/statistics/gender/satisfactions/average"));
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getSatisfactionAveragesEachGenderLast90Days(any(), any());
+                    .getSatisfactionAveragesEachGenderLast30Days(any(), any());
         }
 
         @Test
@@ -189,7 +189,7 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService)
-                    .getSatisfactionAveragesEachGenderLast90Days(any(), eq(RegisterType.SPEND));
+                    .getSatisfactionAveragesEachGenderLast30Days(any(), eq(RegisterType.SPEND));
         }
 
         @Test
@@ -210,7 +210,7 @@ class GenderStatisticsControllerTest {
 
             // then
             verify(genderStatisticsService, times(1))
-                    .getSatisfactionAveragesEachGenderLast90Days(any(), eq(RegisterType.valueOf(registerType)));
+                    .getSatisfactionAveragesEachGenderLast30Days(any(), eq(RegisterType.valueOf(registerType)));
         }
     }
 }

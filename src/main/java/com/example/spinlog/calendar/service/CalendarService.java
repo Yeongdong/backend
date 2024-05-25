@@ -3,6 +3,7 @@ package com.example.spinlog.calendar.service;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.calendar.dto.*;
+import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import com.example.spinlog.utils.DateUtils;
@@ -15,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +32,7 @@ public class CalendarService {
 
         LocalDate parsedDate = DateUtils.parseStringToDate(selectDate);
 
-        Budget budget = Budget.of(user);
+        BudgetDto budgetDto = BudgetDto.of(user, parsedDate);
 
         List<MonthSpend> monthSpendList = createMonthSpendList(parsedDate, articles);
 
@@ -42,7 +42,7 @@ public class CalendarService {
                 .toList();
 
         return TotalCalendarResponseDto.builder()
-                .budget(budget)
+                .budgetDto(budgetDto)
                 .monthSpendList(monthSpendList)
                 .daySpendList(daySpendList)
                 .build();
@@ -66,7 +66,7 @@ public class CalendarService {
     private User getUser(String userName) {
         return userRepository.findByAuthenticationName(userName).stream()
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException(userName + "에 해당하는 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException(userName));
     }
 
     private List<Article> getArticlesFromUser(String userName) {
