@@ -24,6 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
+    private final CustomSessionManager customSessionManager;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String sessionId = request.getHeader("authorization");
@@ -33,7 +34,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        Optional<CustomSession> session = CustomSessionManager.getSession(sessionId);
+        Optional<CustomSession> session = customSessionManager.getSession(sessionId);
 
         if(session.isEmpty()){
             filterChain.doFilter(request, response);

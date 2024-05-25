@@ -8,6 +8,7 @@ import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginSucce
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutSuccessHandler;
 import com.example.spinlog.global.security.oauth2.service.CustomOAuth2UserService;
+import com.example.spinlog.global.security.session.CustomSessionManager;
 import com.example.spinlog.global.security.session.SessionAuthenticationFilter;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -44,6 +46,7 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     private final UserRepository userRepository;
+    private final CustomSessionManager customSessionManager;
 
 //    private final CorsConfig corsConfig;
 
@@ -85,7 +88,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/users/logout")
-                        //.addLogoutHandler(oAuth2LogoutHandler)
+                        .addLogoutHandler(oAuth2LogoutHandler)
                         //.invalidateHttpSession(true)
                         //.clearAuthentication(true)
                         .logoutSuccessHandler(oAuth2LogoutSuccessHandler)
@@ -101,7 +104,7 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
-                .addFilterBefore(new SessionAuthenticationFilter(userRepository), AnonymousAuthenticationFilter.class)
+                .addFilterBefore(new SessionAuthenticationFilter(userRepository, customSessionManager), LogoutFilter.class)
                 .addFilterAfter(new TemporaryAuthFilter(), ExceptionTranslationFilter.class);
 
         return http.build();

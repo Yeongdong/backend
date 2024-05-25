@@ -17,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+    private final CustomSessionManager customSessionManager;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -34,10 +35,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             response.sendRedirect("https://frontend-chi-sage-83.vercel.app/auth?isFirstLogin=false" + queryParameter);
     }
 
-    private static String createSession(CustomOAuth2User principal) {
+    private String createSession(CustomOAuth2User principal) {
         String sessionId = UUID.randomUUID().toString();
         String authenticationName = principal.getOAuth2Response().getAuthenticationName();
-        CustomSessionManager.createSession(sessionId, authenticationName);
+        customSessionManager.createSession(sessionId, authenticationName);
         return sessionId;
     }
 }

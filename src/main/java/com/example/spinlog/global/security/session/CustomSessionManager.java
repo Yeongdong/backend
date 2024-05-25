@@ -13,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CustomSessionManager {
     private static final Map<String, CustomSession> sessions = new ConcurrentHashMap<>();
 
-    public static void createSession(String sessionId, String authenticationName) {
+    // TODO 세션 탈취 케이스 고려
+
+    public void createSession(String sessionId, String authenticationName) {
         sessions.put(
                 sessionId,
                 CustomSession.builder()
@@ -23,11 +25,11 @@ public class CustomSessionManager {
                         .build());
     }
 
-    public static void deleteSession(String sessionId) {
+    public void deleteSession(String sessionId) {
         sessions.remove(sessionId);
     }
 
-    public static Optional<CustomSession> getSession(String sessionId) {
+    public Optional<CustomSession> getSession(String sessionId) {
         if(sessions.containsKey(sessionId)) {
             CustomSession session = sessions.get(sessionId);
             session.updateLastAccessedTime();
