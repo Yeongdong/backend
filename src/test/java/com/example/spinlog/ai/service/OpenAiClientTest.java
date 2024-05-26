@@ -7,38 +7,55 @@ import com.example.spinlog.ai.dto.Message;
 import com.example.spinlog.article.dto.WriteArticleRequestDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
-import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
-import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
+import com.example.spinlog.global.error.exception.ai.EmptyCommentException;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@ContextConfiguration(classes = {WireMockConfig.class})
+@AutoConfigureWireMock(port = 0)
 @Transactional
+@Slf4j
 public class OpenAiClientTest {
 
     private final static String AI_MODEL = "gpt-3.5-turbo";
     private final static String AI_ROLE = "system";
     private final static String USER_ROLE = "user";
-    private final static String MESSAGE_TO_AI = "You are collecting emotional and consumption data from users in their 20s and 30s. Connect emotions and consumption and provide users with consumption-related advice in one sentence in Korean.";
+    private final static String MESSAGE_TO_AI = "Your role is to give advice.\n" +
+            "The data is from a person in their 20s or 30s who made a purchase due to emotional expression. You need to provide empathy and advice based on the data.\n" +
+            "Please follow the rules below when responding.\n" +
+            "\n" +
+            "Include an empathetic response based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details).\n" +
+            "Give a improvement suggestions.\n" +
+            "Provide advice based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details). Also, explain why you recommend each suggestion.\n" +
+            "Example: If you feel (emotion) and want to (action), how about trying this? Improvement suggestion" +
+            "Use up to 100 Korean characters.\n" +
+            "Speak in a friendly tone as if talking to a friend, using the informal polite speech style (~해요) instead of the formal style (~다나까).\n" +
+            "Include references to the latest trends, memes, or news in Korea.";
 
-    @MockBean
+    @Autowired
     private OpenAiClient openAiClient;
 
     @Autowired  // userId가 필요해 Autowired 설정
@@ -47,19 +64,26 @@ public class OpenAiClientTest {
     @Autowired  // articleId가 필요해 Autowired 설정
     private ArticleRepository articleRepository;
 
+    @Autowired
+    private WireMockServer wireMockServer;
+
+    @LocalServerPort
+    private int port;
+
+    @BeforeEach
+    void setup() throws FileNotFoundException {
+        AiMocks.setupAiMockResponse(wireMockServer);
+    }
+
     @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
+    @DisplayName("서버에 요청을 보내면 지정된 답변을 반환받는다.")
     void testGetAiComment() {
         // Given
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String authenticationName = oAuth2User.getOAuth2Response().getAuthenticationName();
         User buildUser = User.builder()
-                .email(oAuth2User.getName())
+                .email("kakaoemail@kakao.com")
                 .mbti(Mbti.ISTP)
                 .gender(Gender.MALE)
-                .authenticationName(authenticationName)
+                .authenticationName("123ab")
                 .build();
         User user = userRepository.save(buildUser);
 
@@ -97,15 +121,16 @@ public class OpenAiClientTest {
                 .model(AI_MODEL)
                 .messages(messages)
                 .build();
-        CommentResponse fakeResponse = new CommentResponse();
-
-        when(openAiClient.getAiComment(authorization, commentRequest))
-                .thenReturn(fakeResponse);
 
         // When
         CommentResponse response = openAiClient.getAiComment(authorization, commentRequest);
 
         // Then
         assertThat(response).isNotNull();
+        assertThat(response.getChoices()
+                .stream()
+                .findFirst()
+                .map(choice -> choice.getMessage().getContent())
+                .orElseThrow(() -> new EmptyCommentException("fail to get ai comment"))).isEqualTo("This is a test!");
     }
 }

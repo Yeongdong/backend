@@ -7,7 +7,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class AiMocks {
 
     public static void setupAiMockResponse(WireMockServer mockService) {
-        mockService.stubFor(post(urlEqualTo("/api/articles/ai"))
+        mockService.stubFor(post(urlPathEqualTo("/v1/chat/completions"))
+                .withHeader("Authorization", equalTo("test-key"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
