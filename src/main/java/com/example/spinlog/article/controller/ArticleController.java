@@ -72,7 +72,7 @@ public class ArticleController {
      * @return 업데이트 성공 메시지 ResponseEntity
      */
     @PatchMapping("/{articleId}")
-    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody UpdateArticleRequestDto updateRequestDTO) {
+    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody @Valid UpdateArticleRequestDto updateRequestDTO) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
         articleService.updateArticle(userName, articleId, updateRequestDTO);
         log.info("게시글 업데이트 성공");
