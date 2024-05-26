@@ -13,7 +13,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @FeignClient(name = "OpenAiClient", url = "${openai.url}")
 public interface OpenAiClient {
-    @PostMapping(consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/v1/chat/completions", consumes = APPLICATION_JSON_VALUE)
     @CircuitBreaker(name = "openAiClient", fallbackMethod = "fallbackGetAiComment")
     @Retry(name = "openAiClient")
     CommentResponse getAiComment(@RequestHeader("Authorization") String authorization, @RequestBody CommentRequest commentRequest);

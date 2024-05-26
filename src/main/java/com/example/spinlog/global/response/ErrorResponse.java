@@ -1,11 +1,8 @@
 package com.example.spinlog.global.response;
 
-import com.example.spinlog.global.exception.codes.ErrorCode;
 import lombok.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-
-import java.util.Collections;
 
 @Getter
 @Builder
