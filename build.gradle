@@ -88,7 +88,6 @@ dependencies {
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner:4.1.2'
-	testImplementation 'com.github.tomakehurst:wiremock:2.32.0'
 
 
 	// mybatis test
