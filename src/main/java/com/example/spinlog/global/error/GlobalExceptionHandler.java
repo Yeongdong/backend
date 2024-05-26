@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Handle MethodArgumentNotValidException", e);
+        log.warn("Handle MethodArgumentNotValidException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.getMessage(), ErrorCode.INVALID_INPUT_VALUE);
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.warn("Handle MethodArgumentTypeMismatchException", e);
+        log.warn("Handle MethodArgumentTypeMismatchException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.getMessage(), ErrorCode.INVALID_INPUT_VALUE);
 
@@ -52,8 +52,9 @@ public class GlobalExceptionHandler {
      * 지원하지 않는 HTTP 메서드로 요청 시
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ApiResponseWrapper<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.info("Handle HttpRequestMethodNotSupportedException", e);
+        log.info("Handle HttpRequestMethodNotSupportedException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED.getMessage(), ErrorCode.METHOD_NOT_ALLOWED);
 
@@ -66,7 +67,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<ErrorResponse> handleNullPointerException(NullPointerException e) {
-        log.warn("Handle NullPointerException", e);
+        log.warn("Handle NullPointerException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.NULL_POINTER.getMessage(), ErrorCode.NULL_POINTER);
 
@@ -81,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<ErrorResponse> handleNotFoundException(NotFoundException e) {
-        log.warn("Handle NotFoundException", e);
+        log.warn("Handle NotFoundException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
 
@@ -94,7 +95,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponseWrapper<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
-        log.warn("Handle UnauthorizedException", e);
+        log.warn("Handle UnauthorizedException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.UNAUTHORIZED.getMessage(), ErrorCode.UNAUTHORIZED);
 
@@ -104,7 +105,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AiNetworkException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ApiResponseWrapper<ErrorResponse> handleAiNetworkException(AiNetworkException e) {
-        log.error("Handle AiNetworkException", e);
+        log.error("Handle AiNetworkException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.AI_NETWORK.getMessage(), ErrorCode.AI_NETWORK);
 
@@ -115,7 +116,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.warn("Handle BusinessException", e);
+        log.warn("Handle BusinessException", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.BAD_REQUEST.getMessage(), ErrorCode.BAD_REQUEST);
 
@@ -129,7 +130,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponseWrapper<ErrorResponse> handleException(Exception e) {
-        log.warn("Handle Exception", e);
+        log.warn("Handle Exception", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage(), ErrorCode.INTERNAL_SERVER_ERROR);
 

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController { //TODO 배포 시 삭제
 
-    @GetMapping("/")
+    //@GetMapping("/")
     public String homePage() {
         return "home";
     }

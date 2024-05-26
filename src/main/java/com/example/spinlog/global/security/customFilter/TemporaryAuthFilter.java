@@ -1,4 +1,4 @@
-package com.example.spinlog.global.security.filter;
+package com.example.spinlog.global.security.customFilter;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import jakarta.servlet.FilterChain;
@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -23,12 +22,10 @@ public class TemporaryAuthFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth != null &&
                 !(auth instanceof AnonymousAuthenticationToken)) {
-            log.info("already authentication object exists");
             filterChain.doFilter(request, response);
             return;
         }
 
-        log.info("authentication object is not inserted");
         String temporary = request.getHeader("TemporaryAuth");
 
         if(temporary != null && temporary.equals("OurAuthValue")){
