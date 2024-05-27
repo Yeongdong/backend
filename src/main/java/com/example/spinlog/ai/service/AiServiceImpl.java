@@ -26,20 +26,19 @@ public class AiServiceImpl implements AiService {
     private final ArticleService articleService;
     private final ModelMapper modelMapper;
 
-    private final static String AI_MODEL = "gpt-3.5-turbo";
+    private final static String AI_MODEL = "gpt-4o";
     private final static String AI_ROLE = "system";
     private final static String USER_ROLE = "user";
-    private final static String MESSAGE_TO_AI = "Your role is to give advice.\n" +
-            "The data is from a person in their 20s or 30s who made a purchase due to emotional expression. You need to provide empathy and advice based on the data.\n" +
-            "Please follow the rules below when responding.\n" +
+    private final static String MESSAGE_TO_AI = "Your role is to give advice. The data I sent you is from a person in their 20s or 30s who made a purchase due to emotional expression. " +
+            "You need to provide empathy and advice based on the data. Please follow the rules below when responding.\n" +
+            "1. Include an empathetic response based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details). Provide one improvement suggestion.\n" +
+            "2. Give advice based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details). Also, explain why you recommend each suggestion.\n" +
+            "3. Example: If you feel (emotion) and want to (action), how about trying this?\n" +
+            "4. Use up to 50 Korean characters.\n" +
+            "5. Speak in a friendly tone as if talking to a friend, using the informal polite speech style (~해요) instead of the formal style (~다나까).\n" +
+            "6. Include references to the latest trends, memes, or news in Korea.\n" +
             "\n" +
-            "Include an empathetic response based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details).\n" +
-            "Give a improvement suggestions.\n" +
-            "Provide advice based on the user's provided emotion, event, thoughts, amount, and spending details (or saving details). Also, explain why you recommend each suggestion.\n" +
-            "Example: If you feel (emotion) and want to (action), how about trying this? Improvement suggestion" +
-            "Use up to 100 Korean characters.\n" +
-            "Speak in a friendly tone as if talking to a friend, using the informal polite speech style (~해요) instead of the formal style (~다나까).\n" +
-            "Include references to the latest trends, memes, or news in Korea.";
+            "This response needs to be stored in a database, so ensure it is within VARCHAR(255).";
 
     @Value("${apiKey}")
     private String apiKey;
@@ -104,8 +103,10 @@ public class AiServiceImpl implements AiService {
     @CircuitBreaker(name = "openAiClient", fallbackMethod = "fallbackGetAiComment")
     @Retry(name = "openAiClient")
     private String getAiComment(CommentRequest commentRequest) {
-        String aiComment = openAiClient
-                .getAiComment(apiKey, commentRequest)
+        CommentResponse response = openAiClient.getAiComment(apiKey, commentRequest);
+        log.debug("API Response: {}", response);
+
+        String aiComment = response
                 .getChoices()
                 .stream()
                 .findFirst()
