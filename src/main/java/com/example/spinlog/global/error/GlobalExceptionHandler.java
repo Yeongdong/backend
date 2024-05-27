@@ -28,9 +28,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Handle MethodArgumentNotValidException", e.getMessage());
+        log.warn("Handle MethodArgumentNotValidException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.getMessage(), ErrorCode.INVALID_INPUT_VALUE);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.toString(), ErrorCode.INVALID_INPUT_VALUE);
 
         return ResponseUtils.error(response);
     }
@@ -41,9 +41,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.warn("Handle MethodArgumentTypeMismatchException", e.getMessage());
+        log.warn("Handle MethodArgumentTypeMismatchException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.getMessage(), ErrorCode.INVALID_INPUT_VALUE);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.toString(), ErrorCode.INVALID_INPUT_VALUE);
 
         return ResponseUtils.error(response);
     }
@@ -54,9 +54,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ApiResponseWrapper<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.info("Handle HttpRequestMethodNotSupportedException", e.getMessage());
+        log.info("Handle HttpRequestMethodNotSupportedException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED.getMessage(), ErrorCode.METHOD_NOT_ALLOWED);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED.toString(), ErrorCode.METHOD_NOT_ALLOWED);
 
         return ResponseUtils.error(response);
     }
@@ -67,9 +67,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<ErrorResponse> handleNullPointerException(NullPointerException e) {
-        log.warn("Handle NullPointerException", e.getMessage());
+        log.warn("Handle NullPointerException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.NULL_POINTER.getMessage(), ErrorCode.NULL_POINTER);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.NULL_POINTER.toString(), ErrorCode.NULL_POINTER);
 
         return ResponseUtils.error(response);
     }
@@ -82,9 +82,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<ErrorResponse> handleNotFoundException(NotFoundException e) {
-        log.warn("Handle NotFoundException", e.getMessage());
+        log.warn("Handle NotFoundException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_FOUND.getMessage(), ErrorCode.NOT_FOUND);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_FOUND.toString(), ErrorCode.NOT_FOUND);
 
         return ResponseUtils.error(response);
     }
@@ -95,9 +95,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponseWrapper<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
-        log.warn("Handle UnauthorizedException", e.getMessage());
+        log.warn("Handle UnauthorizedException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.UNAUTHORIZED.getMessage(), ErrorCode.UNAUTHORIZED);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.UNAUTHORIZED.toString(), ErrorCode.UNAUTHORIZED);
 
         return ResponseUtils.error(response);
     }
@@ -105,9 +105,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AiNetworkException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ApiResponseWrapper<ErrorResponse> handleAiNetworkException(AiNetworkException e) {
-        log.error("Handle AiNetworkException", e.getMessage());
+        log.error("Handle AiNetworkException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.AI_NETWORK.getMessage(), ErrorCode.AI_NETWORK);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.AI_NETWORK.toString(), ErrorCode.AI_NETWORK);
 
         return ResponseUtils.error(response);
 
@@ -116,9 +116,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.warn("Handle BusinessException", e.getMessage());
+        log.warn("Handle BusinessException", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.BAD_REQUEST.getMessage(), ErrorCode.BAD_REQUEST);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.BAD_REQUEST.toString(), ErrorCode.BAD_REQUEST);
 
         return ResponseUtils.error(response);
     }
@@ -130,9 +130,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponseWrapper<ErrorResponse> handleException(Exception e) {
-        log.warn("Handle Exception", e.getMessage());
+        log.warn("Handle Exception", e.toString());
 
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage(), ErrorCode.INTERNAL_SERVER_ERROR);
+        ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.toString(), ErrorCode.INTERNAL_SERVER_ERROR);
 
         return ResponseUtils.error(response);
     }
