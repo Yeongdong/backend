@@ -88,7 +88,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/users/logout")
-                        .addLogoutHandler(oAuth2LogoutHandler)
+                        //.addLogoutHandler(oAuth2LogoutHandler)
                         //.invalidateHttpSession(true)
                         //.clearAuthentication(true)
                         .logoutSuccessHandler(oAuth2LogoutSuccessHandler)
