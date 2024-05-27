@@ -26,7 +26,7 @@ public class AiServiceImpl implements AiService {
     private final ArticleService articleService;
     private final ModelMapper modelMapper;
 
-    private final static String AI_MODEL = "gpt-4o";
+    private final static String AI_MODEL = "gpt-3.5-turbo";
     private final static String AI_ROLE = "system";
     private final static String USER_ROLE = "user";
     private final static String MESSAGE_TO_AI = "Your role is to give advice. The data I sent you is from a person in their 20s or 30s who made a purchase due to emotional expression. " +
