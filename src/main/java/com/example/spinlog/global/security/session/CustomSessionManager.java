@@ -33,6 +33,9 @@ public class CustomSessionManager {
     }
 
     public Optional<CustomSession> getSession(String sessionId) {
+        if(sessionId == null)
+            return Optional.empty();
+
         if(sessions.containsKey(sessionId)) {
             CustomSession session = sessions.get(sessionId);
             session.updateLastAccessedTime();

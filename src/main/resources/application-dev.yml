@@ -26,6 +26,9 @@ spring:
       ddl-auto: validate
     open-in-view: false
 
+logging:
+  config: classpath:logback-dev.xml
+
 management:
   server:
     port: 8081
