@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Handle MethodArgumentNotValidException", e.toString());
+        log.info("Handle MethodArgumentNotValidException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.toString(), ErrorCode.INVALID_INPUT_VALUE);
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.warn("Handle MethodArgumentTypeMismatchException", e.toString());
+        log.info("Handle MethodArgumentTypeMismatchException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE.toString(), ErrorCode.INVALID_INPUT_VALUE);
 
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ApiResponseWrapper<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.info("Handle HttpRequestMethodNotSupportedException", e.toString());
+        log.info("Handle HttpRequestMethodNotSupportedException: {}", e.getMethod());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED.toString(), ErrorCode.METHOD_NOT_ALLOWED);
 
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<ErrorResponse> handleNullPointerException(NullPointerException e) {
-        log.warn("Handle NullPointerException", e.toString());
+        log.info("Handle NullPointerException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.NULL_POINTER.toString(), ErrorCode.NULL_POINTER);
 
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<ErrorResponse> handleNotFoundException(NotFoundException e) {
-        log.warn("Handle NotFoundException", e.toString());
+        log.info("Handle NotFoundException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_FOUND.toString(), ErrorCode.NOT_FOUND);
 
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResponseWrapper<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
-        log.warn("Handle UnauthorizedException", e.toString());
+        log.info("Handle UnauthorizedException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.UNAUTHORIZED.toString(), ErrorCode.UNAUTHORIZED);
 
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AiNetworkException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ApiResponseWrapper<ErrorResponse> handleAiNetworkException(AiNetworkException e) {
-        log.error("Handle AiNetworkException", e.toString());
+        log.warn("Handle AiNetworkException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.AI_NETWORK.toString(), ErrorCode.AI_NETWORK);
 
@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.warn("Handle BusinessException", e.toString());
+        log.info("Handle BusinessException: {}", e.getMessage());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.BAD_REQUEST.toString(), ErrorCode.BAD_REQUEST);
 
@@ -130,7 +130,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponseWrapper<ErrorResponse> handleException(Exception e) {
-        log.warn("Handle Exception", e.toString());
+        log.warn("Handle {}", e.toString());
 
         ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.toString(), ErrorCode.INTERNAL_SERVER_ERROR);
 
@@ -156,6 +156,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponseWrapper<Void> handleNoSuchElementException(NoSuchElementException e) {
+        log.info("Handle NoSuchElementException: {}", e.getMessage());
         return ResponseUtils.error("Requested resource not found");
     }
 
@@ -166,6 +167,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseWrapper<Void> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.info("Handle IllegalArgumentException: {}", e.getMessage());
         return ResponseUtils.error("Invalid input");
     }
 }
