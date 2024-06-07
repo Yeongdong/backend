@@ -17,9 +17,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         String requestURI = request.getRequestURI();
-        log.info("fail authenticate, requestURI: {}", requestURI);
-
-        //response.sendRedirect("/api/authentication/not-authenticated?redirectURI="+requestURI);
         response.setStatus(401);
     }
 }
