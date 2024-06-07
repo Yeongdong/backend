@@ -15,10 +15,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Set up JDK 21
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        java-version: '17'
         distribution: 'temurin'
     - name: add execute permission for gradlew
       run: chmod +x gradlew
@@ -48,7 +48,7 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USER }}
         script: |
-          aws s3 mv s3://spinlog-files/dev/deploy.zip ./zips/deploy.zip
+          aws s3 cp s3://spinlog-files/dev/deploy.zip ./zips/deploy.zip
           echo "success to receive zip file from s3"
           cd zips
           unzip -o deploy.zip
