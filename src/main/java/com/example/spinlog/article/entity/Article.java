@@ -7,10 +7,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
@@ -19,7 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "articles")
 @Getter
 @DynamicUpdate
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article extends BaseTimeEntity {
 
     @Id
@@ -68,7 +65,7 @@ public class Article extends BaseTimeEntity {
     private RegisterType registerType; // 지출과 소비
 
     @Builder
-    public Article(User user, String content, LocalDateTime spendDate, String event, String thought, Emotion emotion, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
+    private Article(User user, String content, LocalDateTime spendDate, String event, String thought, Emotion emotion, Float satisfaction, String reason, String improvements, @Nullable String aiComment, Integer amount, RegisterType registerType) {
         this.user = user;
         this.content = content;
         this.spendDate = spendDate;
