@@ -1,5 +1,6 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.controller.request;
 
+import com.example.spinlog.article.service.request.SearchCond;
 import com.example.spinlog.utils.DateUtils;
 import com.example.spinlog.utils.ParameterParser;
 import lombok.AllArgsConstructor;

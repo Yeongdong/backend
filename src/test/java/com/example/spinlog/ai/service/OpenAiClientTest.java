@@ -4,9 +4,10 @@ import com.example.spinlog.ai.dto.AiRequestDto;
 import com.example.spinlog.ai.dto.CommentRequest;
 import com.example.spinlog.ai.dto.CommentResponse;
 import com.example.spinlog.ai.dto.Message;
-import com.example.spinlog.article.dto.WriteArticleRequestDto;
+import com.example.spinlog.article.controller.request.WriteArticleRequestDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
+import com.example.spinlog.article.service.request.ArticleCreateRequest;
 import com.example.spinlog.global.error.exception.ai.EmptyCommentException;
 import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -87,7 +87,7 @@ public class OpenAiClientTest {
                 .build();
         User user = userRepository.save(buildUser);
 
-        WriteArticleRequestDto WriteRequestDto = WriteArticleRequestDto.builder()
+        ArticleCreateRequest writeRequestDto = ArticleCreateRequest.builder()
                 .content("투썸플레이스 아이스아메리카노")
                 .spendDate("2024-04-04T11:22:33")
                 .event("부장님께 혼남")
@@ -99,7 +99,7 @@ public class OpenAiClientTest {
                 .amount(5000)
                 .registerType("SPEND")
                 .build();
-        Article article = articleRepository.save(WriteRequestDto.toEntity(user));
+        Article article = articleRepository.save(writeRequestDto.toEntity(user));
 
         AiRequestDto requestDto = AiRequestDto.builder()
                 .articleId(article.getArticleId())

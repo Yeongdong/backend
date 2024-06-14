@@ -1,8 +1,15 @@
 package com.example.spinlog.article.service;
 
+import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
 import com.example.spinlog.article.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
+import com.example.spinlog.article.service.request.ArticleCreateRequest;
+import com.example.spinlog.article.service.request.ArticleUpdateRequest;
+import com.example.spinlog.article.service.request.SearchCond;
+import com.example.spinlog.article.service.response.ViewArticleResponseDto;
+import com.example.spinlog.article.service.response.ViewListResponseDto;
+import com.example.spinlog.article.service.response.WriteArticleResponseDto;
 import com.example.spinlog.global.error.exception.article.ArticleNotFoundException;
 import com.example.spinlog.global.error.exception.user.UnauthorizedArticleRequestException;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
@@ -26,7 +33,7 @@ public class ArticleService {
     private final UserRepository userRepository;
 
     @Transactional
-    public WriteArticleResponseDto createArticle(String userName, WriteArticleRequestDto requestDto) {
+    public WriteArticleResponseDto createArticle(String userName, ArticleCreateRequest requestDto) {
         User user = getUser(userName);
         Article articleEntity = requestDto.toEntity(user);
         Article savedArticle = articleRepository.save(articleEntity);
@@ -35,10 +42,8 @@ public class ArticleService {
         return WriteArticleResponseDto.from(savedArticle, modelMapper);
     }
 
-    public ViewListResponseDto listArticles(String userName, Pageable pageable, SearchCondRequestDto searchCondDto) {
+    public ViewListResponseDto listArticles(String userName, Pageable pageable, SearchCond searchCond) {
         User user = getUser(userName);
-        SearchCond searchCond = searchCondDto.toSearchCond();
-
         Page<ViewArticleSumDto> response = articleRepository.search(user, pageable, searchCond);
         return ViewListResponseDto.builder()
                 .nextPage(!response.isLast())
@@ -54,7 +59,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public void updateArticle(String userName, Long id, UpdateArticleRequestDto requestDto) {
+    public void updateArticle(String userName, Long id, ArticleUpdateRequest requestDto) {
         User user = getUser(userName);
         Article updateArticle = findArticleById(id);
         validateUserArticle(user, updateArticle);

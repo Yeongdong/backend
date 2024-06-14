@@ -1,7 +1,12 @@
 package com.example.spinlog.article.controller;
 
-import com.example.spinlog.article.dto.*;
+import com.example.spinlog.article.controller.request.SearchCondRequestDto;
+import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
+import com.example.spinlog.article.controller.request.WriteArticleRequestDto;
 import com.example.spinlog.article.service.ArticleService;
+import com.example.spinlog.article.service.response.ViewArticleResponseDto;
+import com.example.spinlog.article.service.response.ViewListResponseDto;
+import com.example.spinlog.article.service.response.WriteArticleResponseDto;
 import com.example.spinlog.global.response.ApiResponseWrapper;
 import com.example.spinlog.global.response.ResponseUtils;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
@@ -29,7 +34,7 @@ public class ArticleController {
     @PostMapping
     public ApiResponseWrapper<WriteArticleResponseDto> create(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @RequestBody @Valid WriteArticleRequestDto article) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
-        WriteArticleResponseDto responseDto = articleService.createArticle(userName, article);
+        WriteArticleResponseDto responseDto = articleService.createArticle(userName, article.toServiceRequest());
         log.info("게시글 작성 성공");
         return ResponseUtils.ok(responseDto, "게시글 작성 성공");
     }
@@ -45,7 +50,7 @@ public class ArticleController {
                                                             @PageableDefault Pageable pageable,
                                                             SearchCondRequestDto searchCond) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
-        ViewListResponseDto responseDto = articleService.listArticles(userName, pageable, searchCond);
+        ViewListResponseDto responseDto = articleService.listArticles(userName, pageable, searchCond.toSearchCond());
         log.info("게시글 리스트 불러오기 성공");
         return ResponseUtils.ok(responseDto, "게시글 리스트 불러오기 성공");
     }
@@ -68,13 +73,13 @@ public class ArticleController {
      * 게시글 수정
      *
      * @param articleId        업데이트 요청 데이터 Id
-     * @param updateRequestDTO 업데이트 요청 데이터
+     * @param updateRequestDto 업데이트 요청 데이터
      * @return 업데이트 성공 메시지 ResponseEntity
      */
     @PatchMapping("/{articleId}")
-    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody @Valid UpdateArticleRequestDto updateRequestDTO) {
+    public ApiResponseWrapper<Void> updateArticle(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @PathVariable Long articleId, @RequestBody @Valid UpdateArticleRequestDto updateRequestDto) {
         String userName = oAuth2User.getOAuth2Response().getAuthenticationName();
-        articleService.updateArticle(userName, articleId, updateRequestDTO);
+        articleService.updateArticle(userName, articleId, updateRequestDto.toServiceUpdateRequest());
         log.info("게시글 업데이트 성공");
         return ResponseUtils.ok("게시글 업데이트 성공");
     }

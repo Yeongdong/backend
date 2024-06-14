@@ -1,4 +1,4 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.service.request;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;

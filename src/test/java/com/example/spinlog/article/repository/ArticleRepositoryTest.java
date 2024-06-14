@@ -1,7 +1,8 @@
 package com.example.spinlog.article.repository;
 
-import com.example.spinlog.article.dto.SearchCond;
-import com.example.spinlog.article.dto.UpdateArticleRequestDto;
+import com.example.spinlog.article.service.request.ArticleUpdateRequest;
+import com.example.spinlog.article.service.request.SearchCond;
+import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
 import com.example.spinlog.article.dto.ViewArticleSumDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.user.entity.User;
@@ -275,7 +276,7 @@ class ArticleRepositoryTest {
         Article article = createArticle();
         articleRepository.save(article);
 
-        UpdateArticleRequestDto updateDto = UpdateArticleRequestDto.builder()
+        ArticleUpdateRequest updateDto = ArticleUpdateRequest.builder()
                 .content("updated content")
                 .spendDate("2024-04-04T11:22:33")
                 .event("updated event")

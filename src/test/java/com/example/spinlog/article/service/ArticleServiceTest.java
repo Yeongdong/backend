@@ -1,15 +1,16 @@
 package com.example.spinlog.article.service;
 
-import com.example.spinlog.article.dto.SearchCondRequestDto;
-import com.example.spinlog.article.dto.UpdateArticleRequestDto;
-import com.example.spinlog.article.dto.ViewArticleResponseDto;
-import com.example.spinlog.article.dto.ViewListResponseDto;
-import com.example.spinlog.article.dto.WriteArticleRequestDto;
-import com.example.spinlog.article.dto.WriteArticleResponseDto;
+import com.example.spinlog.article.controller.request.SearchCondRequestDto;
+import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
+import com.example.spinlog.article.service.response.ViewArticleResponseDto;
+import com.example.spinlog.article.service.response.ViewListResponseDto;
+import com.example.spinlog.article.controller.request.WriteArticleRequestDto;
+import com.example.spinlog.article.service.response.WriteArticleResponseDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
+import com.example.spinlog.article.service.request.ArticleCreateRequest;
 import com.example.spinlog.global.error.exception.article.ArticleNotFoundException;
 import com.example.spinlog.global.error.exception.user.UnauthorizedArticleRequestException;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
@@ -66,7 +67,7 @@ public class ArticleServiceTest {
                 .build();
         user = userRepository.save(buildUser);
 
-        WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
+        ArticleCreateRequest requestDto = ArticleCreateRequest.builder()
                 .content("Test Content")
                 .spendDate("2024-04-04T11:22:33")
                 .event("Test event")
@@ -106,7 +107,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        WriteArticleResponseDto responseDto = articleService.createArticle(user.getAuthenticationName(), requestDto);
+        WriteArticleResponseDto responseDto = articleService.createArticle(user.getAuthenticationName(), requestDto.toServiceRequest());
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -172,7 +173,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        ViewListResponseDto responseDto = articleService.listArticles(user.getAuthenticationName(), pageable, searchCond);
+        ViewListResponseDto responseDto = articleService.listArticles(user.getAuthenticationName(), pageable, searchCond.toSearchCond());
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -241,7 +242,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        ViewListResponseDto responseDto = articleService.listArticles(user.getAuthenticationName(), pageable, searchCond);
+        ViewListResponseDto responseDto = articleService.listArticles(user.getAuthenticationName(), pageable, searchCond.toSearchCond());
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -325,7 +326,7 @@ public class ArticleServiceTest {
                 .build();
 
         // When
-        articleService.updateArticle(user.getAuthenticationName(), article.getArticleId(), updateDto);
+        articleService.updateArticle(user.getAuthenticationName(), article.getArticleId(), updateDto.toServiceUpdateRequest());
 
         // Then
         assertThat(article.getEmotion()).isEqualTo(Emotion.SAD);

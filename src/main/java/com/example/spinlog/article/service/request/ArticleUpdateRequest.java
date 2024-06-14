@@ -1,4 +1,4 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.service.request;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UpdateArticleRequestDto {
+public class ArticleUpdateRequest {
 
     @NotEmpty
     private String content;

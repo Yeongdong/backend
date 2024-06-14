@@ -1,4 +1,4 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.service.request;
 
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
@@ -7,19 +7,15 @@ import com.example.spinlog.user.entity.User;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class WriteArticleRequestDto {
-
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ArticleCreateRequest {
     @NotEmpty
     private String content;
 
@@ -50,11 +46,6 @@ public class WriteArticleRequestDto {
     @NotEmpty
     private String registerType;
 
-    /**
-     * DTO를 Article 엔티티로 변환하는 메서드
-     *
-     * @return 변환된 Article 엔티티
-     */
     public Article toEntity(User user) {
         return Article.builder()
                 .user(user)

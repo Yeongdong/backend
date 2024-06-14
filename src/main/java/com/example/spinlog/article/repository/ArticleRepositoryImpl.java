@@ -1,6 +1,6 @@
 package com.example.spinlog.article.repository;
 
-import com.example.spinlog.article.dto.SearchCond;
+import com.example.spinlog.article.service.request.SearchCond;
 import com.example.spinlog.article.dto.ViewArticleSumDto;
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;

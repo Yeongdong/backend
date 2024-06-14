@@ -1,6 +1,7 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.service.response;
 
 
+import com.example.spinlog.article.dto.ViewArticleSumDto;
 import com.example.spinlog.utils.NullDataConverter;
 import lombok.Builder;
 import lombok.Data;

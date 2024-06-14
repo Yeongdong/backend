@@ -1,6 +1,7 @@
 package com.example.spinlog.article.entity;
 
-import com.example.spinlog.article.dto.*;
+import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
+import com.example.spinlog.article.service.request.ArticleUpdateRequest;
 import com.example.spinlog.global.entity.BaseTimeEntity;
 import com.example.spinlog.user.entity.User;
 import jakarta.annotation.Nullable;
@@ -80,7 +81,7 @@ public class Article extends BaseTimeEntity {
         this.registerType = registerType;
     }
 
-    public void update(UpdateArticleRequestDto updateArticle) {
+    public void update(ArticleUpdateRequest updateArticle) {
         this.content = updateArticle.getContent();
         this.spendDate = LocalDateTime.parse(updateArticle.getSpendDate());
         this.event = updateArticle.getEvent();

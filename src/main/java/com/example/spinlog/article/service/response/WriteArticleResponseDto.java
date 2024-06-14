@@ -1,4 +1,4 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.service.response;
 
 import com.example.spinlog.article.entity.Article;
 import lombok.Data;
