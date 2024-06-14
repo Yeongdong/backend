@@ -1,12 +1,12 @@
 package com.example.spinlog.article.service;
 
-import com.example.spinlog.article.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.article.service.request.ArticleCreateRequest;
 import com.example.spinlog.article.service.request.ArticleUpdateRequest;
 import com.example.spinlog.article.service.request.SearchCond;
 import com.example.spinlog.article.service.response.ViewArticleResponseDto;
+import com.example.spinlog.article.service.response.ViewArticleSumDto;
 import com.example.spinlog.article.service.response.ViewListResponseDto;
 import com.example.spinlog.article.service.response.WriteArticleResponseDto;
 import com.example.spinlog.global.error.exception.article.ArticleNotFoundException;

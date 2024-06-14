@@ -1,12 +1,12 @@
-package com.example.spinlog.article.dto;
+package com.example.spinlog.article.service.response;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ViewArticleSumDto {
