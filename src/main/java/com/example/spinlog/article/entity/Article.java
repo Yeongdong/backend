@@ -1,6 +1,5 @@
 package com.example.spinlog.article.entity;
 
-import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
 import com.example.spinlog.article.service.request.ArticleUpdateRequest;
 import com.example.spinlog.global.entity.BaseTimeEntity;
 import com.example.spinlog.user.entity.User;

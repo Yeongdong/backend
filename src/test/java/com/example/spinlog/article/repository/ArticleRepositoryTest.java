@@ -2,7 +2,6 @@ package com.example.spinlog.article.repository;
 
 import com.example.spinlog.article.service.request.ArticleUpdateRequest;
 import com.example.spinlog.article.service.request.SearchCond;
-import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
 import com.example.spinlog.article.dto.ViewArticleSumDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.user.entity.User;

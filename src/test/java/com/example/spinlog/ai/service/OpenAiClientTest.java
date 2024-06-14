@@ -4,7 +4,6 @@ import com.example.spinlog.ai.dto.AiRequestDto;
 import com.example.spinlog.ai.dto.CommentRequest;
 import com.example.spinlog.ai.dto.CommentResponse;
 import com.example.spinlog.ai.dto.Message;
-import com.example.spinlog.article.controller.request.WriteArticleRequestDto;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.article.service.request.ArticleCreateRequest;

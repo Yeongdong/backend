@@ -1,6 +1,5 @@
 package com.example.spinlog.article.service;
 
-import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
 import com.example.spinlog.article.dto.*;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.repository.ArticleRepository;
