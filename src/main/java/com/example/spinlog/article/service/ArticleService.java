@@ -16,7 +16,6 @@ import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ArticleService {
     private final ArticleRepository articleRepository;
-    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
 
     @Transactional
@@ -38,7 +36,7 @@ public class ArticleService {
         Article savedArticle = articleRepository.save(articleEntity);
         user.addArticle(savedArticle);
         log.info("게시글이 성공적으로 저장되었습니다. ID: {}", savedArticle.getArticleId());
-        return WriteArticleResponseDto.from(savedArticle, modelMapper);
+        return WriteArticleResponseDto.from(savedArticle);
     }
 
     public ViewListResponseDto listArticles(String userName, Pageable pageable, SearchCond searchCond) {
@@ -54,7 +52,7 @@ public class ArticleService {
         User user = getUser(userName);
         Article viewArticle = findArticleById(id);
         validateUserArticle(user, viewArticle);
-        return ViewArticleResponseDto.from(viewArticle, modelMapper);
+        return ViewArticleResponseDto.from(viewArticle);
     }
 
     @Transactional
