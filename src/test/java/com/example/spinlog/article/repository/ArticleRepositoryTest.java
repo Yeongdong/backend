@@ -8,7 +8,6 @@ import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,10 +96,9 @@ class ArticleRepositoryTest {
         Long invalidId = 999L;
 
         // when then
-        assertThatThrownBy(() -> {
-            articleRepository.findById(invalidId)
-                    .orElseThrow(() -> new EntityNotFoundException("Article not found with id " + invalidId));
-        }).isInstanceOf(EntityNotFoundException.class)
+        assertThatThrownBy(() -> articleRepository.findById(invalidId)
+                .orElseThrow(() -> new EntityNotFoundException("Article not found with id " + invalidId)))
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Article not found with id " + invalidId);
     }
 
@@ -190,7 +188,6 @@ class ArticleRepositoryTest {
                 .amount(100)
                 .registerType(SAVE)
                 .build();
-        ;
         Article article4 = Article.builder()
                 .user(user)
                 .content("test content")
