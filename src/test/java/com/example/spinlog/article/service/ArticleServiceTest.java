@@ -1,347 +1,361 @@
 package com.example.spinlog.article.service;
 
-import com.example.spinlog.article.controller.request.SearchCondRequestDto;
-import com.example.spinlog.article.controller.request.UpdateArticleRequestDto;
+import com.example.spinlog.article.service.request.ArticleUpdateRequest;
+import com.example.spinlog.article.service.request.SearchCond;
 import com.example.spinlog.article.service.response.ViewArticleResponseDto;
+import com.example.spinlog.article.service.response.ViewArticleSumDto;
 import com.example.spinlog.article.service.response.ViewListResponseDto;
-import com.example.spinlog.article.controller.request.WriteArticleRequestDto;
 import com.example.spinlog.article.service.response.WriteArticleResponseDto;
 import com.example.spinlog.article.entity.Article;
-import com.example.spinlog.article.entity.Emotion;
-import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.article.service.request.ArticleCreateRequest;
 import com.example.spinlog.global.error.exception.article.ArticleNotFoundException;
 import com.example.spinlog.global.error.exception.user.UnauthorizedArticleRequestException;
-import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
-import com.example.spinlog.user.custom.securitycontext.WithMockCustomOAuth2User;
-import com.example.spinlog.user.entity.Gender;
-import com.example.spinlog.user.entity.Mbti;
+import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.spinlog.user.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import static com.example.spinlog.user.custom.securitycontext.OAuth2Provider.KAKAO;
+import static com.example.spinlog.article.entity.Emotion.ANNOYED;
+import static com.example.spinlog.article.entity.RegisterType.SAVE;
+import static com.example.spinlog.article.entity.RegisterType.SPEND;
+import static com.example.spinlog.user.entity.Gender.MALE;
+import static com.example.spinlog.user.entity.Mbti.ISTJ;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.*;
 
 @ActiveProfiles("test")
 @Transactional
 @SpringBootTest
 public class ArticleServiceTest {
 
-    @Autowired  // articleId가 필요해 Autowired 설정
+    @Mock
     private ArticleRepository articleRepository;
 
-    @Autowired  // userId가 필요해 Autowired 설정
+    @Mock
     private UserRepository userRepository;
 
-    @Autowired  //userId, articleId가 필요해 Autowired 설정
+    @InjectMocks
     private ArticleService articleService;
+    @Autowired
+    private UserService userService;
 
-    private User user;
-    private Article article;
+    @DisplayName("일기 작성 요청을 받아 일기를 생성한다.")
+    @Test
+    void creatArticle() {
+        // Given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
 
-    @BeforeEach
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void setUp() {
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String authenticationName = oAuth2User.getOAuth2Response().getAuthenticationName();
-        User buildUser = User.builder()
-                .email(oAuth2User.getName())
-                .mbti(Mbti.ISTP)
-                .gender(Gender.MALE)
-                .authenticationName(authenticationName)
+        Article article = createArticle(user);
+        given(articleRepository.save(any(Article.class))).willReturn(article);
+
+        ArticleCreateRequest requestDto = createArticleCreateRequest();
+
+        // When
+        WriteArticleResponseDto response = articleService.createArticle(user.getAuthenticationName(), requestDto);
+
+        // Then
+        assertThat(response).isNotNull();
+
+        Long savedArticleId = user.getArticles().stream()
+                .findAny().get().getArticleId();
+        assertThat(savedArticleId).isEqualTo(response.getArticleId());
+        verify(articleRepository, times(1)).save(any(Article.class));
+    }
+
+
+    @DisplayName("필터없이 조회시 저장된 모든 일기를 반환한다.")
+    @Test
+    void listArticles() {
+        // Given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
+
+        Pageable pageable = PageRequest.of(0, 10);
+        SearchCond cond = SearchCond.builder()
+                .registerTypes(List.of(SPEND))
+                .emotions(List.of(ANNOYED))
+                .satisfactions(List.of(5F))
+                .words(List.of(""))
                 .build();
-        user = userRepository.save(buildUser);
+        Page<ViewArticleSumDto> articlePages = new PageImpl<>(Collections.singletonList(ViewArticleSumDto.builder().build()));
+        given(articleRepository.search(any(User.class), any(Pageable.class), any(SearchCond.class))).willReturn(articlePages);
 
-        ArticleCreateRequest requestDto = ArticleCreateRequest.builder()
-                .content("Test Content")
-                .spendDate("2024-04-04T11:22:33")
-                .event("Test event")
-                .thought("Test thought")
-                .emotion("ANNOYED")
+        // When
+        ViewListResponseDto result = articleService.listArticles("test user", pageable, cond);
+
+        // Then
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).search(user, pageable, cond);
+
+        assertThat(articlePages.getContent()).isEqualTo(result.getSpendList());
+        assertThat(!articlePages.isLast()).isEqualTo(result.isNextPage());
+    }
+
+    @DisplayName("저장된 일기가 없으면 빈 리스트를 반환한다.")
+    @Test
+    void listArticles_fail() {
+        // Given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
+
+        Pageable pageable = PageRequest.of(0, 10);
+        SearchCond cond = SearchCond.builder()
+                .registerTypes(List.of(SPEND))
+                .emotions(List.of(ANNOYED))
+                .satisfactions(List.of(5F))
+                .words(List.of(""))
+                .build();
+        Page<ViewArticleSumDto> articlePages = new PageImpl<>(Collections.emptyList());
+        given(articleRepository.search(any(User.class), any(Pageable.class), any(SearchCond.class))).willReturn(articlePages);
+
+        // When
+        ViewListResponseDto result = articleService.listArticles("test user", pageable, cond);
+
+        // Then
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).search(user, pageable, cond);
+
+        assertThat(result.getSpendList()).isEmpty(); // 결과가 빈 리스트인지 확인
+        assertThat(result.isNextPage()).isFalse(); // 다음 페이지가 없는지 확인
+    }
+
+    @DisplayName("검색 필터가 있으면 필터에 해당하는 일기만 반환한다.")
+    @Test
+    void listArticles_filtered() {
+        // given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
+
+        Pageable pageable = PageRequest.of(0, 10);
+        SearchCond cond = SearchCond.builder()
+                .registerTypes(List.of(SPEND))
+                .emotions(List.of(ANNOYED))
+                .satisfactions(List.of(5F))
+                .words(List.of("Hello", "Hi"))
+                .build();
+
+        ViewArticleSumDto article1 = ViewArticleSumDto.builder()
+                .articleId(1L)
+                .content("Hello")
                 .satisfaction(5F)
-                .reason("Test Reason")
-                .improvements("Test Improvements")
-                .amount(100)
-                .registerType("SPEND")
+                .amount(1000)
+                .emotion(ANNOYED)
+                .registerType(SPEND)
                 .build();
-        article = articleRepository.save(requestDto.toEntity(user));
-    }
-
-    @AfterEach
-    void tearDown() {
-        articleRepository.deleteAll();
-    }
-
-    @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void 게시글_작성() {
-        // Given
-        WriteArticleRequestDto requestDto = WriteArticleRequestDto.builder()
-                .content("Test Content")
-                .spendDate("2024-04-04T11:22:33")
-                .event("Test event")
-                .thought("Test thought")
-                .emotion("ANNOYED")
+        ViewArticleSumDto article2 = ViewArticleSumDto.builder()
+                .articleId(1L)
+                .content("Hi")
                 .satisfaction(5F)
-                .reason("Test Reason")
-                .improvements("Test Improvements")
-                .amount(100)
-                .registerType("SPEND")
+                .amount(1000)
+                .emotion(ANNOYED)
+                .registerType(SPEND)
+                .build();
+        ViewArticleSumDto article3 = ViewArticleSumDto.builder()
+                .articleId(1L)
+                .content("Bye")
+                .satisfaction(5F)
+                .amount(1000)
+                .emotion(ANNOYED)
+                .registerType(SPEND)
                 .build();
 
-        // When
-        WriteArticleResponseDto responseDto = articleService.createArticle(user.getAuthenticationName(), requestDto.toServiceRequest());
-
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getArticleId()).isNotNull();
-        assertThat(articleRepository.findById(responseDto.getArticleId()).isPresent()).isTrue();
-    }
-
-    @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    public void 게시글_리스트_조회_전체_테스트() {
-        // Given
-        for (int i = 1; i <= 15; i++) {
-            Article article1 = Article.builder()
-                    .user(user)
-                    .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0).plusDays(i))
-                    .content("Test Content" + i)
-                    .event("Test event" + i)
-                    .thought("Test thought" + i)
-                    .emotion(Emotion.valueOf("ANNOYED"))
-                    .satisfaction(Float.parseFloat(i + ""))
-                    .reason("Test Reason" + i)
-                    .improvements("Test Improvements" + i)
-                    .amount(i * 1000)
-                    .registerType(RegisterType.valueOf("SPEND"))
-                    .build();
-            articleRepository.save(article1);
-
-            Article article2 = Article.builder()
-                    .user(user)
-                    .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0).plusDays(i))
-                    .content("Test Content" + i)
-                    .event("Test event" + i)
-                    .thought("Test thought" + i)
-                    .emotion(Emotion.valueOf("SHY"))
-                    .satisfaction(Float.parseFloat(i + ""))
-                    .reason("Test Reason" + i)
-                    .improvements("Test Improvements" + i)
-                    .amount(i * 1000)
-                    .registerType(RegisterType.valueOf("SPEND"))
-                    .build();
-            articleRepository.save(article2);
-
-            Article article3 = Article.builder()
-                    .user(user)
-                    .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0).plusDays(i))
-                    .content("Test Content" + i)
-                    .event("Test event" + i)
-                    .thought("Test thought" + i)
-                    .emotion(Emotion.valueOf("SAD"))
-                    .satisfaction(Float.parseFloat(i + ""))
-                    .reason("Test Reason" + i)
-                    .improvements("Test Improvements" + i)
-                    .amount(i * 1000)
-                    .registerType(RegisterType.valueOf("SAVE"))
-                    .build();
-            articleRepository.save(article3);
-        }
-
-        Pageable pageable = Pageable.ofSize(10).withPage(0);
-        SearchCondRequestDto searchCond = SearchCondRequestDto.builder()
-                .build();
+        List<ViewArticleSumDto> filteredArticles = List.of(article1, article2);
+        Page<ViewArticleSumDto> articlePages = new PageImpl<>(filteredArticles, pageable, filteredArticles.size());
+        given(articleRepository.search(any(User.class), any(Pageable.class), any(SearchCond.class))).willReturn(articlePages);
 
         // When
-        ViewListResponseDto responseDto = articleService.listArticles(user.getAuthenticationName(), pageable, searchCond.toSearchCond());
+        ViewListResponseDto result = articleService.listArticles("test user", pageable, cond);
 
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getSpendList().size()).isEqualTo(10);
+        // then
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).search(user, pageable, cond);
+
+        assertThat(result.getSpendList()).containsExactlyInAnyOrder(article1, article2);
+        assertThat(result.getSpendList()).doesNotContain(article3);
+        assertThat(result.isNextPage()).isFalse();
     }
 
+    @DisplayName("일기 ID를 입력하면 일기를 반환한다.")
     @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    public void 게시글_리스트_조회_필터_테스트() {
-        // Given
-        for (int i = 1; i <= 15; i++) {
-            Article article1 = Article.builder()
-                    .user(user)
-                    .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0).plusDays(i))
-                    .content("Test Content" + i)
-                    .event("Test event" + i)
-                    .thought("Test thought" + i)
-                    .emotion(Emotion.valueOf("ANNOYED"))
-                    .satisfaction(Float.parseFloat(i + ""))
-                    .reason("Test Reason" + i)
-                    .improvements("Test Improvements" + i)
-                    .amount(i * 1000)
-                    .registerType(RegisterType.valueOf("SPEND"))
-                    .build();
-            articleRepository.save(article1);
+    void getArticle() {
+        // given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
 
-            Article article2 = Article.builder()
-                    .user(user)
-                    .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0).plusDays(i))
-                    .content("Test Content" + i)
-                    .event("Test event" + i)
-                    .thought("Test thought" + i)
-                    .emotion(Emotion.valueOf("SHY"))
-                    .satisfaction(Float.parseFloat(i + ""))
-                    .reason("Test Reason" + i)
-                    .improvements("Test Improvements" + i)
-                    .amount(i * 1000)
-                    .registerType(RegisterType.valueOf("SPEND"))
-                    .build();
-            articleRepository.save(article2);
+        Article article = createArticle(user);
+        given(articleRepository.findById(anyLong())).willReturn(Optional.of(article));
 
-            Article article3 = Article.builder()
-                    .user(user)
-                    .spendDate(LocalDateTime.of(2024, 5, 1, 0, 0).plusDays(i))
-                    .content("Test Content" + i)
-                    .event("Test event" + i)
-                    .thought("Test thought" + i)
-                    .emotion(Emotion.valueOf("SAD"))
-                    .satisfaction(Float.parseFloat(i + ""))
-                    .reason("Test Reason" + i)
-                    .improvements("Test Improvements" + i)
-                    .amount(i * 1000)
-                    .registerType(RegisterType.valueOf("SAVE"))
-                    .build();
-            articleRepository.save(article3);
-        }
+        // when
+        ViewArticleResponseDto result = articleService.getArticle("test user", 1L);
 
-        Pageable pageable = Pageable.ofSize(10).withPage(0);
-        SearchCondRequestDto searchCond = SearchCondRequestDto.builder()
-                .registerType("SAVE")
-                .emotion("SAD")
-                .from("20240501")
-                .to("20240515")
-                .build();
-
-        // When
-        ViewListResponseDto responseDto = articleService.listArticles(user.getAuthenticationName(), pageable, searchCond.toSearchCond());
-
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getSpendList().size()).isEqualTo(10);
+        // then
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).findById(1L);
+        assertThat(result).isNotNull();
     }
 
+    @DisplayName("사용자 이름으로 사용자를 찾지 못하면 UserNotFound 예외를 반환한다.")
     @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void 게시글_1개_조회_성공() {
-        // When
-        ViewArticleResponseDto responseDto = articleService.getArticle(user.getAuthenticationName(), article.getArticleId());
+    void getArticle_userNotFound() {
+        // given
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.empty());
 
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getContent()).isEqualTo("Test Content");
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticle("test user", 1L))
+                .isInstanceOf(UserNotFoundException.class);
+
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository, never()).findById(anyLong());
     }
 
+    @DisplayName("해당 일기 ID가 없으면 ArticleNotFound 예외를 반환한다.")
     @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void 존재하지_않는_게시글_조회_실패() {
-        // Given
-        Long articleId = 999L; // 존재하지 않는 게시글 ID
+    void getArticle_ArticleNotFound() {
+        // given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
 
-        // When, Then
-        assertThatThrownBy(() -> articleService.getArticle(user.getAuthenticationName(), articleId))
+        given(articleRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> articleService.getArticle("test user", 1L))
                 .isInstanceOf(ArticleNotFoundException.class);
+
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).findById(1L);
     }
 
+    @DisplayName("타 작성자의 게시글을 조회시에 UnauthorizedArticleRequestException이 반환된다.")
     @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void 타_작성자의_게시글_조회_실패() {
-        // Given
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String authenticationName = "differentAuthenticationName";
+    void getArticle_user_filtered() {
+        // given
+        User user = createUser();
+        User otherUser = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
 
-        User buildUser = User.builder()
-                .email(oAuth2User.getName())
-                .mbti(Mbti.ISTP)
-                .gender(Gender.MALE)
-                .authenticationName(authenticationName)
-                .build();
-        User diffUser = userRepository.save(buildUser);
+        Article otherUserArticle = createArticle(otherUser);
+        given(articleRepository.findById(2L)).willReturn(Optional.of(otherUserArticle));
 
-        // When
-        assertThatThrownBy(() -> articleService.getArticle(diffUser.getAuthenticationName(), article.getArticleId()))
+        // when
+        assertThatThrownBy(() -> articleService.getArticle("test user", 2L))
                 .isInstanceOf(UnauthorizedArticleRequestException.class);
+
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).findById(2L);
     }
 
+    @DisplayName("게시글 업데이트 요청시 게시글이 수정된다.")
     @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void 게시글_수정() {
-        UpdateArticleRequestDto updateDto = UpdateArticleRequestDto.builder()
-                //private String content;
-                //    private String event;
-                //    private String spendDate;
-                //    private String thought;
-                //    private String emotion;
-                //    private Float satisfaction;
-                //    private String reason;
-                //    private String improvements;
-                //    private Integer amount;
-                //    private String registerType;
+    void updateArticle() {
+        // given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
+
+        Article article = createArticle(user);
+        ArticleUpdateRequest updateRequest = ArticleUpdateRequest.builder()
                 .content("Test Content")
+                .spendDate("2024-04-04T11:22:33")
                 .event("Test event")
-                .spendDate("2024-05-05T12:34:56")
                 .thought("Test thought")
-                .emotion(Emotion.SAD.toString())
+                .emotion("ANNOYED")
+                .satisfaction(1F)
+                .reason("Test Reason")
+                .improvements("Test Improvements")
+                .amount(100)
+                .registerType("SAVE")
+                .build();
+        given(articleRepository.findById(anyLong())).willReturn(Optional.of(article));
+
+        // when
+        articleService.updateArticle("test user", 1L, updateRequest);
+
+        // then
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).findById(1L);
+
+        assertThat(article.getRegisterType()).isEqualTo(SAVE);
+        assertThat(article.getSatisfaction()).isEqualTo(1F);
+    }
+
+    @DisplayName("게시글 ID를 입력하면 게시글을 삭제한다.")
+    @Test
+    void deleteArticle() {
+        // given
+        User user = createUser();
+        given(userRepository.findByAuthenticationName(anyString())).willReturn(Optional.of(user));
+
+        Article article = createArticle(user);
+        given(articleRepository.findById(anyLong())).willReturn(Optional.of(article));
+
+        // when
+        articleService.deleteArticle("test user", 1L);
+
+        // then
+        verify(userRepository).findByAuthenticationName("test user");
+        verify(articleRepository).findById(1L);
+        verify(articleRepository).delete(article);
+
+        assertThat(user.getArticles()).doesNotContain(article);
+    }
+
+    private User createUser() {
+        return User.builder()
+                .email("test@example.com")
+                .mbti(ISTJ)
+                .gender(MALE)
+                .authenticationName("test user")
+                .build();
+    }
+
+    private Article createArticle(User user) {
+        return Article.builder()
+                .user(user)
+                .content("test content")
+                .spendDate(LocalDateTime.of(2024, 5, 30, 0, 0))
+                .event("test event")
+                .thought("test thought")
+                .emotion(ANNOYED)
+                .satisfaction(5F)
+                .reason(null)
+                .improvements(null)
+                .aiComment(null)
+                .amount(100)
+                .registerType(SPEND)
+                .build();
+    }
+
+    private ArticleCreateRequest createArticleCreateRequest() {
+        return ArticleCreateRequest.builder()
+                .content("Test Content")
+                .spendDate("2024-04-04T11:22:33")
+                .event("Test event")
+                .thought("Test thought")
+                .emotion("ANNOYED")
                 .satisfaction(5F)
                 .reason("Test Reason")
                 .improvements("Test Improvements")
-                .amount(123)
-                .registerType(RegisterType.SAVE.toString())
+                .amount(100)
+                .registerType("SPEND")
                 .build();
-
-        // When
-        articleService.updateArticle(user.getAuthenticationName(), article.getArticleId(), updateDto.toServiceUpdateRequest());
-
-        // Then
-        assertThat(article.getEmotion()).isEqualTo(Emotion.SAD);
-        assertThat(article.getRegisterType()).isEqualTo(RegisterType.SAVE);
-    }
-
-    @Test
-    @WithMockCustomOAuth2User(
-            provider = KAKAO, email = "kakaoemail@kakao.com", providerMemberId = "123ab", isFirstLogin = false
-    )
-    void 게시글_삭제() {
-        // When
-        articleService.deleteArticle(user.getAuthenticationName(), article.getArticleId());
-
-        // Then
-        assertThat(articleRepository.existsById(article.getArticleId())).isFalse();
     }
 }
