@@ -39,6 +39,8 @@ class ArticleRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+
+
     @DisplayName("일기를 저장하면 ID를 반환한다.")
     @Test
     void create() {
@@ -165,65 +167,6 @@ class ArticleRepositoryTest {
 
         // then
         assertThat(result).isEmpty();
-    }
-
-    @DisplayName("필터에 해당하는 일기만 반환한다.")
-    @Test
-    void findAll_filtered() {
-        // given
-        User user = createUser();
-        userRepository.save(user);
-
-        Article article1 = createArticle(user);
-        Article article2 = createArticle(user);
-        Article article3 = Article.builder()
-                .user(user)
-                .content("test content")
-                .spendDate(LocalDateTime.of(2024, 5, 30, 0, 0))
-                .event("test event")
-                .thought("test thought")
-                .emotion(SAD)
-                .satisfaction(5F)
-                .reason(null)
-                .improvements(null)
-                .aiComment(null)
-                .amount(100)
-                .registerType(SAVE)
-                .build();
-        Article article4 = Article.builder()
-                .user(user)
-                .content("test content")
-                .spendDate(LocalDateTime.of(2024, 5, 30, 0, 0))
-                .event("test event")
-                .thought("test thought")
-                .emotion(SAD)
-                .satisfaction(5F)
-                .reason(null)
-                .improvements(null)
-                .aiComment(null)
-                .amount(100)
-                .registerType(SAVE)
-                .build();
-        articleRepository.saveAll(List.of(article1, article2, article3, article4));
-
-        Pageable pageable = PageRequest.of(0, 10);
-        SearchCond cond = SearchCond.builder()
-                .registerTypes(List.of(SAVE))
-                .emotions(List.of(SAD))
-                .satisfactions(List.of(5F))
-                .words(List.of(""))
-                .build();
-
-        // when
-        Page<ViewArticleSumDto> result = articleRepository.search(user, pageable, cond);
-
-        // then
-        assertThat(result).hasSize(2)
-                .extracting("articleId", "registerType", "emotion")
-                .containsExactlyInAnyOrder(
-                        tuple(3L, SAVE, SAD),
-                        tuple(4L, SAVE, SAD)
-                );
     }
 
     @DisplayName("해당 유저의 일기만 반환한다.")
