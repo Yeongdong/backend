@@ -3,13 +3,11 @@ package com.example.spinlog.article.controller.request;
 import com.example.spinlog.article.service.request.SearchCond;
 import com.example.spinlog.utils.DateUtils;
 import com.example.spinlog.utils.ParameterParser;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
 @Builder
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class SearchCondRequestDto {
     private String registerType;
     private String emotion;
