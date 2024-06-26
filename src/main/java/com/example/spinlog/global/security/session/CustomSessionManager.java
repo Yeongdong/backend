@@ -18,8 +18,6 @@ public class CustomSessionManager {
     private static final Map<String, CustomSession> sessions = new ConcurrentHashMap<>();
     private static final Map<String, String> authNameToSessionIdMap = new ConcurrentHashMap<>();
 
-    // TODO 세션 탈취 케이스 고려
-
     public String createSession(String authenticationName) {
         if(authNameToSessionIdMap.containsKey(authenticationName)){
             String oldSessionId = authNameToSessionIdMap.get(authenticationName);
