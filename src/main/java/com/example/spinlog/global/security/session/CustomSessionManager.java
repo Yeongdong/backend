@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -19,7 +20,7 @@ public class CustomSessionManager {
 
     // TODO 세션 탈취 케이스 고려
 
-    public void createSession(String sessionId, String authenticationName) {
+    public String createSession(String authenticationName) {
         if(authNameToSessionIdMap.containsKey(authenticationName)){
             String oldSessionId = authNameToSessionIdMap.get(authenticationName);
             sessions.remove(oldSessionId);
@@ -27,6 +28,7 @@ public class CustomSessionManager {
             log.info("createSession, remove old session: " + oldSessionId);
         }
 
+        String sessionId = UUID.randomUUID().toString();
         sessions.put(
                 sessionId,
                 CustomSession.builder()
@@ -35,6 +37,8 @@ public class CustomSessionManager {
                         .lastAccessedTime(LocalDateTime.now())
                         .build());
         authNameToSessionIdMap.put(authenticationName, sessionId);
+
+        return sessionId;
     }
 
     public void deleteSession(String sessionId) {
@@ -46,7 +50,6 @@ public class CustomSessionManager {
     public Optional<CustomSession> getSession(String sessionId) {
         if(sessionId == null)
             return Optional.empty();
-
         if(sessions.containsKey(sessionId)) {
             CustomSession session = sessions.get(sessionId);
             session.updateLastAccessedTime();
