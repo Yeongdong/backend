@@ -11,7 +11,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +24,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
         Boolean isFirstLogin = principal.getFirstLogin();
 
-        String sessionId = createSession(principal);
+        String authenticationName = principal.getOAuth2Response().getAuthenticationName();
+        String sessionId = customSessionManager.createSession(authenticationName);
 
         String queryParameter = "&token=" + sessionId;
 
@@ -33,12 +33,5 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             response.sendRedirect("https://spinlog.swygbro.com/auth?isFirstLogin=true" + queryParameter);
         else
             response.sendRedirect("https://spinlog.swygbro.com/auth?isFirstLogin=false" + queryParameter);
-    }
-
-    private String createSession(CustomOAuth2User principal) {
-        String sessionId = UUID.randomUUID().toString();
-        String authenticationName = principal.getOAuth2Response().getAuthenticationName();
-        customSessionManager.createSession(sessionId, authenticationName);
-        return sessionId;
     }
 }
