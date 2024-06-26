@@ -15,13 +15,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class CustomSessionManager {
     private static final Map<String, CustomSession> sessions = new ConcurrentHashMap<>();
+    private static final Map<String, String> authNameToSessionIdMap = new ConcurrentHashMap<>();
 
     // TODO 세션 탈취 케이스 고려
 
     public void createSession(String sessionId, String authenticationName) {
-        CustomSession removed = sessions.remove(sessionId);
-        if(removed != null)
-            log.info("createSession, remove old session: " + removed.getAuthenticationName());
+        if(authNameToSessionIdMap.containsKey(authenticationName)){
+            String oldSessionId = authNameToSessionIdMap.get(authenticationName);
+            sessions.remove(oldSessionId);
+            authNameToSessionIdMap.remove(authenticationName);
+            log.info("createSession, remove old session: " + oldSessionId);
+        }
 
         sessions.put(
                 sessionId,
@@ -30,10 +34,13 @@ public class CustomSessionManager {
                         .createdTime(LocalDateTime.now())
                         .lastAccessedTime(LocalDateTime.now())
                         .build());
+        authNameToSessionIdMap.put(authenticationName, sessionId);
     }
 
     public void deleteSession(String sessionId) {
-        sessions.remove(sessionId);
+        CustomSession removed = sessions.remove(sessionId);
+        if(removed != null)
+            authNameToSessionIdMap.remove(removed.getAuthenticationName());
     }
 
     public Optional<CustomSession> getSession(String sessionId) {
@@ -51,9 +58,15 @@ public class CustomSessionManager {
     @Scheduled(fixedRate = 1000 * 60 * 60 * 2)
     public void deleteExpiredSessions() {
         int beforeDeletion = sessions.size();
-        sessions.entrySet().removeIf(entry -> entry.getValue()
-                .getLastAccessedTime()
-                .isBefore(LocalDateTime.now().minusHours(1)));
+
+        sessions.entrySet().removeIf(entry -> {
+            if (entry.getValue().getLastAccessedTime().isBefore(LocalDateTime.now().minusHours(1))) {
+                authNameToSessionIdMap.remove(entry.getValue().getAuthenticationName());
+                return true;
+            }
+            return false;
+        });
+
         log.info("deleteExpiredSessions, " + beforeDeletion + " -> " + sessions.size());
     }
 }
