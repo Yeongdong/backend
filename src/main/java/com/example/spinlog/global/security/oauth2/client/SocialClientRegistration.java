@@ -15,12 +15,17 @@ public class SocialClientRegistration {
 
     @Value("${client-id.kakao}") private String kakaoClientId;
     @Value("${client-secret.kakao}") private String kakaoClientSecret;
-
+    
     @Value("${client-id.naver}") private String naverClientId;
     @Value("${client-secret.naver}") private String naverClientSecret;
 
     @Value("${client-id.google}") private String googleClientId;
     @Value("${client-secret.google}") private String googleClientSecret;
+
+    @Value("${client-id.mock}") private String mockClientId;
+    @Value("${client-secret.mock}") private String mockClientSecret;
+    @Value("${private-mock-server-url}") private String privateMockServerUrl;
+    @Value("${public-mock-server-url}") private String publicMockServerUrl;
 
     public ClientRegistration kakaoClientRegistration() {
 
@@ -66,6 +71,21 @@ public class SocialClientRegistration {
                 .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
                 .issuerUri("https://accounts.google.com")
                 .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .userNameAttributeName(SUB)
+                .build();
+    }
+
+    public ClientRegistration mockClientRegistration() {
+
+        return ClientRegistration.withRegistrationId("mock")
+                .clientId(mockClientId)
+                .clientSecret(mockClientSecret)
+                .redirectUri(baseUrl + "/login/oauth2/code/mock")
+                .authorizationGrantType(AUTHORIZATION_CODE)
+                .scope("email")
+                .authorizationUri(publicMockServerUrl + "/oauth2/authorize")
+                .tokenUri(privateMockServerUrl + "/oauth2/token")
+                .userInfoUri(privateMockServerUrl + "/oauth2/userinfo")
                 .userNameAttributeName(SUB)
                 .build();
     }
