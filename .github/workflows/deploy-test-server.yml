@@ -1,0 +1,58 @@
+name: deploy test
+
+on:
+  push:
+    branches: [ "test" ]
+  pull_request:
+    branches: [ "test" ]
+
+env:
+  S3_BUCKET_NAME: spinlog-files
+
+jobs:
+  Deploy-test-server:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: add execute permission for gradlew
+      run: chmod +x gradlew
+      shell: bash
+    - name: Build with Gradle
+      run: ./gradlew build
+      shell: bash
+    - name: make zip file
+      run: zip -r ./$GITHUB_SHA.zip build/libs scripts
+    - run: uname -a
+    - run: ls -al
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Upload to S3
+      run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/test/deploy.zip
+      
+    - name: ssh to ec2
+      uses: appleboy/ssh-action@master
+      with:
+        key: ${{ secrets.TEST_SSH_PRIVATE_KEY }}
+        host: ${{ secrets.TEST_HOST }}
+        username: ${{ secrets.TEST_USER }}
+        script: |
+          aws s3 cp s3://spinlog-files/test/deploy.zip ./zips/deploy.zip
+          echo "success to receive zip file from s3"
+          cd zips
+          unzip -o deploy.zip
+          chmod +x ./scripts/deploy-test-server.sh
+          ./scripts/deploy-test-server.sh
+          
+
