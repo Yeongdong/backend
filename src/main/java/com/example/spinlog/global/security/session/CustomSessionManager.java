@@ -19,6 +19,10 @@ public class CustomSessionManager {
     // TODO 세션 탈취 케이스 고려
 
     public void createSession(String sessionId, String authenticationName) {
+        CustomSession removed = sessions.remove(sessionId);
+        if(removed != null)
+            log.info("createSession, remove old session: " + removed.getAuthenticationName());
+
         sessions.put(
                 sessionId,
                 CustomSession.builder()
