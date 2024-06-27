@@ -17,7 +17,8 @@ public class CustomClientRegistrationRepository {
         return new InMemoryClientRegistrationRepository(
                 socialClientRegistration.kakaoClientRegistration(),
                 socialClientRegistration.naverClientRegistration(),
-                socialClientRegistration.googleClientRegistration()
+                socialClientRegistration.googleClientRegistration(),
+                socialClientRegistration.mockClientRegistration()
         );
     }
 
