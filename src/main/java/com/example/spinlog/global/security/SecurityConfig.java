@@ -12,6 +12,7 @@ import com.example.spinlog.global.security.session.CustomSessionManager;
 import com.example.spinlog.global.security.session.SessionAuthenticationFilter;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +32,10 @@ import java.util.Arrays;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    @Value("${temporary.auth.header}")
+    private String temporaryAuthHeader;
+    @Value("${temporary.auth.value}")
+    private String temporaryAuthValue;
 
     private final CustomClientRegistrationRepository customClientRegistrationRepository;
     private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
@@ -43,7 +48,6 @@ public class SecurityConfig {
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    private final TemporaryAuthFilter temporaryAuthFilter;
     private final UserRepository userRepository;
     private final CustomSessionManager customSessionManager;
 
@@ -103,8 +107,12 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
-                .addFilterBefore(new SessionAuthenticationFilter(userRepository, customSessionManager), LogoutFilter.class)
-                .addFilterAfter(temporaryAuthFilter, ExceptionTranslationFilter.class);
+                .addFilterBefore(
+                        new SessionAuthenticationFilter(userRepository, customSessionManager),
+                        LogoutFilter.class)
+                .addFilterAfter(
+                        new TemporaryAuthFilter(temporaryAuthHeader, temporaryAuthValue),
+                        ExceptionTranslationFilter.class);
 
         return http.build();
     }
