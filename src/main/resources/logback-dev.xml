@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="INFO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/spring_log/info.log</file>
+        <file>${user.home}/spring_log/general/info.log</file>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/spring_log/rolled/info.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/spring_log/general/rolled/info.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -19,12 +19,12 @@
     </appender>
 
     <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/spring_log/warn.log</file>
+        <file>${user.home}/spring_log/general/warn.log</file>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/spring_log/rolled/warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/spring_log/general/rolled/warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>90</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -37,12 +37,12 @@
     </appender>
 
     <appender name="ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/spring_log/error.log</file>
+        <file>${user.home}/spring_log/general/error.log</file>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/spring_log/rolled/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/spring_log/general/rolled/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>90</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -52,6 +52,19 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
+    </appender>
+
+    <appender name="HTTP_MESSAGE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/spring_log/http/message.log</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${user.home}/spring_log/http/rolled/http_message.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
     </appender>
 
     <root level="info">
@@ -67,4 +80,8 @@
     </root>
 
     <logger name="com.example" level="INFO" />
+
+    <logger name="com.example.spinlog.global.filter.HttpMessageLoggingFilter" level="INFO" additivity="false">
+        <appender-ref ref="HTTP_MESSAGE_LOG" />
+    </logger>
 </configuration>
