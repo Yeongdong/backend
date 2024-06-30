@@ -1,6 +1,5 @@
 package com.example.spinlog.global.filter;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,12 +7,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
@@ -28,8 +27,6 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
     private final String temporaryAuthHeader;
-
-    private ContentCachingResponseWrapper wrapper;
 
     private static final Predicate<String> responseHeaderPredicate = headerName -> {
         List<String> headers = List.of(
@@ -69,18 +66,18 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        wrapper = getResponseWrapper(response);
+        ContentCachingRequestWrapper requestWrapper = getRequestWrapper(request);
+        ContentCachingResponseWrapper responseWrapper = getResponseWrapper(response);
 
-        super.doFilterInternal(request, response, filterChain);
+        super.doFilterInternal(requestWrapper, responseWrapper, filterChain);
 
-        String requestMessage = createMessage(request, "\nREQUEST :\n", "\n");
-        String responseMessage = createMessage(response, "\nRESPONSE :\n", "\n");
+        String requestMessage = createMessage(requestWrapper, "\nREQUEST :\n", "\n");
+        String responseMessage = createMessage(responseWrapper, "\nRESPONSE :\n", "\n");
         log.info("{}{}", requestMessage, responseMessage);
     }
 
     @Override
     protected void beforeRequest(HttpServletRequest request, String message) {
-
     }
 
     @Override
@@ -88,14 +85,7 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
 
     }
 
-    /**
-     * almost same with parent class's createMessage method
-     * but headers code is slightly different.
-     * if header's predicate is true, include header
-     * else, exclude header
-     * */
-    @Override
-    protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
+    protected String createMessage(ContentCachingRequestWrapper request, String prefix, String suffix) {
         StringBuilder msg = new StringBuilder();
         msg.append(prefix);
         msg.append(request.getMethod()).append(' ');
@@ -141,7 +131,7 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         }
 
         if (isIncludePayload()) {
-            String payload = getMessagePayload(request);
+            String payload = getReuqestBody(request);
             msg.append("\npayload = ").append(payload);
         }
 
@@ -149,7 +139,7 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         return msg.toString();
     }
 
-    private String createMessage(HttpServletResponse response, String prefix, String suffix) throws IOException {
+    private String createMessage(ContentCachingResponseWrapper response, String prefix, String suffix) throws IOException {
         StringBuilder msg = new StringBuilder();
         msg.append(prefix);
         msg.append(response.getStatus());
@@ -175,14 +165,29 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         return msg.toString();
     }
 
-    private String getResponseBody(HttpServletResponse response) throws IOException {
+    private String getReuqestBody(ContentCachingRequestWrapper requestWrapper) {
         try {
-            String s = new String(wrapper.getContentAsByteArray(), response.getCharacterEncoding());
-            wrapper.copyBodyToResponse();
+            return new String(requestWrapper.getContentAsByteArray(), requestWrapper.getCharacterEncoding());
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+    }
+
+    private String getResponseBody(ContentCachingResponseWrapper responseWrapper) throws IOException {
+        try {
+            String s = new String(responseWrapper.getContentAsByteArray(), responseWrapper.getCharacterEncoding());
+            responseWrapper.copyBodyToResponse();
             return s;
         } catch (UnsupportedEncodingException e) {
             return null;
         }
+    }
+
+    private ContentCachingRequestWrapper getRequestWrapper(HttpServletRequest request) {
+        if (request instanceof ContentCachingRequestWrapper) {
+            return (ContentCachingRequestWrapper)request;
+        }
+        return new ContentCachingRequestWrapper(request);
     }
 
     private ContentCachingResponseWrapper getResponseWrapper(HttpServletResponse response) {
