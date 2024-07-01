@@ -5,16 +5,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.AbstractRequestLoggingFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -24,27 +21,16 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Slf4j
-@RequiredArgsConstructor
-public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
+public class HttpMessageLoggingFilter extends OncePerRequestFilter {
     private final String temporaryAuthHeader;
 
-    private static final Predicate<String> responseHeaderPredicate = headerName -> {
-        List<String> headers = List.of(
-                "content-type",
-                "content-length",
-                "location",
-                "set-cookie"
-        );
-        return headers.contains(headerName.toLowerCase());
-    };
+    private final Predicate<String> requestHeaderPredicate;
+    private final Predicate<String> responseHeaderPredicate;
+    private int maxPayloadLength = 5000;
 
-    public void init() {
-        setIncludePayload(true);
-        setIncludeQueryString(true);
-        setIncludeHeaders(true);
-        setMaxPayloadLength(1000);
-
-        setHeaderPredicate(headerName -> {
+    public HttpMessageLoggingFilter(String temporaryAuthHeader) {
+        this.temporaryAuthHeader = temporaryAuthHeader;
+        requestHeaderPredicate = headerName -> {
             List<String> headers = List.of(
                     "host",
                     "user-agent",
@@ -61,7 +47,16 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
                     temporaryAuthHeader.toLowerCase()
             );
             return headers.contains(headerName.toLowerCase());
-        });
+        };
+        responseHeaderPredicate = headerName -> {
+            List<String> headers = List.of(
+                    "content-type",
+                    "content-length",
+                    "location",
+                    "set-cookie"
+            );
+            return headers.contains(headerName.toLowerCase());
+        };
     }
 
     @Override
@@ -69,20 +64,11 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         ContentCachingRequestWrapper requestWrapper = getRequestWrapper(request);
         ContentCachingResponseWrapper responseWrapper = getResponseWrapper(response);
 
-        super.doFilterInternal(requestWrapper, responseWrapper, filterChain);
+        filterChain.doFilter(requestWrapper, responseWrapper);
 
-        String requestMessage = createMessage(requestWrapper, "\nREQUEST :\n", "\n");
-        String responseMessage = createMessage(responseWrapper, "\nRESPONSE :\n", "\n");
+        String requestMessage = createMessage(requestWrapper, "\n[REQUEST]\n", "\n");
+        String responseMessage = createMessage(responseWrapper, "\n[RESPONSE]\n", "\n");
         log.info("{}{}", requestMessage, responseMessage);
-    }
-
-    @Override
-    protected void beforeRequest(HttpServletRequest request, String message) {
-    }
-
-    @Override
-    protected void afterRequest(HttpServletRequest request, String message) {
-
     }
 
     protected String createMessage(ContentCachingRequestWrapper request, String prefix, String suffix) {
@@ -91,47 +77,32 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         msg.append(request.getMethod()).append(' ');
         msg.append(request.getRequestURI());
 
-        if (isIncludeQueryString()) {
-            String queryString = request.getQueryString();
-            if (queryString != null) {
-                msg.append('?').append(queryString);
-            }
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            msg.append('?').append(queryString);
         }
 
-        if (isIncludeClientInfo()) {
-            String client = request.getRemoteAddr();
-            if (StringUtils.hasLength(client)) {
-                msg.append("\nclient = ").append(client);
-            }
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                msg.append("\nsession = ").append(session.getId());
-            }
-            String user = request.getRemoteUser();
-            if (user != null) {
-                msg.append("\nuser = ").append(user);
-            }
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            msg.append("\nsession = ").append(session.getId());
+        }
+        String user = request.getRemoteUser();
+        if (user != null) {
+            msg.append("\nuser = ").append(user);
         }
 
-        if (isIncludeHeaders()) {
-            HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
-            StringBuilder headersString = new StringBuilder();
-            if (getHeaderPredicate() != null) {
-                Enumeration<String> names = request.getHeaderNames();
-                while (names.hasMoreElements()) {
-                    String header = names.nextElement();
-                    if (!getHeaderPredicate().test(header)) {
-                        headers.remove(header);
-                    } else {
-                        headersString.append("\t").append(header).append(": ").append(headers.get(header)).append("\n");
-                    }
-                }
+        StringBuilder headersString = new StringBuilder();
+        Enumeration<String> names = request.getHeaderNames();
+        while (names.hasMoreElements()) {
+            String header = names.nextElement();
+            if (requestHeaderPredicate.test(header)) {
+                headersString.append("\t").append(header).append(": ").append(request.getHeader(header)).append("\n");
             }
-            msg.append("\nheaders = {\n").append(headersString.toString()).append("}");
         }
+        msg.append("\nheaders = {\n").append(headersString.toString()).append("}");
 
-        if (isIncludePayload()) {
-            String payload = getReuqestBody(request);
+        String payload = getReuqestBody(request);
+        if(payload != null && !payload.isEmpty()) {
             msg.append("\npayload = ").append(payload);
         }
 
@@ -144,22 +115,23 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         msg.append(prefix);
         msg.append(response.getStatus());
 
+        // already copy response body, because of body related headers
+        String payload = getResponseBody(response);
+
         // {'Content-Type', 'Content-Length', 'Location', 'Set-Cookie'} headers , response body logging
-        HttpHeaders headers = new ServletServerHttpResponse(response).getHeaders();
         Iterator<String> names = response.getHeaderNames().iterator();
         StringBuilder headersString = new StringBuilder();
         while (names.hasNext()) {
             String header = names.next();
-            if (!responseHeaderPredicate.test(header)) {
-                headers.remove(header);
-            } else {
-                headersString.append("\t").append(header).append(": ").append(headers.get(header)).append("\n");
+            if (responseHeaderPredicate.test(header)) {
+                headersString.append("\t").append(header).append(": ").append(response.getHeader(header)).append("\n");
             }
         }
         msg.append("\nheaders = {\n").append(headersString.toString()).append("}");
 
-        String payload = getResponseBody(response);
-        msg.append("\npayload = ").append(payload);
+        if(payload != null && !payload.isEmpty()) {
+            msg.append("\npayload = ").append(payload);
+        }
 
         msg.append(suffix);
         return msg.toString();
@@ -187,7 +159,7 @@ public class HttpMessageLoggingFilter extends AbstractRequestLoggingFilter {
         if (request instanceof ContentCachingRequestWrapper) {
             return (ContentCachingRequestWrapper)request;
         }
-        return new ContentCachingRequestWrapper(request);
+        return new ContentCachingRequestWrapper(request, maxPayloadLength);
     }
 
     private ContentCachingResponseWrapper getResponseWrapper(HttpServletResponse response) {

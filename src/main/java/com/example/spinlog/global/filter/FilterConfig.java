@@ -17,16 +17,15 @@ public class FilterConfig {
     private String temporaryAuthHeader;
 
     /**
-     * minimum spring security filter's order is 100
-     * (org.springframework.security.config.annotation.web.builders.FilterOrderRegistration)
-     * if custom filter's order is less than 100, it will be executed before spring security filter
+     * spring security filter's minimum order is -100
+     * if custom filter's order is less than -100, it will be executed before spring security filter
      * */
 
     @Bean
     public FilterRegistrationBean<CustomExceptionHandlingFilter> customExceptionHandlingFilterRegistrationBean() {
         FilterRegistrationBean<CustomExceptionHandlingFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new CustomExceptionHandlingFilter());
-        registrationBean.setOrder(-112);
+        registrationBean.setOrder(-111);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
@@ -35,9 +34,8 @@ public class FilterConfig {
     public FilterRegistrationBean<HttpMessageLoggingFilter> httpMessageLoggingFilterRegistrationBean() {
         FilterRegistrationBean<HttpMessageLoggingFilter> registrationBean = new FilterRegistrationBean<>();
         HttpMessageLoggingFilter filter = new HttpMessageLoggingFilter(temporaryAuthHeader);
-        filter.init();
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(-111);
+        registrationBean.setOrder(-112);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
