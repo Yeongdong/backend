@@ -4,6 +4,7 @@ import com.example.spinlog.global.security.customFilter.TemporaryAuthFilter;
 import com.example.spinlog.global.security.oauth2.client.CustomClientRegistrationRepository;
 import com.example.spinlog.global.security.oauth2.client.CustomOAuth2AuthorizedClientService;
 import com.example.spinlog.global.security.oauth2.handler.authentication.CustomAuthenticationEntryPoint;
+import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginFailureHandler;
 import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginSuccessHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutSuccessHandler;
@@ -42,6 +43,7 @@ public class SecurityConfig {
     private final JdbcTemplate jdbcTemplate;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     private final OAuth2LogoutHandler oAuth2LogoutHandler;
     private final OAuth2LogoutSuccessHandler oAuth2LogoutSuccessHandler;
@@ -88,6 +90,7 @@ public class SecurityConfig {
                                 userInfoEndpointConfig.userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/users/logout")
