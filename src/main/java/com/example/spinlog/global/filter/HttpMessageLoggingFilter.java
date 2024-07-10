@@ -15,10 +15,9 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class HttpMessageLoggingFilter extends OncePerRequestFilter {
@@ -37,11 +36,18 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
                     "referer",
                     "accept",
                     "accept-encoding",
+                    "transfer-encoding",
                     "x-forwarded-for",
                     "x-forwarded-proto",
                     "x-real-ip",
                     "request-id",
                     "authorization",
+                    "cookie",
+                    "origin",
+                    "connection",
+                    "cache-control",
+                    "if-none-match",
+                    "if-modified-since",
                     "content-type",
                     "content-length",
                     temporaryAuthHeader.toLowerCase()
@@ -53,7 +59,11 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
                     "content-type",
                     "content-length",
                     "location",
-                    "set-cookie"
+                    "set-cookie",
+                    "cache-control",
+                    "expires",
+                    "etag",
+                    "last-modified"
             );
             return headers.contains(headerName.toLowerCase());
         };
@@ -67,11 +77,11 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
         filterChain.doFilter(requestWrapper, responseWrapper);
 
         String requestMessage = createMessage(requestWrapper, "\n[REQUEST]\n", "\n");
-        String responseMessage = createMessage(responseWrapper, "\n[RESPONSE]\n", "\n");
+        String responseMessage = createMessage(responseWrapper, "\n[RESPONSE]\n", "\n\n");
         log.info("{}{}", requestMessage, responseMessage);
     }
 
-    protected String createMessage(ContentCachingRequestWrapper request, String prefix, String suffix) {
+    private String createMessage(ContentCachingRequestWrapper request, String prefix, String suffix) {
         StringBuilder msg = new StringBuilder();
         msg.append(prefix);
         msg.append(request.getMethod()).append(' ');
@@ -92,11 +102,14 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
         }
 
         StringBuilder headersString = new StringBuilder();
-        Enumeration<String> names = request.getHeaderNames();
-        while (names.hasMoreElements()) {
-            String header = names.nextElement();
+        Set<String> names = Collections.list(request.getHeaderNames()).stream().collect(Collectors.toSet());
+        for(String header: names) {
             if (requestHeaderPredicate.test(header)) {
-                headersString.append("\t").append(header).append(": ").append(request.getHeader(header)).append("\n");
+                Enumeration<String> headers = request.getHeaders(header);
+                while(headers.hasMoreElements()) {
+                    String headerValue = headers.nextElement();
+                    headersString.append("\t").append(header).append(": ").append(headerValue).append("\n");
+                }
             }
         }
         msg.append("\nheaders = {\n").append(headersString.toString()).append("}");
@@ -119,12 +132,15 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
         String payload = getResponseBody(response);
 
         // {'Content-Type', 'Content-Length', 'Location', 'Set-Cookie'} headers , response body logging
-        Iterator<String> names = response.getHeaderNames().iterator();
         StringBuilder headersString = new StringBuilder();
-        while (names.hasNext()) {
-            String header = names.next();
+        Set<String> names = response.getHeaderNames().stream().collect(Collectors.toSet());
+        for(String header: names) {
             if (responseHeaderPredicate.test(header)) {
-                headersString.append("\t").append(header).append(": ").append(response.getHeader(header)).append("\n");
+                Iterator<String> headers = response.getHeaders(header).iterator();
+                while(headers.hasNext()) {
+                    String headerValue = headers.next();
+                    headersString.append("\t").append(header).append(": ").append(headerValue).append("\n");
+                }
             }
         }
         msg.append("\nheaders = {\n").append(headersString.toString()).append("}");
@@ -139,7 +155,7 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
 
     private String getReuqestBody(ContentCachingRequestWrapper requestWrapper) {
         try {
-            return new String(requestWrapper.getContentAsByteArray(), requestWrapper.getCharacterEncoding());
+            return new String(requestWrapper.getContentAsByteArray(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return null;
         }
@@ -147,7 +163,7 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
 
     private String getResponseBody(ContentCachingResponseWrapper responseWrapper) throws IOException {
         try {
-            String s = new String(responseWrapper.getContentAsByteArray(), responseWrapper.getCharacterEncoding());
+            String s = new String(responseWrapper.getContentAsByteArray(), "UTF-8");
             responseWrapper.copyBodyToResponse();
             return s;
         } catch (UnsupportedEncodingException e) {
