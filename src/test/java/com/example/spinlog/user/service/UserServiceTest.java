@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 @DisplayName("회원 정보 비즈니스 로직")
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
 @ContextConfiguration
 class UserServiceTest {
 
