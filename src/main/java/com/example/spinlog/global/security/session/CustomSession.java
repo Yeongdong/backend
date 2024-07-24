@@ -14,6 +14,7 @@ public class CustomSession {
     private String authenticationName;
     private LocalDateTime createdTime;
     private LocalDateTime lastAccessedTime;
+    private String email;
 
     public void updateLastAccessedTime() {
         this.lastAccessedTime = LocalDateTime.now();
