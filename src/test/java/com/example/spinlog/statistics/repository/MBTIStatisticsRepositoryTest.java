@@ -13,6 +13,7 @@ import com.example.spinlog.user.entity.Gender;
 import com.example.spinlog.user.entity.Mbti;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
+import com.example.spinlog.util.ArticleFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
