@@ -1,6 +1,7 @@
 package com.example.spinlog.global.security.oauth2.handler.login;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
+import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
 import com.example.spinlog.global.security.session.CustomSessionManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,12 +21,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        //response.sendRedirect("/api/authentication/login-result");
         CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
         Boolean isFirstLogin = principal.getFirstLogin();
 
-        String authenticationName = principal.getOAuth2Response().getAuthenticationName();
-        String sessionId = customSessionManager.createSession(authenticationName);
+        OAuth2Response oAuth2Response = principal.getOAuth2Response();
+        String sessionId = customSessionManager.createSession(
+                oAuth2Response.getAuthenticationName(),
+                oAuth2Response.getEmail());
 
         String queryParameter = "&token=" + sessionId;
 

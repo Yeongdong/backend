@@ -40,6 +40,7 @@ public class HttpMessageLoggingFilter extends OncePerRequestFilter {
                     "x-forwarded-for",
                     "x-forwarded-proto",
                     "x-real-ip",
+                    "forwarded",
                     "request-id",
                     "authorization",
                     "cookie",

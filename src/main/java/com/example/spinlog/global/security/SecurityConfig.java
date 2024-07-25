@@ -49,8 +49,6 @@ public class SecurityConfig {
     private final OAuth2LogoutSuccessHandler oAuth2LogoutSuccessHandler;
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    private final UserRepository userRepository;
     private final CustomSessionManager customSessionManager;
 
 //    private final CorsConfig corsConfig;
@@ -111,7 +109,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .addFilterBefore(
-                        new SessionAuthenticationFilter(userRepository, customSessionManager),
+                        new SessionAuthenticationFilter(customSessionManager),
                         LogoutFilter.class)
                 .addFilterAfter(
                         new TemporaryAuthFilter(temporaryAuthHeader, temporaryAuthValue),
