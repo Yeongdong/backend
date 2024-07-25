@@ -34,9 +34,9 @@ public class CalendarService {
 
         LocalDate parsedDate = DateUtils.parseStringToDate(selectDate);
 
-        BudgetDto budgetDto = BudgetDto.of(user, parsedDate);
-
         List<MonthSpendDto> dtos = calenderRepository.getMonthSpendList(user.getId(), parsedDate);
+
+        BudgetDto budgetDto = BudgetDto.of(user, parsedDate, dtos);
         List<MonthSpend> monthSpendList = createMonthSpendList(dtos);
 
         List<DaySpend> daySpendList = calenderRepository.getDaySpendList(user.getId(), parsedDate);
@@ -63,11 +63,6 @@ public class CalendarService {
         return userRepository.findByAuthenticationName(userName).stream()
                 .findFirst()
                 .orElseThrow(() -> new UserNotFoundException(userName));
-    }
-
-    private List<Article> getArticlesFromUser(String userName) {
-        User user = getUser(userName);
-        return user.getArticles();
     }
 
     private List<MonthSpend> createMonthSpendList(List<MonthSpendDto> articles) {
