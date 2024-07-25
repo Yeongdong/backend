@@ -1,5 +1,7 @@
 package com.example.spinlog.calendar.dto;
 
+import com.example.spinlog.article.entity.Emotion;
+import com.example.spinlog.article.entity.RegisterType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,12 +9,12 @@ import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 public class DaySpend {
     private Long articleId;
-    private String registerType;
+    private RegisterType registerType;
     private Integer amount;
     private String content;
     private Float satisfaction;
-    private String emotion;
+    private Emotion emotion;
 }

@@ -3,6 +3,7 @@ package com.example.spinlog.calendar.service;
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.calendar.dto.*;
+import com.example.spinlog.calendar.repository.CalenderRepository;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class CalendarService {
 
     private final UserRepository userRepository;
+    private final CalenderRepository calenderRepository;
 
     public TotalCalendarResponseDto requestTotal(String userName, String selectDate) {
         User user = getUser(userName);
@@ -102,11 +104,11 @@ public class CalendarService {
     private DaySpend mapToDaySpend(Article article) {
         return DaySpend.builder()
                 .articleId(article.getArticleId())
-                .registerType(article.getRegisterType().name())
+                .registerType(article.getRegisterType())
                 .amount(article.getAmount())
                 .content(article.getContent())
                 .satisfaction(article.getSatisfaction())
-                .emotion(article.getEmotion().name())
+                .emotion(article.getEmotion())
                 .build();
     }
 
