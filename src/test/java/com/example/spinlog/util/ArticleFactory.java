@@ -1,4 +1,4 @@
-package com.example.spinlog.statistics.repository;
+package com.example.spinlog.util;
 
 import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.Emotion;
