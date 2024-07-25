@@ -24,7 +24,7 @@ class CustomSessionManagerTest {
         @Test
         void 새로운_세션을_생성한다() throws Exception {
             // when
-            String sessionId = customSessionManager.createSession("testName");
+            String sessionId = customSessionManager.createSession("testName", "test@email");
 
             // then
             assertThat(sessionId).isNotNull();
@@ -36,10 +36,10 @@ class CustomSessionManagerTest {
         @Test
         void 기존_세션이_있는_경우_기존_세션을_제거하고_새로운_세션을_생성한다() throws Exception {
             // given
-            String oldSessionId = customSessionManager.createSession("testName");
+            String oldSessionId = customSessionManager.createSession("testName", "test@email");
 
             // when
-            String newSessionId = customSessionManager.createSession("testName");
+            String newSessionId = customSessionManager.createSession("testName", "test@email");
 
             // then
             assertThat(oldSessionId).isNotEqualTo(newSessionId);
@@ -56,7 +56,7 @@ class CustomSessionManagerTest {
         @Test
         void 세션을_삭제한다() throws Exception{
             // given
-            String sessionId = customSessionManager.createSession("testName");
+            String sessionId = customSessionManager.createSession("testName", "test@email");
 
             // when
             customSessionManager.deleteSession(sessionId);
@@ -72,7 +72,7 @@ class CustomSessionManagerTest {
         @Test
         void 세션을_가져온다() throws Exception {
             // given
-            String sessionId = customSessionManager.createSession("testName");
+            String sessionId = customSessionManager.createSession("testName", "test@email");
 
             // when
             Optional<CustomSession> session = customSessionManager.getSession(sessionId);
@@ -85,7 +85,7 @@ class CustomSessionManagerTest {
         @Test
         void 세션의_lastAccessedTime을_업데이트한다() throws Exception {
             // given
-            String sessionId = customSessionManager.createSession("testName");
+            String sessionId = customSessionManager.createSession("testName", "test@email");
             CustomSession customSession = customSessionManager.getSession(sessionId).get();
 
             LocalDateTime lastAccessedTime = setLastAccessedTime(customSession, LocalDateTime.now().minusHours(3));
@@ -104,7 +104,7 @@ class CustomSessionManagerTest {
         @Test
         void lastAccessedTime이_1시간이_넘은_세션들을_삭제한다() throws Exception {
             // given
-            String sessionId = customSessionManager.createSession("testName");
+            String sessionId = customSessionManager.createSession("testName", "test@email");
             CustomSession customSession = customSessionManager.getSession(sessionId).get();
             setLastAccessedTime(customSession, LocalDateTime.now().minusHours(1).minusSeconds(1));
 
@@ -119,7 +119,7 @@ class CustomSessionManagerTest {
         @Test
         void lastAccessedTime이_1시간이_넘지_않은_세션들은_삭제되지_않는다() throws Exception {
             // given
-            String sessionId = customSessionManager.createSession("testName");
+            String sessionId = customSessionManager.createSession("testName", "test@email");
             CustomSession customSession = customSessionManager.getSession(sessionId).get();
             setLastAccessedTime(customSession, LocalDateTime.now().minusHours(1).plusSeconds(1));
 

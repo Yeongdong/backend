@@ -18,7 +18,7 @@ public class CustomSessionManager {
     private static final Map<String, CustomSession> sessions = new ConcurrentHashMap<>();
     private static final Map<String, String> authNameToSessionIdMap = new ConcurrentHashMap<>();
 
-    public String createSession(String authenticationName) {
+    public String createSession(String authenticationName, String email) {
         if(authNameToSessionIdMap.containsKey(authenticationName)){
             String oldSessionId = authNameToSessionIdMap.get(authenticationName);
             sessions.remove(oldSessionId);
@@ -31,6 +31,7 @@ public class CustomSessionManager {
                 sessionId,
                 CustomSession.builder()
                         .authenticationName(authenticationName)
+                        .email(email)
                         .createdTime(LocalDateTime.now())
                         .lastAccessedTime(LocalDateTime.now())
                         .build());
