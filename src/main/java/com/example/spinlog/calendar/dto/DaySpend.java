@@ -2,6 +2,7 @@ package com.example.spinlog.calendar.dto;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
+import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,4 +18,15 @@ public class DaySpend {
     private String content;
     private Float satisfaction;
     private Emotion emotion;
+
+    public static DaySpend of(CalenderDto dto){
+        return DaySpend.builder()
+                .articleId(dto.getArticleId())
+                .registerType(dto.getRegisterType())
+                .amount(dto.getAmount())
+                .content(dto.getContent())
+                .satisfaction(dto.getSatisfaction())
+                .emotion(dto.getEmotion())
+                .build();
+    }
 }

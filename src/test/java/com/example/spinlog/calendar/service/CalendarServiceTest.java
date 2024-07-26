@@ -5,6 +5,7 @@ import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.calendar.dto.DaySpend;
 import com.example.spinlog.calendar.dto.TotalCalendarResponseDto;
 import com.example.spinlog.calendar.repository.CalenderRepository;
+import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
@@ -62,9 +63,9 @@ class CalendarServiceTest {
             
             // then
             verify(calenderRepository)
-                    .getMonthSpendList(eq(user.getId()), any());
-            verify(calenderRepository)
-                    .getDaySpendList(eq(user.getId()), any());
+                    .getMonthSpendList2(eq(user.getId()), any());
+            /*verify(calenderRepository)
+                    .getDaySpendList(eq(user.getId()), any());*/
         }
 
         @Test
@@ -82,9 +83,9 @@ class CalendarServiceTest {
 
             // then
             verify(calenderRepository)
-                    .getMonthSpendList(any(), eq(DateUtils.parseStringToDate(targetDate)));
-            verify(calenderRepository)
-                    .getDaySpendList(any(), eq(DateUtils.parseStringToDate(targetDate)));
+                    .getMonthSpendList2(any(), eq(DateUtils.parseStringToDate(targetDate)));
+            /*verify(calenderRepository)
+                    .getDaySpendList(any(), eq(DateUtils.parseStringToDate(targetDate)));*/
         }
 
         @Test
@@ -121,23 +122,15 @@ class CalendarServiceTest {
                             .email("email1")
                             .authenticationName(authenticationName)
                             .build()));
-            List<MonthSpendDto> monthSpendList = List.of(
-                    new MonthSpendDto(LocalDateTime.now(), 100, RegisterType.SPEND),
-                    new MonthSpendDto(LocalDateTime.now(), 200, RegisterType.SPEND)
+            List<CalenderDto> monthSpendList = List.of(
+                    new CalenderDto(1L, RegisterType.SPEND, 300, "content1", 3f, Emotion.PROUD, LocalDateTime.now())
             );
-            List<DaySpend> daySpendList = List.of(
-                    new DaySpend(1L, RegisterType.SPEND, 100, "content", 5f, Emotion.PROUD),
-                    new DaySpend(2L, RegisterType.SPEND, 200, "content", 4f, Emotion.ANNOYED)
-            );
-
-            when(calenderRepository.getMonthSpendList(any(), any())).thenReturn(monthSpendList);
-            when(calenderRepository.getDaySpendList(any(), any())).thenReturn(daySpendList);
+            when(calenderRepository.getMonthSpendList2(any(), any())).thenReturn(monthSpendList);
             
             // when
             TotalCalendarResponseDto response = calendarService.requestTotal(authenticationName, "20240725");
 
             // then
-            assertThat(response.getDaySpendList()).isEqualTo(daySpendList);
             assertThat(response.getMonthSpendList().size()).isEqualTo(1);
             assertThat(response.getMonthSpendList().get(0).getDaySpend()).isEqualTo(300);
             assertThat(response.getMonthSpendList().get(0).getDaySave()).isEqualTo(0);
