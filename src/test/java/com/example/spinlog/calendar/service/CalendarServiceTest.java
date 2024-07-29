@@ -24,7 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
@@ -128,12 +130,13 @@ class CalendarServiceTest {
             when(calenderRepository.getMonthSpendList2(any(), any())).thenReturn(monthSpendList);
             
             // when
-            TotalCalendarResponseDto response = calendarService.requestTotal(authenticationName, "20240725");
+            TotalCalendarResponseDto response = calendarService.requestTotal(authenticationName, LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
 
             // then
             assertThat(response.getMonthSpendList().size()).isEqualTo(1);
             assertThat(response.getMonthSpendList().get(0).getDaySpend()).isEqualTo(300);
             assertThat(response.getMonthSpendList().get(0).getDaySave()).isEqualTo(0);
+            assertThat(response.getDaySpendList().size()).isEqualTo(1);
 
         }
     }

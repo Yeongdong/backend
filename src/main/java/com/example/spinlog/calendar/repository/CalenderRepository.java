@@ -4,9 +4,6 @@ import com.example.spinlog.calendar.dto.DaySpend;
 import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberTemplate;
-import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
@@ -25,10 +22,8 @@ public class CalenderRepository {
     }
 
     public List<MonthSpendDto> getMonthSpendList(Long userId, LocalDate date) {
-        NumberTemplate<Integer> spendDateYear = Expressions.numberTemplate(Integer.class, "YEAR({0})", article.spendDate);
-        NumberTemplate<Integer> spendDateMonth = Expressions.numberTemplate(Integer.class, "MONTH({0})", article.spendDate);
-        NumberTemplate<Integer> dateYear = Expressions.numberTemplate(Integer.class, "YEAR({0})", date);
-        NumberTemplate<Integer> dateMonth = Expressions.numberTemplate(Integer.class, "MONTH({0})", date);
+        LocalDateTime startDateTime = date.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endDateTime = date.withDayOfMonth(1).atStartOfDay().plusMonths(1L).minusSeconds(1L);
         return queryFactory
                 .select(Projections.constructor(MonthSpendDto.class,
                         article.spendDate,
@@ -37,7 +32,7 @@ public class CalenderRepository {
                 .from(article)
                 .where(
                         article.user.id.eq(userId),
-                        spendDateYear.eq(dateYear).and(spendDateMonth.eq(dateMonth))
+                        article.spendDate.between(startDateTime, endDateTime)
                 )
                 .fetch();
     }
@@ -63,10 +58,8 @@ public class CalenderRepository {
     }
 
     public List<CalenderDto> getMonthSpendList2(Long userId, LocalDate date) {
-        NumberTemplate<Integer> spendDateYear = Expressions.numberTemplate(Integer.class, "YEAR({0})", article.spendDate);
-        NumberTemplate<Integer> spendDateMonth = Expressions.numberTemplate(Integer.class, "MONTH({0})", article.spendDate);
-        NumberTemplate<Integer> dateYear = Expressions.numberTemplate(Integer.class, "YEAR({0})", date);
-        NumberTemplate<Integer> dateMonth = Expressions.numberTemplate(Integer.class, "MONTH({0})", date);
+        LocalDateTime startDateTime = date.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endDateTime = date.withDayOfMonth(1).atStartOfDay().plusMonths(1L).minusSeconds(1L);
         return queryFactory
                 .select(Projections.constructor(CalenderDto.class,
                         article.articleId,
@@ -79,7 +72,7 @@ public class CalenderRepository {
                 .from(article)
                 .where(
                         article.user.id.eq(userId),
-                        spendDateYear.eq(dateYear).and(spendDateMonth.eq(dateMonth))
+                        article.spendDate.between(startDateTime, endDateTime)
                 )
                 .fetch();
     }
