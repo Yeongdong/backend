@@ -20,10 +20,7 @@ public class BudgetDto {
     private Integer monthSpend;
     private Integer monthSave;
 
-    public static BudgetDto of(User user, LocalDate localDate, List<MonthSpendDto> dtos) {
-        Budget budget = user.getBudgetOf(localDate);
-
-        Integer monthBudget = (budget != null) ? budget.getBudget() : 0;
+    public static BudgetDto of(Integer monthBudget, List<MonthSpendDto> dtos) {
         return new BudgetDto(monthBudget, getMonthSpend(dtos), getMonthSave(dtos));
     }
 

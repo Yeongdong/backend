@@ -6,6 +6,7 @@ import com.example.spinlog.calendar.repository.CalenderRepository;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
+import com.example.spinlog.user.repository.BudgetRepositoryCustom;
 import com.example.spinlog.user.repository.UserRepository;
 import com.example.spinlog.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +27,17 @@ public class CalendarService {
 
     private final UserRepository userRepository;
     private final CalenderRepository calenderRepository;
+    private final BudgetRepositoryCustom budgetRepository;
 
     public TotalCalendarResponseDto requestTotal(String userName, String selectDate) {
         User user = getUser(userName);
 
         LocalDate parsedDate = DateUtils.parseStringToDate(selectDate);
 
+        Integer budget = budgetRepository.getBudget(user.getId(), parsedDate.getYear(), parsedDate.getMonthValue());
         List<MonthSpendDto> dtos = calenderRepository.getMonthSpendList(user.getId(), parsedDate);
 
-        BudgetDto budgetDto = BudgetDto.of(user, parsedDate, dtos);
+        BudgetDto budgetDto = BudgetDto.of(budget, dtos);
         List<MonthSpend> monthSpendList = createMonthSpendList(dtos);
 
         List<DaySpend> daySpendList = dtos.stream()

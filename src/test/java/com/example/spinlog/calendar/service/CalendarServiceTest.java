@@ -7,6 +7,7 @@ import com.example.spinlog.calendar.repository.CalenderRepository;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
+import com.example.spinlog.user.repository.BudgetRepositoryCustom;
 import com.example.spinlog.user.repository.UserRepository;
 import com.example.spinlog.utils.DateUtils;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -38,6 +39,9 @@ import static org.mockito.Mockito.*;
 class CalendarServiceTest {
     @Mock
     UserRepository userRepository;
+
+    @Mock
+    BudgetRepositoryCustom budgetRepositoryCustom;
 
     @Mock
     CalenderRepository calenderRepository;
