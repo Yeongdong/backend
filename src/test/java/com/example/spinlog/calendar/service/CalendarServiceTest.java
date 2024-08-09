@@ -2,10 +2,8 @@ package com.example.spinlog.calendar.service;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
-import com.example.spinlog.calendar.dto.DaySpend;
 import com.example.spinlog.calendar.dto.TotalCalendarResponseDto;
 import com.example.spinlog.calendar.repository.CalenderRepository;
-import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
@@ -65,9 +63,7 @@ class CalendarServiceTest {
             
             // then
             verify(calenderRepository)
-                    .getMonthSpendList2(eq(user.getId()), any());
-            /*verify(calenderRepository)
-                    .getDaySpendList(eq(user.getId()), any());*/
+                    .getMonthSpendList(eq(user.getId()), any());
         }
 
         @Test
@@ -85,9 +81,7 @@ class CalendarServiceTest {
 
             // then
             verify(calenderRepository)
-                    .getMonthSpendList2(any(), eq(DateUtils.parseStringToDate(targetDate)));
-            /*verify(calenderRepository)
-                    .getDaySpendList(any(), eq(DateUtils.parseStringToDate(targetDate)));*/
+                    .getMonthSpendList(any(), eq(DateUtils.parseStringToDate(targetDate)));
         }
 
         @Test
@@ -124,10 +118,10 @@ class CalendarServiceTest {
                             .email("email1")
                             .authenticationName(authenticationName)
                             .build()));
-            List<CalenderDto> monthSpendList = List.of(
-                    new CalenderDto(1L, RegisterType.SPEND, 300, "content1", 3f, Emotion.PROUD, LocalDateTime.now())
+            List<MonthSpendDto> monthSpendList = List.of(
+                    new MonthSpendDto(1L, RegisterType.SPEND, 300, "content1", 3f, Emotion.PROUD, LocalDateTime.now())
             );
-            when(calenderRepository.getMonthSpendList2(any(), any())).thenReturn(monthSpendList);
+            when(calenderRepository.getMonthSpendList(any(), any())).thenReturn(monthSpendList);
             
             // when
             TotalCalendarResponseDto response = calendarService.requestTotal(authenticationName, LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));

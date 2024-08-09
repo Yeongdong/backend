@@ -2,8 +2,7 @@ package com.example.spinlog.calendar.dto;
 
 import com.example.spinlog.article.entity.Emotion;
 import com.example.spinlog.article.entity.RegisterType;
-import com.example.spinlog.calendar.repository.dto.CalenderDto;
-import lombok.AccessLevel;
+import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +18,7 @@ public class DaySpend {
     private Float satisfaction;
     private Emotion emotion;
 
-    public static DaySpend of(CalenderDto dto){
+    public static DaySpend of(MonthSpendDto dto){
         return DaySpend.builder()
                 .articleId(dto.getArticleId())
                 .registerType(dto.getRegisterType())

@@ -1,7 +1,6 @@
 package com.example.spinlog.calendar.repository;
 
 import com.example.spinlog.calendar.dto.DaySpend;
-import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,9 +25,13 @@ public class CalenderRepository {
         LocalDateTime endDateTime = date.withDayOfMonth(1).atStartOfDay().plusMonths(1L).minusSeconds(1L);
         return queryFactory
                 .select(Projections.constructor(MonthSpendDto.class,
-                        article.spendDate,
+                        article.articleId,
+                        article.registerType,
                         article.amount,
-                        article.registerType))
+                        article.content,
+                        article.satisfaction,
+                        article.emotion,
+                        article.spendDate))
                 .from(article)
                 .where(
                         article.user.id.eq(userId),
@@ -53,26 +56,6 @@ public class CalenderRepository {
                                 date.atStartOfDay(),
                                 date.plusDays(1).atStartOfDay().minusSeconds(1L)
                         )
-                )
-                .fetch();
-    }
-
-    public List<CalenderDto> getMonthSpendList2(Long userId, LocalDate date) {
-        LocalDateTime startDateTime = date.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDateTime = date.withDayOfMonth(1).atStartOfDay().plusMonths(1L).minusSeconds(1L);
-        return queryFactory
-                .select(Projections.constructor(CalenderDto.class,
-                        article.articleId,
-                        article.registerType,
-                        article.amount,
-                        article.content,
-                        article.satisfaction,
-                        article.emotion,
-                        article.spendDate))
-                .from(article)
-                .where(
-                        article.user.id.eq(userId),
-                        article.spendDate.between(startDateTime, endDateTime)
                 )
                 .fetch();
     }

@@ -1,10 +1,8 @@
 package com.example.spinlog.calendar.service;
 
-import com.example.spinlog.article.entity.Article;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.calendar.dto.*;
 import com.example.spinlog.calendar.repository.CalenderRepository;
-import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.example.spinlog.global.error.exception.user.UserNotFoundException;
 import com.example.spinlog.user.entity.User;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +32,7 @@ public class CalendarService {
 
         LocalDate parsedDate = DateUtils.parseStringToDate(selectDate);
 
-        List<CalenderDto> dtos = calenderRepository.getMonthSpendList2(user.getId(), parsedDate);
+        List<MonthSpendDto> dtos = calenderRepository.getMonthSpendList(user.getId(), parsedDate);
 
         BudgetDto budgetDto = BudgetDto.of(user, parsedDate, dtos);
         List<MonthSpend> monthSpendList = createMonthSpendList(dtos);
@@ -68,7 +65,7 @@ public class CalendarService {
                 .orElseThrow(() -> new UserNotFoundException(userName));
     }
 
-    private List<MonthSpend> createMonthSpendList(List<CalenderDto> dtos) {
+    private List<MonthSpend> createMonthSpendList(List<MonthSpendDto> dtos) {
         return dtos.stream()
                 .collect(Collectors.groupingBy(article -> article.getSpendDate().toLocalDate()))
                 .entrySet()
@@ -77,7 +74,7 @@ public class CalendarService {
                 .toList();
     }
 
-    private MonthSpend createMonthSpendsFromEntry(LocalDate date, List<CalenderDto> articlesOnDate) {
+    private MonthSpend createMonthSpendsFromEntry(LocalDate date, List<MonthSpendDto> articlesOnDate) {
         int totalDaySpend = calculateTotalAmountByType(articlesOnDate, RegisterType.SPEND);
         int totalDaySave = calculateTotalAmountByType(articlesOnDate, RegisterType.SAVE);
 
@@ -88,10 +85,10 @@ public class CalendarService {
                 .build();
     }
 
-    private int calculateTotalAmountByType(List<CalenderDto> articles, RegisterType registerType) {
+    private int calculateTotalAmountByType(List<MonthSpendDto> articles, RegisterType registerType) {
         return articles.stream()
                 .filter(article -> article.getRegisterType() == registerType)
-                .mapToInt(CalenderDto::getAmount)
+                .mapToInt(MonthSpendDto::getAmount)
                 .sum();
     }
 }

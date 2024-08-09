@@ -3,7 +3,6 @@ package com.example.spinlog.calendar.repository;
 import com.example.spinlog.article.entity.RegisterType;
 import com.example.spinlog.article.repository.ArticleRepository;
 import com.example.spinlog.calendar.dto.DaySpend;
-import com.example.spinlog.calendar.repository.dto.CalenderDto;
 import com.example.spinlog.calendar.repository.dto.MonthSpendDto;
 import com.example.spinlog.util.ArticleFactory;
 import com.example.spinlog.user.entity.User;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -129,6 +127,8 @@ class CalenderRepositoryTest {
                     .extracting("registerType")
                     .containsOnly(RegisterType.SPEND);
         }
+
+
     }
 
     @Nested
@@ -219,98 +219,6 @@ class CalenderRepositoryTest {
                     .extracting("registerType")
                     .containsOnly(RegisterType.SPEND);
         }
-
-    }
-
-    @Nested
-    class getMonthSpendList2{
-        @Test
-        void 파라미터로_받은_userId에_해당하는_Article들만_조회된다() throws Exception {
-            // given
-            User user = userRepository.save(
-                    User.builder()
-                            .email("email1")
-                            .authenticationName("name1")
-                            .build()
-            );
-            User another = userRepository.save(
-                    User.builder()
-                            .email("email2")
-                            .authenticationName("name2")
-                            .build()
-            );
-            user.addArticle(articleRepository.save(
-                    ArticleFactory.builder()
-                            .user(user)
-                            .registerType(RegisterType.SPEND)
-                            .build()
-                            .createArticle()));
-            another.addArticle(articleRepository.save(
-                    ArticleFactory.builder()
-                            .user(another)
-                            .registerType(RegisterType.SAVE)
-                            .build()
-                            .createArticle()));
-
-            // when
-            List<CalenderDto> monthSpendList = calenderRepository.getMonthSpendList2(user.getId(), LocalDate.now());
-
-            // then
-            assertThat(monthSpendList.size()).isEqualTo(1);
-            assertThat(monthSpendList)
-                    .extracting("registerType")
-                    .containsExactly(RegisterType.SPEND);
-        }
-
-        @Test
-        void 파라미터로_받은_date의_연도와_월에_해당하는_Article들만_조회된다() throws Exception {
-            // given
-            LocalDate targetDate = LocalDate.of(2021, 1, 1);
-            User user = userRepository.save(
-                    User.builder()
-                            .email("email1")
-                            .authenticationName("name1")
-                            .build()
-            );
-            user.addArticle(articleRepository.save(
-                    ArticleFactory.builder()
-                            .user(user)
-                            .registerType(RegisterType.SPEND)
-                            .spendDate(targetDate.atStartOfDay())
-                            .build()
-                            .createArticle()));
-            user.addArticle(articleRepository.save(
-                    ArticleFactory.builder()
-                            .user(user)
-                            .registerType(RegisterType.SPEND)
-                            .spendDate(targetDate.plusMonths(1L).minusDays(1L).atStartOfDay())
-                            .build()
-                            .createArticle()));
-            user.addArticle(articleRepository.save(
-                    ArticleFactory.builder()
-                            .user(user)
-                            .registerType(RegisterType.SAVE)
-                            .spendDate(targetDate.minusDays(1L).atStartOfDay())
-                            .build()
-                            .createArticle()));
-            user.addArticle(articleRepository.save(
-                    ArticleFactory.builder()
-                            .user(user)
-                            .registerType(RegisterType.SAVE)
-                            .spendDate(targetDate.plusMonths(1L).atStartOfDay())
-                            .build()
-                            .createArticle()));
-
-            // when
-            List<CalenderDto> monthSpendList = calenderRepository.getMonthSpendList2(user.getId(), targetDate);
-
-            // then
-            assertThat(monthSpendList.size()).isEqualTo(2);
-            assertThat(monthSpendList)
-                    .extracting("registerType")
-                    .containsOnly(RegisterType.SPEND);
-        }
-
 
     }
 
