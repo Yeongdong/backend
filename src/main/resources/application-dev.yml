@@ -25,6 +25,12 @@ client-secret.mock: ${mock_client_secret}
 public-mock-server-url: ${mock_oauth2_public_url}
 private-mock-server-url: ${mock_oauth2_private_url}
 
+server:
+  tomcat:
+    threads:
+      max: 30
+      min-spare: 5
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
