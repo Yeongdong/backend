@@ -14,6 +14,13 @@ fi
 
 sudo kill ${TARGET_PID}
 
-nohup java -Xmx512m -jar -Dserver.port=${TARGET_PORT} -Dspring.profiles.active=dev build/libs/spinlog-0.0.1-SNAPSHOT.jar >> ../logs/was_out.log 2> ../logs/was_err.log < /dev/null &
+nohup java -Xms256m -Xmx512m \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -jar -Dserver.port=${TARGET_PORT} -Dspring.profiles.active=dev build/libs/spinlog-0.0.1-SNAPSHOT.jar \
+        >> ../logs/was_out.log 2> ../logs/was_err.log < /dev/null &
 
-echo "finish updating WAS version"
+pid=$!
+
+echo $pid | sudo tee /sys/fs/cgroup/example/tasks/cgroup.procs
+
+echo "Program is running with PID $pid and has been added to cgroup 'tasks'"
