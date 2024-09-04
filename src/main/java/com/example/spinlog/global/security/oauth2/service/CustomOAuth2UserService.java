@@ -1,5 +1,6 @@
 package com.example.spinlog.global.security.oauth2.service;
 
+import com.example.spinlog.global.security.oauth2.user.impl.MockResponse;
 import com.example.spinlog.user.entity.User;
 import com.example.spinlog.user.repository.UserRepository;
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
@@ -30,6 +31,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public static final String KAKAO = "kakao";
     public static final String NAVER = "naver";
     public static final String GOOGLE = "google";
+    private static final String MOCK = "mock";
 
     private final UserRepository userRepository;
 
@@ -73,6 +75,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
         if (oAuth2Provider.equals(GOOGLE)) {
             return GoogleResponse.of(oAuth2User.getAttributes());
+        }
+        if(oAuth2Provider.equals(MOCK)) {
+            return MockResponse.of(oAuth2User.getAttributes());
         }
 
         throw new OAuth2AuthenticationException(new OAuth2Error(INVALID_CLIENT), "Unsupported provider: " + oAuth2Provider);

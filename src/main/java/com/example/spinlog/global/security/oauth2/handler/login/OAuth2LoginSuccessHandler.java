@@ -1,6 +1,7 @@
 package com.example.spinlog.global.security.oauth2.handler.login;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
+import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
 import com.example.spinlog.global.security.session.CustomSessionManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +12,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -21,11 +21,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        //response.sendRedirect("/api/authentication/login-result");
         CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
         Boolean isFirstLogin = principal.getFirstLogin();
 
-        String sessionId = createSession(principal);
+        OAuth2Response oAuth2Response = principal.getOAuth2Response();
+        String sessionId = customSessionManager.createSession(
+                oAuth2Response.getAuthenticationName(),
+                oAuth2Response.getEmail());
 
         String queryParameter = "&token=" + sessionId;
 
@@ -33,12 +35,5 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             response.sendRedirect("https://spinlog.swygbro.com/auth?isFirstLogin=true" + queryParameter);
         else
             response.sendRedirect("https://spinlog.swygbro.com/auth?isFirstLogin=false" + queryParameter);
-    }
-
-    private String createSession(CustomOAuth2User principal) {
-        String sessionId = UUID.randomUUID().toString();
-        String authenticationName = principal.getOAuth2Response().getAuthenticationName();
-        customSessionManager.createSession(sessionId, authenticationName);
-        return sessionId;
     }
 }

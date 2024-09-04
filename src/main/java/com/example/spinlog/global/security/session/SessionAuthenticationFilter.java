@@ -2,8 +2,6 @@ package com.example.spinlog.global.security.session;
 
 import com.example.spinlog.global.security.oauth2.user.CustomOAuth2User;
 import com.example.spinlog.global.security.oauth2.user.OAuth2Response;
-import com.example.spinlog.user.entity.User;
-import com.example.spinlog.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -23,7 +20,6 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
-    private final UserRepository userRepository;
     private final CustomSessionManager customSessionManager;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -42,20 +38,13 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String authenticationName = session.get().getAuthenticationName();
-        Optional<User> optionalUser = userRepository.findByAuthenticationName(authenticationName);
-
-        if(optionalUser.isEmpty()){
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        User user = optionalUser.get();
-        authenticate(user);
+        String email = session.get().getEmail();
+        authenticate(authenticationName, email);
         filterChain.doFilter(request, response);
     }
 
-    private void authenticate(User user) {
-        OAuth2Response oAuth2Response = getOAuth2Response(user);
+    private void authenticate(String authenticationName, String email) {
+        OAuth2Response oAuth2Response = new CustomOAuth2Response(email, authenticationName);
         CustomOAuth2User principal = CustomOAuth2User.builder()
                 .oAuth2Response(oAuth2Response)
                 .firstLogin(false)
@@ -67,9 +56,5 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
-    }
-
-    private OAuth2Response getOAuth2Response(User user) {
-        return new CustomOAuth2Response(user.getEmail(), user.getAuthenticationName());
     }
 }

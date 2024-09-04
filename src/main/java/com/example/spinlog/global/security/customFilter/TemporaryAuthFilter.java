@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -17,13 +18,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
 @Slf4j
+@RequiredArgsConstructor
 public class TemporaryAuthFilter extends OncePerRequestFilter {
-    @Value("${temporary.auth.header}")
-    private String temporaryAuthHeader;
-    @Value("${temporary.auth.value}")
-    private String temporaryAuthValue;
+    private final String temporaryAuthHeader;
+    private final String temporaryAuthValue;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -43,7 +42,7 @@ public class TemporaryAuthFilter extends OncePerRequestFilter {
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     user,
-                    null, // 패스워드는 모르니까 null 처리, 어차피 지금 인증하는게 아니니까!!
+                    null,
                     user.getAuthorities());
             context.setAuthentication(authentication);
             SecurityContextHolder.setContext(context);

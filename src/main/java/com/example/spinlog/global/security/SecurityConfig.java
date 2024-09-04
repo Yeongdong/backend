@@ -4,6 +4,7 @@ import com.example.spinlog.global.security.customFilter.TemporaryAuthFilter;
 import com.example.spinlog.global.security.oauth2.client.CustomClientRegistrationRepository;
 import com.example.spinlog.global.security.oauth2.client.CustomOAuth2AuthorizedClientService;
 import com.example.spinlog.global.security.oauth2.handler.authentication.CustomAuthenticationEntryPoint;
+import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginFailureHandler;
 import com.example.spinlog.global.security.oauth2.handler.login.OAuth2LoginSuccessHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutHandler;
 import com.example.spinlog.global.security.oauth2.handler.logout.OAuth2LogoutSuccessHandler;
@@ -12,6 +13,7 @@ import com.example.spinlog.global.security.session.CustomSessionManager;
 import com.example.spinlog.global.security.session.SessionAuthenticationFilter;
 import com.example.spinlog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,20 +33,22 @@ import java.util.Arrays;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    @Value("${temporary.auth.header}")
+    private String temporaryAuthHeader;
+    @Value("${temporary.auth.value}")
+    private String temporaryAuthValue;
 
     private final CustomClientRegistrationRepository customClientRegistrationRepository;
     private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
     private final JdbcTemplate jdbcTemplate;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     private final OAuth2LogoutHandler oAuth2LogoutHandler;
     private final OAuth2LogoutSuccessHandler oAuth2LogoutSuccessHandler;
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    private final TemporaryAuthFilter temporaryAuthFilter;
-    private final UserRepository userRepository;
     private final CustomSessionManager customSessionManager;
 
 //    private final CorsConfig corsConfig;
@@ -84,6 +88,7 @@ public class SecurityConfig {
                                 userInfoEndpointConfig.userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/users/logout")
@@ -103,8 +108,12 @@ public class SecurityConfig {
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
-                .addFilterBefore(new SessionAuthenticationFilter(userRepository, customSessionManager), LogoutFilter.class)
-                .addFilterAfter(temporaryAuthFilter, ExceptionTranslationFilter.class);
+                .addFilterBefore(
+                        new SessionAuthenticationFilter(customSessionManager),
+                        LogoutFilter.class)
+                .addFilterAfter(
+                        new TemporaryAuthFilter(temporaryAuthHeader, temporaryAuthValue),
+                        ExceptionTranslationFilter.class);
 
         return http.build();
     }
